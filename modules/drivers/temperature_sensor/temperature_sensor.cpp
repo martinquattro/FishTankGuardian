@@ -1,3 +1,10 @@
+/*!****************************************************************************
+ * @file temperature_sensor.cpp
+ * @brief TODO
+ * @author Quattrone Martin
+ * @date Oct 2023
+ *******************************************************************************/
+
 //=====[Libraries]=============================================================
 
 #include "mbed.h"
@@ -5,19 +12,13 @@
 
 namespace Drivers {
 
-//=====[Declaration of private defines]========================================
-//=====[Declaration of private data types]=====================================
-//=====[Declaration and initialization of public global objects]===============
-//=====[Declaration of external public global variables]=======================
-//=====[Declaration and initialization of public global variables]=============
 //=====[Declaration and initialization of private global variables]============
 
 TemperatureSensor* TemperatureSensor::mInstance = nullptr;
 
-//=====[Declarations (prototypes) of private functions]========================
 //=====[Implementations of public functions]===================================
 
-//----------------------------------------------------------------
+//----static-------------------------------------------------------------------------
 void TemperatureSensor::Init(int pin)
 {
     if (mInstance == nullptr)
@@ -26,15 +27,14 @@ void TemperatureSensor::Init(int pin)
     }
 }
 
-//----------------------------------------------------------------
+//----static-------------------------------------------------------------------------
 TemperatureSensor* TemperatureSensor::GetInstance()
 {
     return mInstance;
 }
 
-
-//----------------------------------------------------------------
-void ReadTemperature()
+//-----------------------------------------------------------------------------
+void TemperatureSensor::Read()
 {
 
 }

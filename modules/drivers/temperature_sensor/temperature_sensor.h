@@ -1,11 +1,14 @@
-#ifndef _TEMPERATURE_SENSOR_H
-#define _TEMPERATURE_SENSOR_H
+/*!****************************************************************************
+ * @file temperature_sensor.h
+ * @brief TODO
+ * @author Quattrone Martin
+ * @date Oct 2023
+ *******************************************************************************/
+
+#ifndef TEMPERATURE_SENSOR_H
+#define TEMPERATURE_SENSOR_H
 
 namespace Drivers { 
-
-//=====[Declaration of public defines]=========================================
-//=====[Declaration of public data types]======================================
-//=====[Declarations (prototypes) of public functions]=========================
 
     class TemperatureSensor 
     {
@@ -18,7 +21,7 @@ namespace Drivers {
             static TemperatureSensor* GetInstance();
 
             //!
-            void ReadTemperature();
+            void Read();
 
         private:
 
@@ -30,6 +33,7 @@ namespace Drivers {
             int mPin;
             static TemperatureSensor* mInstance;
     };
-}
 
-#endif // _TEMPERATURE_SENSOR_H
+} // namespace Drivers
+
+#endif // TEMPERATURE_SENSOR_H

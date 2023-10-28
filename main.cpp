@@ -1,17 +1,19 @@
 /*!****************************************************************************
  * @file main.cpp
- * @brief 
+ * @brief TODO
  * @author Quattrone Martin
+ * @date Oct 2023
  *******************************************************************************/
 
 #include "mbed.h"
 
-// main() runs in its own thread in the OS
 int main()
 {
-    while (true) 
+    while (true)
     {
 
     }
 }
+
+
 
