@@ -18,7 +18,7 @@ TdsSensor* TdsSensor::mInstance = nullptr;
 
 //=====[Implementations of public functions]===================================
 
-//----static-------------------------------------------------------------------------
+//----static-------------------------------------------------------------------
 void TdsSensor::Init(int pin)
 {
     if (mInstance == nullptr)
@@ -27,7 +27,7 @@ void TdsSensor::Init(int pin)
     }
 }
 
-//----static-------------------------------------------------------------------------
+//----static-------------------------------------------------------------------
 TdsSensor* TdsSensor::GetInstance()
 {
     return mInstance;

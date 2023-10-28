@@ -18,7 +18,7 @@ Display* Display::mInstance = nullptr;
 
 //=====[Implementations of public functions]===================================
 
-//----static-------------------------------------------------------------------------
+//----static-------------------------------------------------------------------
 void Display::Init(int pin)
 {
     if (mInstance == nullptr)
@@ -27,7 +27,7 @@ void Display::Init(int pin)
     }
 }
 
-//----static-------------------------------------------------------------------------
+//----static-------------------------------------------------------------------
 Display* Display::GetInstance()
 {
     return mInstance;

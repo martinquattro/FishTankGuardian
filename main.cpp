@@ -5,15 +5,19 @@
  * @date Oct 2023
  *******************************************************************************/
 
-#include "mbed.h"
+//=====[Libraries]=============================================================
 
+#include "fish_tank_guardian.h"
+
+//=====[Implementations of public functions]===================================
+
+//-----------------------------------------------------------------------------
 int main()
 {
-    while (true)
+    Subsystems::FishTankGuardian::Init();
+    while (true) 
     {
-
+        Subsystems::FishTankGuardian* fishTankGuardian = Subsystems::FishTankGuardian::GetInstance();
+        fishTankGuardian->Update();
     }
 }
-
-
-

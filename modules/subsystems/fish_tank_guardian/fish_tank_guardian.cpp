@@ -1,5 +1,5 @@
 /*!****************************************************************************
- * @file temperature_sensor.cpp
+ * @file fish_tank_guardian.cpp
  * @brief TODO
  * @author Quattrone Martin
  * @date Oct 2023
@@ -8,37 +8,44 @@
 //=====[Libraries]=============================================================
 
 #include "mbed.h"
-#include "temperature_sensor.h"
+#include "fish_tank_guardian.h"
+#include "non_blocking_delay.h"
 
-namespace Drivers {
+namespace Subsystems {
 
 //=====[Declaration and initialization of private global variables]============
 
-TemperatureSensor* TemperatureSensor::mInstance = nullptr;
+FishTankGuardian* FishTankGuardian::mInstance = nullptr;
+static Util::nonBlockingDelay_t smartHomeSystemDelay;
 
 //=====[Implementations of public functions]===================================
 
 //----static-------------------------------------------------------------------
-void TemperatureSensor::Init(int pin)
+void FishTankGuardian::Init()
 {
+    Util::TickInit();
+    Util::NonBlockingDelayInit(&smartHomeSystemDelay, SYSTEM_TIME_INCREMENT_MS);
+
     if (mInstance == nullptr)
     {
-        mInstance = new TemperatureSensor(pin);
+        mInstance = new FishTankGuardian();
     }
 }
 
 //----static-------------------------------------------------------------------
-TemperatureSensor* TemperatureSensor::GetInstance()
+FishTankGuardian* FishTankGuardian::GetInstance()
 {
     return mInstance;
 }
 
 //-----------------------------------------------------------------------------
-void TemperatureSensor::Read()
+void FishTankGuardian::Update()
 {
-
+    if(Util::NonBlockingDelayRead(&smartHomeSystemDelay)) 
+    {
+    }
 }
 
 //=====[Implementations of private functions]==================================
 
-} // namespace Drivers
+} // namespace Subsystems
