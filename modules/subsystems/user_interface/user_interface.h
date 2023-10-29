@@ -1,38 +1,38 @@
 /*!****************************************************************************
- * @file water_monitor.h
+ * @file user_interface.h
  * @brief TODO
  * @author Quattrone Martin
  * @date Oct 2023
  *******************************************************************************/
 
-#ifndef WATER_MONITOR_H
-#define WATER_MONITOR_H
+#ifndef USER_INTERFACE_H
+#define USER_INTERFACE_H
 
 namespace Subsystems { 
 
-    class WaterMonitor 
+    class UserInterface 
     {
         public:
 
-            //! Initialize the sensor
+            //! Initialize the subsystem
             static void Init();
 
             //! Returns the subsystem object
-            static WaterMonitor* GetInstance();
+            static UserInterface* GetInstance();
 
             //! Update subsystem
             void Update();
 
         private:
 
-            WaterMonitor() {}
-            ~WaterMonitor() = default;
-            WaterMonitor(const WaterMonitor&) = delete;
-            WaterMonitor& operator=(const WaterMonitor&) = delete;
+            UserInterface() {}
+            ~UserInterface() = default;
+            UserInterface(const UserInterface&) = delete;
+            UserInterface& operator=(const UserInterface&) = delete;
 
-            static WaterMonitor* mInstance;
+            static UserInterface* mInstance;
     };
 
 } // namespace Subsystems
 
-#endif // WATER_MONITOR_H
+#endif // USER_INTERFACE_H

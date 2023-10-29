@@ -1,5 +1,5 @@
 /*!****************************************************************************
- * @file food_feeder.cpp
+ * @file user_interface.cpp
  * @brief TODO
  * @author Quattrone Martin
  * @date Oct 2023
@@ -7,35 +7,35 @@
 
 //=====[Libraries]=============================================================
 
-#include "food_feeder.h"
+#include "user_interface.h"
 
 namespace Subsystems {
 
 //=====[Declaration and initialization of private global variables]============
 
-FoodFeeder* FoodFeeder::mInstance = nullptr;
+UserInterface* UserInterface::mInstance = nullptr;
 
 //=====[Implementations of public functions]===================================
 
 //----static-------------------------------------------------------------------
-void FoodFeeder::Init()
+void UserInterface::Init()
 {
     if (mInstance == nullptr)
     {
-        mInstance = new FoodFeeder();
+        mInstance = new UserInterface();
     }
 }
 
 //----static-------------------------------------------------------------------
-FoodFeeder* FoodFeeder::GetInstance()
+UserInterface* UserInterface::GetInstance()
 {
     return mInstance;
 }
 
 //-----------------------------------------------------------------------------
-void FoodFeeder::Update()
+void UserInterface::Update()
 {
-    // TODO: Update Drivers controlled by the FoodFeeder Subsystem
+    // TODO: Update Drivers controlled by the UserInterface Subsystem
 }
 
 //=====[Implementations of private functions]==================================

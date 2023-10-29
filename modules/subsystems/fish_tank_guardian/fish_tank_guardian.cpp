@@ -9,7 +9,10 @@
 
 #include "mbed.h"
 #include "fish_tank_guardian.h"
-#include "non_blocking_delay.h"
+#include "water_monitor.h"
+#include "food_feeder.h"
+#include "user_interface.h"
+#include "delay.h"
 
 namespace Subsystems {
 
@@ -28,7 +31,9 @@ void FishTankGuardian::Init()
     }
 
     Util::Tick::Init();
-    Util::NonBlockingDelay::Init(SYSTEM_TIME_INCREMENT_MS);
+    Subsystems::FoodFeeder::Init();
+    Subsystems::WaterMonitor::Init();
+    Util::Delay::Init(SYSTEM_TIME_INCREMENT_MS);
 }
 
 //----static-------------------------------------------------------------------
@@ -40,8 +45,11 @@ FishTankGuardian* FishTankGuardian::GetInstance()
 //-----------------------------------------------------------------------------
 void FishTankGuardian::Update()
 {
-    if(!Util::NonBlockingDelay::GetInstance()->HasFinished()) 
+    if(!Util::Delay::GetInstance()->HasFinished()) 
     {
+        Subsystems::FoodFeeder::GetInstance()->Update();
+        Subsystems::WaterMonitor::GetInstance()->Update();
+        Subsystems::UserInterface::GetInstance()->Update();
     }
 }
 

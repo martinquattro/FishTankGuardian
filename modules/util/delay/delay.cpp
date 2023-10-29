@@ -1,39 +1,39 @@
 /*!****************************************************************************
- * @file non_blocking_delay.cpp
+ * @file delay.cpp
  * @brief TODO
  * @author Quattrone Martin
  * @date Oct 2023
  *******************************************************************************/
 
-#include "non_blocking_delay.h"
+#include "delay.h"
 
 namespace Util { 
 
 //=====[Declaration and initialization of private global variables]============
 
-NonBlockingDelay* NonBlockingDelay::mInstance = nullptr;
+Delay* Delay::mInstance = nullptr;
 tick_t Tick::mTickCounter = 0;
 Ticker Tick::mTicker;
 
 //=====[Implementations of public functions]===================================
 
 //----static-------------------------------------------------------------------
-void NonBlockingDelay::Init(tick_t duration)
+void Delay::Init(tick_t duration)
 {
     if (mInstance == nullptr)
     {
-        mInstance = new NonBlockingDelay(duration);
+        mInstance = new Delay(duration);
     }
 }
 
 //----static-------------------------------------------------------------------
-NonBlockingDelay* NonBlockingDelay::GetInstance()
+Delay* Delay::GetInstance()
 {
     return mInstance;
 }
 
 //-----------------------------------------------------------------------------
-bool NonBlockingDelay::HasFinished()
+bool Delay::HasFinished()
 {
     bool timeArrived = false;
     tick_t elapsedTime;
@@ -57,7 +57,7 @@ bool NonBlockingDelay::HasFinished()
 }
 
 //-----------------------------------------------------------------------------
-void NonBlockingDelay::Write(tick_t durationValue )
+void Delay::Write(tick_t durationValue )
 {
    mDuration = durationValue;
 }

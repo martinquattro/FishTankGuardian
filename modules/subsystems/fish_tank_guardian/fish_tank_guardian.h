@@ -19,10 +19,10 @@ namespace Subsystems {
             //! Initialize the sensor
             static void Init();
 
-            //! Returns the sensor object
+            //! Returns the subsystem object
             static FishTankGuardian* GetInstance();
 
-            //!
+            //! Update subsystem
             void Update();
 
         private:
