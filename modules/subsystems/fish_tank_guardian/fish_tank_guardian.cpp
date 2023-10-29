@@ -16,20 +16,19 @@ namespace Subsystems {
 //=====[Declaration and initialization of private global variables]============
 
 FishTankGuardian* FishTankGuardian::mInstance = nullptr;
-static Util::nonBlockingDelay_t smartHomeSystemDelay;
 
 //=====[Implementations of public functions]===================================
 
 //----static-------------------------------------------------------------------
 void FishTankGuardian::Init()
 {
-    Util::TickInit();
-    Util::NonBlockingDelayInit(&smartHomeSystemDelay, SYSTEM_TIME_INCREMENT_MS);
-
     if (mInstance == nullptr)
     {
         mInstance = new FishTankGuardian();
     }
+
+    Util::Tick::Init();
+    Util::NonBlockingDelay::Init(SYSTEM_TIME_INCREMENT_MS);
 }
 
 //----static-------------------------------------------------------------------
@@ -41,7 +40,7 @@ FishTankGuardian* FishTankGuardian::GetInstance()
 //-----------------------------------------------------------------------------
 void FishTankGuardian::Update()
 {
-    if(Util::NonBlockingDelayRead(&smartHomeSystemDelay)) 
+    if(!Util::NonBlockingDelay::GetInstance()->HasFinished()) 
     {
     }
 }

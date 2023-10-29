@@ -17,7 +17,6 @@ int main()
     Subsystems::FishTankGuardian::Init();
     while (true) 
     {
-        Subsystems::FishTankGuardian* fishTankGuardian = Subsystems::FishTankGuardian::GetInstance();
-        fishTankGuardian->Update();
+        Subsystems::FishTankGuardian::GetInstance()->Update();
     }
 }
