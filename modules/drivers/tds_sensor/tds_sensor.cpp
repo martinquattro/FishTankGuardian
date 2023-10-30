@@ -19,11 +19,11 @@ TdsSensor* TdsSensor::mInstance = nullptr;
 //=====[Implementations of public functions]===================================
 
 //----static-------------------------------------------------------------------
-void TdsSensor::Init(int pin)
+void TdsSensor::Init()
 {
     if (mInstance == nullptr)
     {
-        mInstance = new TdsSensor(pin);
+        mInstance = new TdsSensor();
     }
 }
 

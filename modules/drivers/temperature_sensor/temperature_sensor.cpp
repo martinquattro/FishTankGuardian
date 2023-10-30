@@ -19,11 +19,11 @@ TemperatureSensor* TemperatureSensor::mInstance = nullptr;
 //=====[Implementations of public functions]===================================
 
 //----static-------------------------------------------------------------------
-void TemperatureSensor::Init(int pin)
+void TemperatureSensor::Init()
 {
     if (mInstance == nullptr)
     {
-        mInstance = new TemperatureSensor(pin);
+        mInstance = new TemperatureSensor();
     }
 }
 

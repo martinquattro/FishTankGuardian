@@ -8,6 +8,8 @@
 //=====[Libraries]=============================================================
 
 #include "water_monitor.h"
+#include "tds_sensor.h"
+#include "temperature_sensor.h"
 
 namespace Subsystems {
 
@@ -24,6 +26,9 @@ void WaterMonitor::Init()
     {
         mInstance = new WaterMonitor();
     }
+
+    Drivers::TemperatureSensor::Init();
+    Drivers::TdsSensor::Init();
 }
 
 //----static-------------------------------------------------------------------

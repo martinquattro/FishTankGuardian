@@ -15,7 +15,7 @@ namespace Drivers {
         public:
 
             //! Initialize the sensor
-            static void Init(int pin);
+            static void Init();
 
             //! Returns the sensor object
             static TdsSensor* GetInstance();
@@ -25,12 +25,11 @@ namespace Drivers {
 
         private:
 
-            TdsSensor(int pin) : mPin(pin) {}
+            TdsSensor() {}
             ~TdsSensor() = default;
             TdsSensor(const TdsSensor&) = delete;
             TdsSensor& operator=(const TdsSensor&) = delete;
 
-            int mPin;
             static TdsSensor* mInstance;
     };
 

@@ -15,22 +15,21 @@ namespace Drivers {
         public:
 
             //! Initialize the sensor
-            static void Init(int pin);
+            static void Init();
 
             //! Returns the sensor object
             static TemperatureSensor* GetInstance();
 
-            //!
+            //! Obtain reading
             void Read();
 
         private:
 
-            TemperatureSensor(int pin) : mPin(pin) {}
+            TemperatureSensor() {}
             ~TemperatureSensor() = default;
             TemperatureSensor(const TemperatureSensor&) = delete;
             TemperatureSensor& operator=(const TemperatureSensor&) = delete;
 
-            int mPin;
             static TemperatureSensor* mInstance;
     };
 
