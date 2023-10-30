@@ -8,6 +8,8 @@
 //=====[Libraries]=============================================================
 
 #include "food_feeder.h"
+#include "motor.h"
+
 
 namespace Subsystems {
 
@@ -24,6 +26,8 @@ void FoodFeeder::Init()
     {
         mInstance = new FoodFeeder();
     }
+
+    Drivers::Motor::Init();
 }
 
 //----static-------------------------------------------------------------------
@@ -35,7 +39,7 @@ FoodFeeder* FoodFeeder::GetInstance()
 //-----------------------------------------------------------------------------
 void FoodFeeder::Update()
 {
-    // TODO: Update Drivers controlled by the FoodFeeder Subsystem
+        // TODO: Update Drivers controlled by the FoodFeeder Subsystem
 }
 
 //=====[Implementations of private functions]==================================
