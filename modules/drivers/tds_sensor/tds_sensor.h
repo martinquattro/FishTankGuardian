@@ -8,6 +8,12 @@
 #ifndef TDS_SENSOR_H
 #define TDS_SENSOR_H
 
+#include "mbed.h"
+#include <vector>
+
+#define TDS_SENSOR_PIN A1
+#define TDS_SENSOR_NUM_AVG_SAMPLES 20
+
 namespace Drivers { 
 
     class TdsSensor 
@@ -21,16 +27,29 @@ namespace Drivers {
             static TdsSensor* GetInstance();
 
             //!
-            void Read();
+            void Update(const float temperature = 25.0);
+
+            //!
+            float Read();
 
         private:
 
-            TdsSensor() {}
+            using TdsReadingsVec = vector<float>;
+
+            TdsSensor(const PinName pin);
             ~TdsSensor() = default;
             TdsSensor(const TdsSensor&) = delete;
             TdsSensor& operator=(const TdsSensor&) = delete;
 
             static TdsSensor* mInstance;
+            AnalogIn mPin;
+            TdsReadingsVec mReadingsVector;
+            TdsReadingsVec::iterator mReadingsVectorIter;
+            float mTemperature;
+            float mRef;
+            float mAdcRange;
+            float mKValue;
+
     };
 
 } // namespace Drivers
