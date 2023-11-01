@@ -4,7 +4,7 @@ projectfiles
 *.py*
 mbed-os
 BUILD
-
+Schematic
 compile_commands.json
 .clangd
 .cache
