@@ -38,23 +38,23 @@ PcSerialCom* PcSerialCom::GetInstance()
 //-----------------------------------------------------------------------------
 void PcSerialCom::Write(const char* format, ...)
 {
-    // Inicializar la lista de argumentos variables
+    // Initialize the variable arguments list
     va_list args;
     va_start(args, format);
 
-    // Calcular la longitud de la cadena formateada
+    // Calculate the length of the formatted string
     int length = vsnprintf(nullptr, 0, format, args);
 
-    // Reservar memoria para la cadena formateada
+    // Allocate memory for the formatted string
     char* buffer = new char[length + 1];
 
-    // Formatear la cadena y almacenarla en el búfer
+    // Format the string and store it in the buffer
     vsnprintf(buffer, length + 1, format, args);
 
-    // Limpiar la lista de argumentos variables
+    // Clean up the variable arguments list
     va_end(args);
 
-    // Escribir la cadena en el puerto serial
+    // Write the string to the serial port
     mUartUsb.write(buffer, strlen(buffer));
 
     // Liberar la memoria del búfer
