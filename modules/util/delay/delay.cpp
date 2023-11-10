@@ -38,7 +38,7 @@ bool Delay::HasFinished()
     bool timeArrived = false;
     tick_t elapsedTime;
 
-    if(mIsRunning) 
+    if(!mIsRunning) 
     {
         mStartTime = Tick::GetTickCounter();
         mIsRunning = true;

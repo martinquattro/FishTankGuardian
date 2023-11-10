@@ -47,8 +47,9 @@ FishTankGuardian* FishTankGuardian::GetInstance()
 //-----------------------------------------------------------------------------
 void FishTankGuardian::Update()
 {
-    if(!Util::Delay::GetInstance()->HasFinished()) 
+    if(Util::Delay::GetInstance()->HasFinished()) 
     {
+        Drivers::PcSerialCom::GetInstance()->Write("Initializing \n");
         Subsystems::FoodFeeder::GetInstance()->Update();
         Subsystems::WaterMonitor::GetInstance()->Update();
         Subsystems::UserInterface::GetInstance()->Update();

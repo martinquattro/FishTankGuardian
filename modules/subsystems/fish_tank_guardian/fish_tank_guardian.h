@@ -8,7 +8,7 @@
 #ifndef FISH_TANK_GUARDIAN_H
 #define FISH_TANK_GUARDIAN_H
 
-#define SYSTEM_TIME_INCREMENT_MS   10
+#define SYSTEM_TIME_INCREMENT_MS   1000
 
 namespace Subsystems { 
 

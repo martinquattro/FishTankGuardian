@@ -25,7 +25,7 @@ void PcSerialCom::Init()
 {
     if (mInstance == nullptr)
     {
-        mInstance = new PcSerialCom();
+        mInstance = new PcSerialCom(USBTX, USBRX, BAUD_RATE);
     }
 }
 
@@ -57,14 +57,13 @@ void PcSerialCom::Write(const char* format, ...)
     // Write the string to the serial port
     mUartUsb.write(buffer, strlen(buffer));
 
-    // Liberar la memoria del búfer
     delete[] buffer;
 }
 
 //=====[Implementations of private functions]==================================
 
-PcSerialCom::PcSerialCom()
-    : mUartUsb(USBTX, USBRX, BAUD_RATE)
+PcSerialCom::PcSerialCom(PinName txPin, PinName rxPin, const int baudRate)
+    : mUartUsb(txPin, rxPin, baudRate)
 {
 }
 

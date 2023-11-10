@@ -29,7 +29,7 @@ namespace Drivers {
 
         private:
 
-            PcSerialCom();
+            PcSerialCom(PinName txPin, PinName rxPin, const int baudRate);
             ~PcSerialCom() = default;
             PcSerialCom(const PcSerialCom&) = delete;
             PcSerialCom& operator=(const PcSerialCom&) = delete;

@@ -11,9 +11,9 @@
 #include "mbed.h"
 #include <string>
 
-#define WIFI_PIN_TX A1
-#define WIFI_PIN_RX A2
-#define WIFI_BAUD_RATE 115200
+#define WIFI_PIN_TX     A1
+#define WIFI_PIN_RX     A2
+#define WIFI_BAUD_RATE  115200
 
 namespace Drivers { 
 
@@ -41,10 +41,7 @@ namespace Drivers {
             Wifi(const Wifi&) = delete;
             Wifi& operator=(const Wifi&) = delete;
 
-            void SerialWrite(std::string str);
-
-
-
+            void Write(std::string str);
     };
 
 } // namespace Drivers

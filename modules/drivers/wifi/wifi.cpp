@@ -50,7 +50,7 @@ Wifi::Wifi(PinName txPin, PinName rxPin, const int baudRate)
 }
 
 //-----------------------------------------------------------------------------
-void Wifi::SerialWrite(std::string str)
+void Wifi::Write(std::string str)
 {
     mSerial.write(str.c_str(), str.size());
 }
