@@ -35,6 +35,7 @@ void FishTankGuardian::Init()
     Util::Tick::Init();
     Subsystems::FoodFeeder::Init();
     Subsystems::WaterMonitor::Init();
+    
     Util::Delay::Init(SYSTEM_TIME_INCREMENT_MS);
 }
 
@@ -49,7 +50,6 @@ void FishTankGuardian::Update()
 {
     if(Util::Delay::GetInstance()->HasFinished()) 
     {
-        Drivers::PcSerialCom::GetInstance()->Write("Initializing \n");
         Subsystems::FoodFeeder::GetInstance()->Update();
         Subsystems::WaterMonitor::GetInstance()->Update();
         Subsystems::UserInterface::GetInstance()->Update();
