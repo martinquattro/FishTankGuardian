@@ -1,5 +1,5 @@
 /*!****************************************************************************
- * @file user_interface.cpp
+ * @file wifi.cpp
  * @brief TODO
  * @author Quattrone Martin
  * @date Oct 2023
@@ -7,41 +7,52 @@
 
 //=====[Libraries]=============================================================
 
-#include "user_interface.h"
 #include "wifi.h"
 
-namespace Subsystems {
+namespace Drivers {
 
 //=====[Declaration and initialization of private global variables]============
 
-UserInterface* UserInterface::mInstance = nullptr;
+Wifi* Wifi::mInstance = nullptr;
 
 //=====[Implementations of public functions]===================================
 
 //----static-------------------------------------------------------------------
-void UserInterface::Init()
+void Wifi::Init()
 {
     if (mInstance == nullptr)
     {
-        mInstance = new UserInterface();
+        mInstance = new Wifi(WIFI_PIN_TX, WIFI_PIN_RX, WIFI_BAUD_RATE);
     }
-
-    Drivers::Wifi::Init();
 
 }
 
 //----static-------------------------------------------------------------------
-UserInterface* UserInterface::GetInstance()
+Wifi* Wifi::GetInstance()
 {
     return mInstance;
 }
 
 //-----------------------------------------------------------------------------
-void UserInterface::Update()
+void Wifi::Update()
 {
-    Drivers::Wifi::GetInstance()->Update();
+
 }
+
 
 //=====[Implementations of private functions]==================================
 
-} // namespace Subsystems
+//-----------------------------------------------------------------------------
+Wifi::Wifi(PinName txPin, PinName rxPin, const int baudRate)
+    : mSerial(txPin, rxPin, baudRate)
+{
+    
+}
+
+//-----------------------------------------------------------------------------
+void Wifi::SerialWrite(std::string str)
+{
+    mSerial.write(str.c_str(), str.size());
+}
+
+} // namespace Drivers
