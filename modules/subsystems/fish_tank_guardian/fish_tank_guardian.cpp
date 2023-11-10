@@ -13,6 +13,7 @@
 #include "food_feeder.h"
 #include "user_interface.h"
 #include "delay.h"
+#include "pc_serial_com.h"
 
 namespace Subsystems {
 
@@ -30,6 +31,7 @@ void FishTankGuardian::Init()
         mInstance = new FishTankGuardian();
     }
 
+    Drivers::PcSerialCom::Init();
     Util::Tick::Init();
     Subsystems::FoodFeeder::Init();
     Subsystems::WaterMonitor::Init();
