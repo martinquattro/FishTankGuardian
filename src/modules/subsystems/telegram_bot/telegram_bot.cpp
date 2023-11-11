@@ -8,7 +8,7 @@
 //=====[Libraries]=============================================================
 
 #include "telegram_bot.h"
-#include "wifi.h"
+#include "wifi_com.h"
 
 namespace Subsystems {
 
