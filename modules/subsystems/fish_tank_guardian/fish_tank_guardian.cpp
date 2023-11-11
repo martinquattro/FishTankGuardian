@@ -15,7 +15,7 @@
 #include "pc_serial_com.h"
 #include "user_interface.h"
 #include "water_monitor.h"
-#include "wifi_com.h"
+#include "telegram_bot.h"
 
 namespace Subsystems {
 
@@ -37,7 +37,7 @@ void FishTankGuardian::Init()
     Util::Tick::Init();
     Subsystems::FoodFeeder::Init();
     Subsystems::WaterMonitor::Init();
-    Drivers::WiFiCom::Init();
+    Subsystems::TelegramBot::Init();
 }
 
 //----static-------------------------------------------------------------------
@@ -55,7 +55,7 @@ void FishTankGuardian::Update()
         Subsystems::WaterMonitor::GetInstance()->Update();
         Subsystems::UserInterface::GetInstance()->Update();
     }
-    Drivers::WiFiCom::GetInstance()->Update();
+    Subsystems::TelegramBot::GetInstance()->Update();
 }
 
 //=====[Implementations of private functions]==================================
