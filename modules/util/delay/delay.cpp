@@ -11,26 +11,10 @@ namespace Util {
 
 //=====[Declaration and initialization of private global variables]============
 
-Delay* Delay::mInstance = nullptr;
 tick_t Tick::mTickCounter = 0;
 Ticker Tick::mTicker;
 
 //=====[Implementations of public functions]===================================
-
-//----static-------------------------------------------------------------------
-void Delay::Init(tick_t duration)
-{
-    if (mInstance == nullptr)
-    {
-        mInstance = new Delay(duration);
-    }
-}
-
-//----static-------------------------------------------------------------------
-Delay* Delay::GetInstance()
-{
-    return mInstance;
-}
 
 //-----------------------------------------------------------------------------
 bool Delay::HasFinished()
@@ -57,7 +41,7 @@ bool Delay::HasFinished()
 }
 
 //-----------------------------------------------------------------------------
-void Delay::Write(tick_t durationValue )
+void Delay::Start(tick_t durationValue )
 {
    mDuration = durationValue;
 }

@@ -8,7 +8,6 @@
 //=====[Libraries]=============================================================
 
 #include "user_interface.h"
-#include "wifi.h"
 
 namespace Subsystems {
 
@@ -25,9 +24,6 @@ void UserInterface::Init()
     {
         mInstance = new UserInterface();
     }
-
-    Drivers::Wifi::Init();
-
 }
 
 //----static-------------------------------------------------------------------
@@ -39,7 +35,6 @@ UserInterface* UserInterface::GetInstance()
 //-----------------------------------------------------------------------------
 void UserInterface::Update()
 {
-    Drivers::Wifi::GetInstance()->Update();
 }
 
 //=====[Implementations of private functions]==================================

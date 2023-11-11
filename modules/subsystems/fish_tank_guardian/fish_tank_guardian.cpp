@@ -7,13 +7,15 @@
 
 //=====[Libraries]=============================================================
 
-#include "mbed.h"
 #include "fish_tank_guardian.h"
-#include "water_monitor.h"
-#include "food_feeder.h"
-#include "user_interface.h"
+
 #include "delay.h"
+#include "food_feeder.h"
+#include "mbed.h"
 #include "pc_serial_com.h"
+#include "user_interface.h"
+#include "water_monitor.h"
+#include "wifi_com.h"
 
 namespace Subsystems {
 
@@ -31,12 +33,11 @@ void FishTankGuardian::Init()
         mInstance = new FishTankGuardian();
     }
 
-    Drivers::PcSerialCom::Init();
+    Util::PcSerialCom::Init();
     Util::Tick::Init();
     Subsystems::FoodFeeder::Init();
     Subsystems::WaterMonitor::Init();
-    
-    Util::Delay::Init(SYSTEM_TIME_INCREMENT_MS);
+    Drivers::WiFiCom::Init();
 }
 
 //----static-------------------------------------------------------------------
@@ -48,14 +49,20 @@ FishTankGuardian* FishTankGuardian::GetInstance()
 //-----------------------------------------------------------------------------
 void FishTankGuardian::Update()
 {
-    if(Util::Delay::GetInstance()->HasFinished()) 
+    if(mDelay.HasFinished()) 
     {
         Subsystems::FoodFeeder::GetInstance()->Update();
         Subsystems::WaterMonitor::GetInstance()->Update();
         Subsystems::UserInterface::GetInstance()->Update();
     }
+    Drivers::WiFiCom::GetInstance()->Update();
 }
 
 //=====[Implementations of private functions]==================================
+
+//-----------------------------------------------------------------------------
+FishTankGuardian::FishTankGuardian() 
+    : mDelay(SYSTEM_TIME_INCREMENT_MS)
+{}
 
 } // namespace Subsystems

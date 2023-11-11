@@ -21,20 +21,11 @@ namespace Util {
 
         public:
 
-
-            //! Initialize the delay
-            static void Init(tick_t duration);
-
-            //! Returns the sensor object
-            static Delay* GetInstance();
-
             //! Check if the delay has finished
             bool HasFinished();
 
             //! Write a new duration
-            void Write(tick_t duration);
-
-        private:
+            void Start(tick_t duration);
 
             Delay(tick_t duration) 
                 : mDuration(duration) 
@@ -45,10 +36,12 @@ namespace Util {
             Delay(const Delay&) = delete;
             Delay& operator=(const Delay&) = delete;
 
+        private:
+
             tick_t mStartTime;
             tick_t mDuration;
             bool mIsRunning; 
-            static Delay* mInstance;
+            Delay* mInstance;
     };
 
     class Tick

@@ -12,7 +12,7 @@
 #include "pc_serial_com.h"
 #include <cstdarg>
 
-namespace Drivers {
+namespace Util {
 
 //=====[Declaration and initialization of private global variables]============
 
@@ -67,5 +67,5 @@ PcSerialCom::PcSerialCom(PinName txPin, PinName rxPin, const int baudRate)
 {
 }
 
-} // namespace Drivers
+} // namespace Util
 

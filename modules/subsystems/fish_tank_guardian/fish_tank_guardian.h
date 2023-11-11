@@ -8,6 +8,8 @@
 #ifndef FISH_TANK_GUARDIAN_H
 #define FISH_TANK_GUARDIAN_H
 
+#include "delay.h"
+
 #define SYSTEM_TIME_INCREMENT_MS   1000
 
 namespace Subsystems { 
@@ -27,12 +29,13 @@ namespace Subsystems {
 
         private:
 
-            FishTankGuardian() {}
+            FishTankGuardian();
             ~FishTankGuardian() = default;
             FishTankGuardian(const FishTankGuardian&) = delete;
             FishTankGuardian& operator=(const FishTankGuardian&) = delete;
 
             static FishTankGuardian* mInstance;
+            Util::Delay mDelay;
     };
 
 } // namespace Subsystems

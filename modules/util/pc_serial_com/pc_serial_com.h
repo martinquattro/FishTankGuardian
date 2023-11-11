@@ -12,7 +12,7 @@
 
 #define BAUD_RATE 115200
 
-namespace Drivers { 
+namespace Util { 
 
     class PcSerialCom 
     {
@@ -39,6 +39,6 @@ namespace Drivers {
 
     };
 
-} // namespace Drivers
+} // namespace Util
 
 #endif // PC_SERIAL_COM_H
