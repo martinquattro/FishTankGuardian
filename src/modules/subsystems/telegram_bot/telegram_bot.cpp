@@ -43,4 +43,38 @@ void TelegramBot::Update()
 
 //=====[Implementations of private functions]==================================
 
+//-----------------------------------------------------------------------------
+void TelegramBot::_SendMessage(const std::string chatId, const std::string message)
+{
+
+}
+
+//-----------------------------------------------------------------------------
+// TelegramBot::TelegramMessage TelegramBot::_GetMessage()
+// {
+// //     TelegramMessage message;
+// //     std::string server = "https://api.telegram.org/bot" + mToken + "/getUpdates";
+// //     std::string response = "";//wifi.post(server, request);
+
+// //     Json json(response.c_str(), response.length());
+
+// //     if (!json.isValidJson())
+// //     {
+// //         return message;
+// //     }
+
+// //     bool result = true;
+
+// //     if (json.tokenBooleanValue(json.findChildIndexOf(json.findKeyIndex("ok")), result) < 0)
+// //     {
+// //         return messages;
+// //     }
+// //     messages = parseJsonMessages(json);
+
+
+// //   return message;
+
+// //     return TelegramMessage();
+// }
+
 } // namespace Subsystems

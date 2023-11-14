@@ -9,21 +9,22 @@
 
 #include "wifi_com.h"
 #include "pc_serial_com.h"
+#include "arm_book_lib.h"
 
 namespace Drivers {
 
 //=====[Declaration and initialization of private global variables]============
 
-WiFiCom* WiFiCom::mInstance             = nullptr;
-static const char responseOk[]          = "OK";
-static const char responseCwjapOk[]     = "+CWJAP:";
-static const char responseCwjap1[]      = "WIFI CONNECTED";
-static const char responseCwjap2[]      = "WIFI GOT IP";
-static const char responseCifsr[]       = "+CIFSR:STAIP,\"";
-static const char responseStatus3[]     = "STATUS:3";
-static const char responseCipstatus[]   = "+CIPSTATUS:";
-static const char responseSendOk[]      = "SEND OK";
-static const char responseCipclose[]    = "CLOSED";
+WiFiCom* WiFiCom::mInstance              = nullptr;
+static const char sResponseOk[]          = "OK";
+static const char sResponseCwjapOk[]     = "+CWJAP:";
+static const char sResponseCwjap1[]      = "WIFI CONNECTED";
+static const char sResponseCwjap2[]      = "WIFI GOT IP";
+static const char sResponseCifsr[]       = "+CIFSR:STAIP,\"";
+static const char sResponseStatus3[]     = "STATUS:3";
+static const char sResponseCipstatus[]   = "+CIPSTATUS:";
+static const char sResponseSendOk[]      = "SEND OK";
+static const char sResponseCipclose[]    = "CLOSED";
 
 //=====[Implementations of public functions]===================================
 
@@ -32,7 +33,7 @@ void WiFiCom::Init()
 {
     if (mInstance == nullptr)
     {
-        mInstance = new WiFiCom(WIFI_PIN_TX, WIFI_PIN_RX, WIFI_BAUD_RATE);
+        mInstance = new WiFiCom(PE_8, PE_7, 115200);
     }
 }
 
@@ -49,7 +50,7 @@ void WiFiCom::Update()
     {
         case WIFI_STATE::INIT:
         {
-            mWiFiComDelay.Start(DELAY_5_SECONDS);
+            mWiFiComDelay.Start(DELAY_10_SECONDS);
             mState = WIFI_STATE::SEND_AT;
         }
         break;
@@ -57,11 +58,11 @@ void WiFiCom::Update()
         {
             if (mWiFiComDelay.HasFinished())
             {
-                WriteCom("AT");
-                mExpectedResponse = responseOk;
-                Util::PcSerialCom::GetInstance()->Write("SEND_AT : ExpectedResponse = %s \n", mExpectedResponse.c_str());
-                mWiFiComDelay.Start(DELAY_10_SECONDS);
+                _Write("AT");
+                mExpectedResponse = sResponseOk;
+                mWiFiComDelay.Start(DELAY_5_SECONDS);
                 mState = WIFI_STATE::WAIT_AT;
+
                 Util::PcSerialCom::GetInstance()->Write("AT command Sent\r\n");
             }
         }
@@ -72,20 +73,20 @@ void WiFiCom::Update()
             {
                 mWiFiComDelay.Start(DELAY_5_SECONDS);
                 mState = WIFI_STATE::SEND_CWMODE;
-                Util::PcSerialCom::GetInstance()->Write("AT command responded correctly\r\n");
+                Util::PcSerialCom::GetInstance()->Write("AT command responded fine\r\n");
             }
             else if (mWiFiComDelay.HasFinished()) 
             {
                 Util::PcSerialCom::GetInstance()->Write("AT command not responded correctly\r\n");
-                mState = WIFI_STATE::ERROR;
+                mState = WIFI_STATE::SEND_AT;
             }
         }
-        // break;
+        break;
         // case WIFI_STATE::SEND_CWMODE:
         // {
         //     if (mWiFiComDelay.HasFinished()) 
         //     {
-        //         mSerial.Write("AT+CWMODE=1\r\n");
+        //         _Write("AT+CWMODE=1\r\n");
         //         mExpectedResponse = responseOk;
         //         mWiFiComDelay.Start(DELAY_5_SECONDS);
         //         mState = WIFI_STATE::WAIT_CWMODE;
@@ -98,12 +99,12 @@ void WiFiCom::Update()
         //     {
         //         mWiFiComDelay.Start(DELAY_5_SECONDS);
         //         mState = WIFI_STATE::SEND_CWJAP_IS_SET;
+        //         Util::PcSerialCom::GetInstance()->Write("AT+CWMODE=1 responded correctly\r\n");
         //     }
 
         //     if (mWiFiComDelay.HasFinished()) 
         //     {
-        //         mSerial.Write("AT+CWMODE=1 command not ");
-        //         mSerial.Write("responded correctly\r\n");
+        //         Util::PcSerialCom::GetInstance()->Write("AT+CWMODE=1 command not responded correctly\r\n");
         //         mState = WIFI_STATE::ERROR;
         //     }
         // }
@@ -112,7 +113,7 @@ void WiFiCom::Update()
         // {
         //     if (mWiFiComDelay.HasFinished()) 
         //     {
-        //         mSerial.Write("AT+CWJAP?\r\n");
+        //         _Write("AT+CWJAP?\r\n");
         //         mExpectedResponse = responseCwjapOk;
         //         mWiFiComDelay.Start(DELAY_5_SECONDS);
         //         mState = WIFI_STATE::WAIT_CWJAP_IS_SET;
@@ -126,6 +127,7 @@ void WiFiCom::Update()
         //         mExpectedResponse = responseOk;
         //         mState = WIFI_STATE::SEND_CIFSR;
         //     }
+
         //     if (mWiFiComDelay.HasFinished()) 
         //     {
         //         mWiFiComDelay.Start(DELAY_5_SECONDS);
@@ -137,7 +139,7 @@ void WiFiCom::Update()
         // {
         //     if (mWiFiComDelay.HasFinished()) 
         //     {
-        //         mSerial.Write("AT+CWJAP=\"%s\",\"%s\"\r\n", wifi_comComApSsid, wifi_comComApPassword );
+        //         _Write("AT+CWJAP=\"%s\",\"%s\"\r\n", mApSsid, mApPassword);
         //         mExpectedResponse = responseCwjap1;
         //         mWiFiComDelay.Start(DELAY_10_SECONDS);
         //         mState = WIFI_STATE::WAIT_CWJAP_SET_1;
@@ -428,9 +430,33 @@ WiFiCom::WiFiCom(PinName txPin, PinName rxPin, const int baudRate)
 }
 
 //-----------------------------------------------------------------------------
-void WiFiCom::WriteCom(std::string str)
+void WiFiCom::_Write(const char* format, ...)
 {
-    mSerial.write(str.c_str(), str.size());
+    // Initialize the variable arguments list
+    va_list args;
+    va_start(args, format);
+
+    // Calculate the length of the formatted string
+    int length = vsnprintf(nullptr, 0, format, args);
+
+    // Allocate memory for the formatted string
+    char* buffer = new char[length + 1];
+
+    // Format the string and store it in the buffer
+    vsnprintf(buffer, length + 1, format, args);
+
+    // Clean up the variable arguments list
+    va_end(args);
+
+    Util::PcSerialCom::GetInstance()->Write("Sending %s .\r\n", buffer);
+    // Write the string to the serial port
+    // Util::PcSerialCom::GetInstance()->Write("mSerial.writable() = %s\r\n", mSerial.writable() ? "TRUE" : "FALSE");
+    const int bytesWritten = mSerial.write(buffer, strlen(buffer));
+    // mSerial.write(buffer, strlen(buffer));
+    
+    Util::PcSerialCom::GetInstance()->Write("bytesWritten = %d .\r\n", bytesWritten);
+
+    delete[] buffer;
 }
 
 //-----------------------------------------------------------------------------

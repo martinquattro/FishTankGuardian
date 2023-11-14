@@ -14,7 +14,7 @@
 
 #define WIFI_PIN_TX             PE_8
 #define WIFI_PIN_RX             PE_7
-#define WIFI_BAUD_RATE          115200
+#define WIFI_BAUD_RATE          9600
 #define DELAY_10_SECONDS        10000
 #define DELAY_5_SECONDS         5000
 
@@ -75,7 +75,7 @@ namespace Drivers {
             WiFiCom& operator=(const WiFiCom&) = delete;
 
             //!
-            void WriteCom(std::string str);
+            void _Write(const char* format, ...);
 
             //!
             bool ReadCom(char* receivedChar);

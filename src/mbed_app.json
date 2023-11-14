@@ -1,6 +1,7 @@
 {
     "target_overrides": {
         "*": {
+            "platform.stdio-convert-newlines": 1,
             "target.printf_lib": "std"
         }
     }

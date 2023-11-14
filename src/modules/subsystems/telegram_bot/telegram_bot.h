@@ -9,6 +9,7 @@
 #define TELEGRAM_BOT_H
 
 #include "Json.h"
+#include <string>
 
 namespace Subsystems { 
 
@@ -27,12 +28,28 @@ namespace Subsystems {
 
         private:
 
+            struct TelegramMessage 
+            {
+                const std::string mUpdateId;
+                const std::string mFromId;
+                const std::string mFromUserName;
+                const std::string mFromName;
+                const std::string mMessage;
+            };
+
+            //!
+            void _SendMessage(const std::string chatId, const std::string message);
+
+            //!
+            // TelegramMessage _GetMessage();
+
             TelegramBot() {}
             ~TelegramBot() = default;
             TelegramBot(const TelegramBot&) = delete;
             TelegramBot& operator=(const TelegramBot&) = delete;
 
             static TelegramBot* mInstance;
+            std::string mToken;
     };
 
 } // namespace Subsystems
