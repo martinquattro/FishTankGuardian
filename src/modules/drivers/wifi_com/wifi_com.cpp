@@ -58,7 +58,7 @@ void WiFiCom::Update()
         {
             if (mWiFiComDelay.HasFinished())
             {
-                _Write("AT");
+                mSerial.write("AT\r\n", 4);
                 mExpectedResponse = sResponseOk;
                 mWiFiComDelay.Start(DELAY_5_SECONDS);
                 mState = WIFI_STATE::WAIT_AT;
