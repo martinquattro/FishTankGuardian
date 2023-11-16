@@ -27,6 +27,8 @@
 
 #define delay(ms)      thread_sleep_for( ms )
 
+#define DEBUG_PRINT(format, ...) printf(format, ##__VA_ARGS__)
+
 //=====[#include guards - end]=================================================
 
 #endif // _ARM_BOOK_LIB_H_

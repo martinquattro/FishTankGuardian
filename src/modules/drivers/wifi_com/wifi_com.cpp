@@ -8,8 +8,9 @@
 //=====[Libraries]=============================================================
 
 #include "wifi_com.h"
-#include "pc_serial_com.h"
+
 #include "arm_book_lib.h"
+#include "mbed.h"
 
 namespace Drivers {
 
@@ -33,7 +34,7 @@ void WiFiCom::Init()
 {
     if (mInstance == nullptr)
     {
-        mInstance = new WiFiCom(PE_8, PE_7, 115200);
+        mInstance = new WiFiCom(WIFI_PIN_TX, WIFI_PIN_RX, WIFI_BAUD_RATE);
     }
 }
 
@@ -46,6 +47,8 @@ WiFiCom* WiFiCom::GetInstance()
 //-----------------------------------------------------------------------------
 void WiFiCom::Update()
 {
+    char command[100];
+
     switch (mState) 
     {
         case WIFI_STATE::INIT:
@@ -58,12 +61,12 @@ void WiFiCom::Update()
         {
             if (mWiFiComDelay.HasFinished())
             {
-                mSerial.write("AT\r\n", 4);
+                sprintf(command, "AT");
+                _Write("%s\r\n", command);
                 mExpectedResponse = sResponseOk;
                 mWiFiComDelay.Start(DELAY_5_SECONDS);
                 mState = WIFI_STATE::WAIT_AT;
-
-                Util::PcSerialCom::GetInstance()->Write("AT command Sent\r\n");
+                DEBUG_PRINT("WiFiCom::Update() - [%s] command Sent\r\n", command);
             }
         }
         break;
@@ -73,108 +76,114 @@ void WiFiCom::Update()
             {
                 mWiFiComDelay.Start(DELAY_5_SECONDS);
                 mState = WIFI_STATE::SEND_CWMODE;
-                Util::PcSerialCom::GetInstance()->Write("AT command responded fine\r\n");
+                DEBUG_PRINT("WiFiCom::Update() - AT command responded correctly\r\n");
             }
             else if (mWiFiComDelay.HasFinished()) 
             {
-                Util::PcSerialCom::GetInstance()->Write("AT command not responded correctly\r\n");
-                mState = WIFI_STATE::SEND_AT;
+                mState = WIFI_STATE::ERROR;
+                DEBUG_PRINT("WiFiCom::Update() - AT command not responded correctly\r\n");
             }
         }
         break;
-        // case WIFI_STATE::SEND_CWMODE:
-        // {
-        //     if (mWiFiComDelay.HasFinished()) 
-        //     {
-        //         _Write("AT+CWMODE=1\r\n");
-        //         mExpectedResponse = responseOk;
-        //         mWiFiComDelay.Start(DELAY_5_SECONDS);
-        //         mState = WIFI_STATE::WAIT_CWMODE;
-        //     }
-        // }
-        // break;
-        // case WIFI_STATE::WAIT_CWMODE:
-        // {
-        //     if (IsExpectedResponse()) 
-        //     {
-        //         mWiFiComDelay.Start(DELAY_5_SECONDS);
-        //         mState = WIFI_STATE::SEND_CWJAP_IS_SET;
-        //         Util::PcSerialCom::GetInstance()->Write("AT+CWMODE=1 responded correctly\r\n");
-        //     }
+        case WIFI_STATE::SEND_CWMODE:
+        {
+            if (mWiFiComDelay.HasFinished()) 
+            {
+                sprintf(command, "AT+CWMODE=1");
+                _Write("%s\r\n", command);
+                mExpectedResponse = sResponseOk;
+                mWiFiComDelay.Start(DELAY_5_SECONDS);
+                mState = WIFI_STATE::WAIT_CWMODE;
+                DEBUG_PRINT("WiFiCom::Update() - [%s] command Sent\r\n", command);
+            }
+        }
+        break;
+        case WIFI_STATE::WAIT_CWMODE:
+        {
+            if (IsExpectedResponse()) 
+            {
+                mWiFiComDelay.Start(DELAY_5_SECONDS);
+                mState = WIFI_STATE::SEND_CWJAP_IS_SET;
+                DEBUG_PRINT("WiFiCom::Update() - AT+CWMODE=1 responded correctly\r\n");
+            }
 
-        //     if (mWiFiComDelay.HasFinished()) 
-        //     {
-        //         Util::PcSerialCom::GetInstance()->Write("AT+CWMODE=1 command not responded correctly\r\n");
-        //         mState = WIFI_STATE::ERROR;
-        //     }
-        // }
-        // break;
-        // case WIFI_STATE::SEND_CWJAP_IS_SET:
-        // {
-        //     if (mWiFiComDelay.HasFinished()) 
-        //     {
-        //         _Write("AT+CWJAP?\r\n");
-        //         mExpectedResponse = responseCwjapOk;
-        //         mWiFiComDelay.Start(DELAY_5_SECONDS);
-        //         mState = WIFI_STATE::WAIT_CWJAP_IS_SET;
-        //     }
-        // }
-        // break;
-        // case WIFI_STATE::WAIT_CWJAP_IS_SET:
-        // {
-        //     if (IsExpectedResponse())
-        //     {
-        //         mExpectedResponse = responseOk;
-        //         mState = WIFI_STATE::SEND_CIFSR;
-        //     }
+            if (mWiFiComDelay.HasFinished()) 
+            {
+                mState = WIFI_STATE::ERROR;
+                DEBUG_PRINT("WiFiCom::Update() - AT+CWMODE=1 command not responded correctly\r\n");
+            }
+        }
+        break;
+        case WIFI_STATE::SEND_CWJAP_IS_SET:
+        {
+            if (mWiFiComDelay.HasFinished()) 
+            {
+                sprintf(command, "AT+CWJAP?");
+                _Write("%s\r\n", command);
+                mExpectedResponse = sResponseCwjapOk;
+                mWiFiComDelay.Start(DELAY_5_SECONDS);
+                mState = WIFI_STATE::WAIT_CWJAP_IS_SET;
+                DEBUG_PRINT("WiFiCom::Update() - [%s] command sent\r\n", command);
+            }
+        }
+        break;
+        case WIFI_STATE::WAIT_CWJAP_IS_SET:
+        {
+            if (IsExpectedResponse())
+            {
+                mExpectedResponse = sResponseOk;
+                mState = WIFI_STATE::SEND_CIFSR;
+            }
 
-        //     if (mWiFiComDelay.HasFinished()) 
-        //     {
-        //         mWiFiComDelay.Start(DELAY_5_SECONDS);
-        //         mState = WIFI_STATE::SEND_CWJAP_SET;
-        //     }
-        // }
-        // break;
-        // case WIFI_STATE::SEND_CWJAP_SET:
-        // {
-        //     if (mWiFiComDelay.HasFinished()) 
-        //     {
-        //         _Write("AT+CWJAP=\"%s\",\"%s\"\r\n", mApSsid, mApPassword);
-        //         mExpectedResponse = responseCwjap1;
-        //         mWiFiComDelay.Start(DELAY_10_SECONDS);
-        //         mState = WIFI_STATE::WAIT_CWJAP_SET_1;
-        //     }
-        // }
-        // break;
-        // case WIFI_STATE::WAIT_CWJAP_SET_1:
-        // {
-        //     if (IsExpectedResponse()) 
-        //     {
-        //         mExpectedResponse = responseCwjap2;
-        //         mState = WIFI_STATE::WAIT_CWJAP_SET_2;
-        //     }
+            if (mWiFiComDelay.HasFinished()) 
+            {
+                mWiFiComDelay.Start(DELAY_5_SECONDS);
+                mState = WIFI_STATE::SEND_CWJAP_SET;
+            }
+        }
+        break;
+        case WIFI_STATE::SEND_CWJAP_SET:
+        {
+            if (mWiFiComDelay.HasFinished()) 
+            {
+                sprintf(command, "AT+CWJAP=\"%s\",\"%s\"", mApSsid.c_str(), mApPassword.c_str());
+                _Write("%s\r\n", command);
+                mExpectedResponse = sResponseCwjap1;
+                mWiFiComDelay.Start(DELAY_10_SECONDS);
+                mState = WIFI_STATE::WAIT_CWJAP_SET_1;
+                DEBUG_PRINT("WiFiCom::Update() - [%s] command sent\r\n", command);
+            }
+        }
+        break;
+        case WIFI_STATE::WAIT_CWJAP_SET_1:
+        {
+            if (IsExpectedResponse()) 
+            {
+                mExpectedResponse = sResponseCwjap2;
+                mState = WIFI_STATE::WAIT_CWJAP_SET_2;
+            }
 
-        //     if (mWiFiComDelay.HasFinished()) 
-        //     {
-        //         Util::PcSerialCom::GetInstance()->Write("Error in state = WIFI_STATE::WAIT_CWJAP_SET_1. Check Wi-Fi AP credentials ");
-        //         mState = WIFI_STATE::ERROR;
-        //     }
-        //     break;
-        // }
-        // case WIFI_STATE::WAIT_CWJAP_SET_2:
-        // {
-        //     if (IsExpectedResponse())
-        //     {
-        //         mState = WIFI_STATE::SEND_CIFSR;
-        //     }
+            if (mWiFiComDelay.HasFinished()) 
+            {
+                DEBUG_PRINT("WiFiCom::Update() - Error in state = WIFI_STATE::WAIT_CWJAP_SET_1. Check Wi-Fi AP credentials\r\n");
+                mState = WIFI_STATE::ERROR;
+            }
+            break;
+        }
+        case WIFI_STATE::WAIT_CWJAP_SET_2:
+        {
+            if (IsExpectedResponse())
+            {
+                mState = WIFI_STATE::SEND_CIFSR;
+            }
 
-        //     if (mWiFiComDelay.HasFinished()) 
-        //     {
-        //         Util::PcSerialCom::GetInstance()->Write("Error in state = WIFI_STATE::WAIT_CWJAP_SET_2. Check Wi-Fi AP credentials");
-        //         mState = WIFI_STATE::ERROR;
-        //     }
-        // }
-        // break;
+            if (mWiFiComDelay.HasFinished()) 
+            {
+                // DEBUG_PRINT("WiFiCom::Update() - Error in state = WIFI_STATE::WAIT_CWJAP_SET_2. Check Wi-Fi AP credentials");
+                mState = WIFI_STATE::ERROR;
+            }
+        }
+        break;
         // case WIFI_STATE::SEND_CIFSR:
         // {
         //     if (mWiFiComDelay.HasFinished())
@@ -427,6 +436,9 @@ WiFiCom::WiFiCom(PinName txPin, PinName rxPin, const int baudRate)
     , mWiFiComDelay(0)
 {
     mState = WIFI_STATE::INIT;
+
+    mApSsid = "Cuchitril 2.4GHz";
+    mApPassword = "Defensa5232022";
 }
 
 //-----------------------------------------------------------------------------
@@ -448,14 +460,9 @@ void WiFiCom::_Write(const char* format, ...)
     // Clean up the variable arguments list
     va_end(args);
 
-    Util::PcSerialCom::GetInstance()->Write("Sending %s .\r\n", buffer);
     // Write the string to the serial port
-    // Util::PcSerialCom::GetInstance()->Write("mSerial.writable() = %s\r\n", mSerial.writable() ? "TRUE" : "FALSE");
     const int bytesWritten = mSerial.write(buffer, strlen(buffer));
-    // mSerial.write(buffer, strlen(buffer));
     
-    Util::PcSerialCom::GetInstance()->Write("bytesWritten = %d .\r\n", bytesWritten);
-
     delete[] buffer;
 }
 
@@ -484,9 +491,6 @@ bool WiFiCom::IsExpectedResponse()
 
     if(ReadCom(&charReceived))
     {
-        std::string tr(1, charReceived);
-        Util::PcSerialCom::GetInstance()->Write("IsExpectedResponse : charReceived = %s \n ", tr.c_str());
-
         if (charReceived == mExpectedResponse[responseStringPositionIndex]) 
         {
             responseStringPositionIndex++;

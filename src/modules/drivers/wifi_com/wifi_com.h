@@ -8,9 +8,9 @@
 #ifndef WIFI_COM
 #define WIFI_COM
 
-#include "mbed.h"
 #include <string>
 #include "delay.h"
+#include "mbed.h"
 
 #define WIFI_PIN_TX             PE_8
 #define WIFI_PIN_RX             PE_7
@@ -88,8 +88,8 @@ namespace Drivers {
             WIFI_STATE          mState;
             Util::Delay         mWiFiComDelay;
             std::string         mExpectedResponse;
-            char*               mApSsid;
-            char*               mApPassword;
+            std::string         mApSsid;
+            std::string         mApPassword;
     };
 
 } // namespace Drivers
