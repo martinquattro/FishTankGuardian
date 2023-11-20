@@ -39,7 +39,7 @@ FoodFeeder* FoodFeeder::GetInstance()
 //-----------------------------------------------------------------------------
 void FoodFeeder::Update()
 {
-        // TODO: Update Drivers controlled by the FoodFeeder Subsystem
+    Drivers::Motor::GetInstance()->Update();
 }
 
 //=====[Implementations of private functions]==================================

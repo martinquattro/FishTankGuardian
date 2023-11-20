@@ -13,9 +13,9 @@
 #include "food_feeder.h"
 #include "mbed.h"
 #include "pc_serial_com.h"
+#include "telegram_bot.h"
 #include "user_interface.h"
 #include "water_monitor.h"
-#include "telegram_bot.h"
 
 namespace Subsystems {
 
@@ -38,6 +38,7 @@ void FishTankGuardian::Init()
     Subsystems::FoodFeeder::Init();
     Subsystems::WaterMonitor::Init();
     Subsystems::TelegramBot::Init();
+    Subsystems::UserInterface::Init();
 }
 
 //----static-------------------------------------------------------------------
