@@ -9,6 +9,9 @@
 
 #include "user_interface.h"
 
+#include "arm_book_lib.h"
+#include "display.h"
+
 namespace Subsystems {
 
 //=====[Declaration and initialization of private global variables]============
@@ -24,6 +27,9 @@ void UserInterface::Init()
     {
         mInstance = new UserInterface();
     }
+
+    displayInit(DISPLAY_TYPE_LCD_HD44780, DISPLAY_CONNECTION_GPIO_4BITS);
+    displayClear();
 }
 
 //----static-------------------------------------------------------------------
@@ -35,6 +41,19 @@ UserInterface* UserInterface::GetInstance()
 //-----------------------------------------------------------------------------
 void UserInterface::Update()
 {
+    DEBUG_PRINT("UserInterface::Update()\r\n");
+    
+    displayCharPositionWrite (0,0);
+    displayStringWrite("Fish Tank Guardian");
+
+    displayCharPositionWrite (0,1);
+    displayStringWrite("Next Feed:" );
+
+    displayCharPositionWrite (0,2);
+    displayStringWrite("Temperature:");
+    
+    displayCharPositionWrite (0,2);
+    displayStringWrite("TDS:" );
 }
 
 //=====[Implementations of private functions]==================================
