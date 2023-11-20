@@ -14,8 +14,8 @@
 #define MOTOR_PIN_2           D13
 #define MOTOR_PIN_3           D14
 #define MOTOR_PIN_4           D15
-#define MOTOR_TOTAL_STEPS     2048
-#define MOTOR_SPEED           1200
+#define MOTOR_TOTAL_STEPS     512
+#define MOTOR_SPEED           800
 
 namespace Drivers { 
 
@@ -39,33 +39,38 @@ namespace Drivers {
 
             enum class MOTOR_STATE
             {
-                STOPPED,
-                ROTATING
+                STOP,
+                ROTATE
             };
 
-            int stepsMap[4][4] =
+            const int stepsMap[8][4] =
             {
-                {1, 0, 0, 0},
-                {0, 1, 0, 0},
+                {0, 0, 0, 1},
+                {0, 0, 1, 1},
                 {0, 0, 1, 0},
-                {0, 0, 0, 1}
+                {0, 1, 1, 0},
+                {0, 1, 0, 0},
+                {1, 1, 0, 0},
+                {1, 0, 0, 0},
+                {1, 0, 0, 0},
             };
 
             //!
-            void _Step();
+            void _Rotate(const int numSteps);
 
-            Motor(PinName pin1, PinName pin2, PinName pin3, PinName pin4, const int speed, const int steps);
+            //!
+            void _Denergize();
+
+            Motor(PinName pin1, PinName pin2, PinName pin3, PinName pin4, const int speed);
             ~Motor() = default;
             Motor(const Motor&) = delete;
             Motor& operator=(const Motor&) = delete;
 
             static Motor* mInstance;
 
-            const int mNumberSteps;
             const int mSpeed;
 
             MOTOR_STATE mState;
-            int mCurrentStep;
             DigitalOut mPin1;
             DigitalOut mPin2;
             DigitalOut mPin3;

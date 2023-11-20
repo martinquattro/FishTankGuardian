@@ -10,7 +10,7 @@
 
 #include "delay.h"
 
-#define SYSTEM_TIME_INCREMENT_MS   1000
+#define SYSTEM_TIME_INCREMENT_MS   100
 
 namespace Subsystems { 
 

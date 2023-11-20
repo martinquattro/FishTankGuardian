@@ -16,6 +16,7 @@
 #include "telegram_bot.h"
 #include "user_interface.h"
 #include "water_monitor.h"
+#include "arm_book_lib.h"
 
 namespace Subsystems {
 
