@@ -1,6 +1,8 @@
 /*!****************************************************************************
  * @file motor.cpp
- * @brief TODO
+ * @brief Implementation of the Motor class for 5-12V 28BYJ Stepper Motor with ULN2003 Driver
+ * @details This code controls a 12V 28BYJ stepper motor using the ULN2003 driver.
+ *          It includes initialization, rotation control, and utility functions.
  * @author Quattrone Martin
  * @date Oct 2023
  *******************************************************************************/
@@ -38,10 +40,13 @@ void Motor::Update()
 {
     if (mState == MOTOR_STATE::ROTATE)
     {
+        DEBUG_PRINT("Motor::Update() - Initiating rotation...\r\n");
+        
         _Rotate(MOTOR_TOTAL_STEPS);
-
         _Denergize();
         mState = MOTOR_STATE::STOP;
+
+        DEBUG_PRINT("Motor::Update() - Rotation finished\r\n");
     }
 }
 
@@ -62,7 +67,6 @@ Motor::Motor(PinName pin1, PinName pin2, PinName pin3, PinName pin4, const int s
     , mSpeed(speed)
 {
     _Denergize();
-
     mState = MOTOR_STATE::ROTATE;
 }
 
@@ -83,10 +87,10 @@ void Motor::_Rotate(const int numSteps)
     {
         for (int i = 0; i < 8; ++i)
         {
-            mPin1 = stepsMap[i][0];
-            mPin2 = stepsMap[i][1];
-            mPin3 = stepsMap[i][2];
-            mPin4 = stepsMap[i][3];
+            mPin1 = sStepsMap[i][0];
+            mPin2 = sStepsMap[i][1];
+            mPin3 = sStepsMap[i][2];
+            mPin4 = sStepsMap[i][3];
 
             wait_us(mSpeed);
         }

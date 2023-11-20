@@ -8,6 +8,8 @@
 //=====[Libraries]=============================================================
 
 #include "food_feeder.h"
+
+#include "arm_book_lib.h"
 #include "motor.h"
 
 
@@ -22,12 +24,16 @@ FoodFeeder* FoodFeeder::mInstance = nullptr;
 //----static-------------------------------------------------------------------
 void FoodFeeder::Init()
 {
+    DEBUG_PRINT("FoodFeeder::Init() - Initiating...\r\n");
+
     if (mInstance == nullptr)
     {
         mInstance = new FoodFeeder();
     }
 
     Drivers::Motor::Init();
+
+    DEBUG_PRINT("FoodFeeder::Init() - Initiating Finished.\r\n");
 }
 
 //----static-------------------------------------------------------------------

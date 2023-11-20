@@ -8,8 +8,10 @@
 //=====[Libraries]=============================================================
 
 #include "water_monitor.h"
-#include "tds_sensor.h"
+
+#include "arm_book_lib.h"
 #include "temperature_sensor.h"
+#include "tds_sensor.h"
 
 namespace Subsystems {
 
@@ -22,6 +24,8 @@ WaterMonitor* WaterMonitor::mInstance = nullptr;
 //----static-------------------------------------------------------------------
 void WaterMonitor::Init()
 {
+    DEBUG_PRINT("WaterMonitor::Init() - Initiating...\r\n");
+
     if (mInstance == nullptr)
     {
         mInstance = new WaterMonitor();
@@ -29,6 +33,8 @@ void WaterMonitor::Init()
 
     Drivers::TemperatureSensor::Init();
     Drivers::TdsSensor::Init();
+
+    DEBUG_PRINT("WaterMonitor::Init() - Initiating Finished.\r\n");
 }
 
 //----static-------------------------------------------------------------------

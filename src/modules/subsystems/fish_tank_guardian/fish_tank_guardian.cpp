@@ -9,6 +9,7 @@
 
 #include "fish_tank_guardian.h"
 
+#include "arm_book_lib.h"
 #include "delay.h"
 #include "food_feeder.h"
 #include "mbed.h"
@@ -16,7 +17,6 @@
 #include "telegram_bot.h"
 #include "user_interface.h"
 #include "water_monitor.h"
-#include "arm_book_lib.h"
 
 namespace Subsystems {
 
@@ -53,6 +53,8 @@ void FishTankGuardian::Update()
 {
     if(mDelay.HasFinished()) 
     {
+        DEBUG_PRINT("tickCounter = %d\r\n", static_cast<int>(Util::Tick::GetTickCounter()));    
+
         Subsystems::FoodFeeder::GetInstance()->Update();
         Subsystems::WaterMonitor::GetInstance()->Update();
         Subsystems::UserInterface::GetInstance()->Update();

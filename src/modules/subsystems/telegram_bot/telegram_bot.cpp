@@ -8,6 +8,8 @@
 //=====[Libraries]=============================================================
 
 #include "telegram_bot.h"
+
+#include "arm_book_lib.h"
 #include "wifi_com.h"
 
 namespace Subsystems {
@@ -21,12 +23,16 @@ TelegramBot* TelegramBot::mInstance = nullptr;
 //----static-------------------------------------------------------------------
 void TelegramBot::Init()
 {
+    DEBUG_PRINT("TelegramBot::Init() - Initiating...\r\n");
+
     if (mInstance == nullptr)
     {
         mInstance = new TelegramBot();
     }
 
     Drivers::WiFiCom::Init();
+
+    DEBUG_PRINT("TelegramBot::Init() - Initiating Finished.\r\n");
 }
 
 //----static-------------------------------------------------------------------

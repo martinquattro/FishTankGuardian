@@ -23,6 +23,8 @@ UserInterface* UserInterface::mInstance = nullptr;
 //----static-------------------------------------------------------------------
 void UserInterface::Init()
 {
+    DEBUG_PRINT("UserInterface::Init() - Initiating...\r\n");
+
     if (mInstance == nullptr)
     {
         mInstance = new UserInterface();
@@ -30,19 +32,7 @@ void UserInterface::Init()
 
     displayInit(DISPLAY_TYPE_LCD_HD44780, DISPLAY_CONNECTION_GPIO_4BITS);
     displayClear();
-}
 
-//----static-------------------------------------------------------------------
-UserInterface* UserInterface::GetInstance()
-{
-    return mInstance;
-}
-
-//-----------------------------------------------------------------------------
-void UserInterface::Update()
-{
-    DEBUG_PRINT("UserInterface::Update()\r\n");
-    
     displayCharPositionWrite (0,0);
     displayStringWrite("Fish Tank Guardian");
 
@@ -54,6 +44,20 @@ void UserInterface::Update()
     
     displayCharPositionWrite (0,2);
     displayStringWrite("TDS:" );
+
+    DEBUG_PRINT("UserInterface::Init() - Initiating Finished.\r\n");
+}
+
+//----static-------------------------------------------------------------------
+UserInterface* UserInterface::GetInstance()
+{
+    return mInstance;
+}
+
+//-----------------------------------------------------------------------------
+void UserInterface::Update()
+{
+    
 }
 
 //=====[Implementations of private functions]==================================

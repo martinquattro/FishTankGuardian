@@ -8,9 +8,10 @@
 
 //=====[Libraries]=============================================================
 
-#include "mbed.h"
 #include "pc_serial_com.h"
+
 #include <cstdarg>
+#include "mbed.h"
 
 namespace Util {
 

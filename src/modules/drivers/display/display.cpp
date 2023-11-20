@@ -39,9 +39,7 @@ static void displayCodeWrite( bool type, int dataBus );
 
 //-----------------------------------------------------------------------------
 void displayInit(displayType_t type, displayConnection_t connection)
-{
-    DEBUG_PRINT("displayInit\r\n");
-    
+{   
     display.type = type;
     display.connection = connection;
     display.mode = DISPLAY_MODE_CHAR;

@@ -10,12 +10,12 @@
 
 #include "mbed.h"
 
-#define MOTOR_PIN_1           D12
-#define MOTOR_PIN_2           D13
-#define MOTOR_PIN_3           D14
-#define MOTOR_PIN_4           D15
-#define MOTOR_TOTAL_STEPS     512
-#define MOTOR_SPEED           800
+#define MOTOR_PIN_1         D12
+#define MOTOR_PIN_2         D13
+#define MOTOR_PIN_3         D14
+#define MOTOR_PIN_4         D15
+#define MOTOR_TOTAL_STEPS   512
+#define MOTOR_SPEED         800
 
 namespace Drivers { 
 
@@ -23,16 +23,16 @@ namespace Drivers {
     {
         public:
 
-            //! Initialize the sensor
+            //! Initialize the module
             static void Init();
 
-            //! Returns the sensor object
+            //! Returns the module object
             static Motor* GetInstance();
 
-            //!
+            //! Update motor state
             void Update();
             
-            //!
+            //! Start motor rotation
             void Start();
 
         private:
@@ -43,7 +43,7 @@ namespace Drivers {
                 ROTATE
             };
 
-            const int stepsMap[8][4] =
+            static constexpr int sStepsMap[8][4] =
             {
                 {0, 0, 0, 1},
                 {0, 0, 1, 1},
@@ -52,13 +52,13 @@ namespace Drivers {
                 {0, 1, 0, 0},
                 {1, 1, 0, 0},
                 {1, 0, 0, 0},
-                {1, 0, 0, 0},
+                {1, 0, 0, 1},
             };
 
-            //!
+            //! Rotate motor by specified number of steps
             void _Rotate(const int numSteps);
 
-            //!
+            //! De-energize the motor
             void _Denergize();
 
             Motor(PinName pin1, PinName pin2, PinName pin3, PinName pin4, const int speed);
@@ -69,7 +69,6 @@ namespace Drivers {
             static Motor* mInstance;
 
             const int mSpeed;
-
             MOTOR_STATE mState;
             DigitalOut mPin1;
             DigitalOut mPin2;
