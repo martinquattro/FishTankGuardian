@@ -13,7 +13,6 @@
 #include "delay.h"
 #include "food_feeder.h"
 #include "mbed.h"
-#include "pc_serial_com.h"
 #include "real_time_clock.h"
 #include "telegram_bot.h"
 #include "user_interface.h"
@@ -36,7 +35,6 @@ void FishTankGuardian::Init()
         mInstance = new FishTankGuardian();
     }
 
-    Util::PcSerialCom::Init();
     Util::Tick::Init();
     Util::RealTimeClock::Init();
     Subsystems::FoodFeeder::Init();

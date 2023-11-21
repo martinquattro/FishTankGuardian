@@ -35,7 +35,7 @@ namespace Util {
 
         private:
 
-            RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t adress);
+            RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t address);
             ~RealTimeClock() = default;
             RealTimeClock(const RealTimeClock&) = delete;
             RealTimeClock& operator=(const RealTimeClock&) = delete;
