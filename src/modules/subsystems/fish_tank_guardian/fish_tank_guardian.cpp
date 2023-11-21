@@ -58,10 +58,10 @@ void FishTankGuardian::Update()
     {
         // DEBUG_PRINT("tickCounter = %d\r\n", static_cast<int>(Util::Tick::GetTickCounter()));   
 
-        // tm currentTime = Util::RealTimeClock::GetInstance()->GetCurrentTime();
-        // char buffer[80];
-        // strftime(buffer, sizeof(buffer), "%%H:%M:%S", &currentTime);
-        // DEBUG_PRINT("%s\r\n", buffer);
+        tm currentTime = Util::RealTimeClock::GetInstance()->GetCurrentTime();
+        char buffer[80];
+        strftime(buffer, sizeof(buffer), "%H:%M:%S", &currentTime);
+        DEBUG_PRINT("%s\r\n", buffer);
 
         Subsystems::FoodFeeder::GetInstance()->Update();
         Subsystems::WaterMonitor::GetInstance()->Update();

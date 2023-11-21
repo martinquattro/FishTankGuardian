@@ -28,20 +28,11 @@ namespace Drivers {
 
             //! Returns the module object
             static Motor* GetInstance();
-
-            //! Update motor state
-            void Update();
-            
+           
             //! Start motor rotation
-            void Start();
+            void Rotate();
 
         private:
-
-            enum class MOTOR_STATE
-            {
-                STOP,
-                ROTATE
-            };
 
             static constexpr int sStepsMap[8][4] =
             {
@@ -69,7 +60,6 @@ namespace Drivers {
             static Motor* mInstance;
 
             const int mSpeed;
-            MOTOR_STATE mState;
             DigitalOut mPin1;
             DigitalOut mPin2;
             DigitalOut mPin3;

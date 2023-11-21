@@ -8,6 +8,8 @@
 #ifndef FOOD_FEEDER_H
 #define FOOD_FEEDER_H
 
+#include "mbed.h"
+
 namespace Subsystems { 
 
     class FoodFeeder 
@@ -29,6 +31,9 @@ namespace Subsystems {
             ~FoodFeeder() = default;
             FoodFeeder(const FoodFeeder&) = delete;
             FoodFeeder& operator=(const FoodFeeder&) = delete;
+
+            //!
+            bool _IsTimeToFeed(const tm currentTime);
 
             static FoodFeeder* mInstance;
     };

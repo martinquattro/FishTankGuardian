@@ -83,11 +83,11 @@ void RealTimeClock::Sync()
     struct tm rtcTime;
 
     rtcTime.tm_year = 123;
-    rtcTime.tm_mon  = 6 - 1;
+    rtcTime.tm_mon  = 11;
     rtcTime.tm_mday = 23;
-    rtcTime.tm_hour = 23;
-    rtcTime.tm_min  = 59;
-    rtcTime.tm_sec  = 50;
+    rtcTime.tm_hour = 20;
+    rtcTime.tm_min  = 44;
+    rtcTime.tm_sec  = 45;
     rtcTime.tm_isdst = -1;
 
     mktime(&rtcTime);

@@ -36,25 +36,14 @@ Motor* Motor::GetInstance()
 }
 
 //-----------------------------------------------------------------------------
-void Motor::Update()
+void Motor::Rotate()
 {
-    if (mState == MOTOR_STATE::ROTATE)
-    {
-        DEBUG_PRINT("Motor::Update() - Initiating rotation...\r\n");
-        
-        _Rotate(MOTOR_TOTAL_STEPS);
-        _Denergize();
-        mState = MOTOR_STATE::STOP;
+    DEBUG_PRINT("Motor::Rotate() - Initiating rotation...\r\n");
+    
+    _Rotate(MOTOR_TOTAL_STEPS);
+    _Denergize();
 
-        DEBUG_PRINT("Motor::Update() - Rotation finished\r\n");
-    }
-}
-
-//-----------------------------------------------------------------------------
-void Motor::Start()
-{
-    mState = MOTOR_STATE::ROTATE;
-}
+    DEBUG_PRINT("Motor::Rotate() - Rotation finished\r\n");}
 
 //=====[Implementations of private functions]==================================
 
@@ -67,7 +56,6 @@ Motor::Motor(PinName pin1, PinName pin2, PinName pin3, PinName pin4, const int s
     , mSpeed(speed)
 {
     _Denergize();
-    mState = MOTOR_STATE::ROTATE;
 }
 
 //-----------------------------------------------------------------------------
