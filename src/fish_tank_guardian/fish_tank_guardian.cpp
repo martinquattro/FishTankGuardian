@@ -19,6 +19,8 @@
 #include "user_interface.h"
 #include "water_monitor.h"
 
+#include "tds_sensor.h"       // debug
+
 namespace Subsystems {
 
 //=====[Declaration and initialization of private global variables]============
@@ -72,7 +74,8 @@ void FishTankGuardian::Update()
         // debug ---------------------------------
         // DEBUG_PRINT("tickCounter = %d\r\n", static_cast<int>(Util::Tick::GetTickCounter()));   
 
-        DEBUG_PRINT("%s\r\n", Util::RealTimeClock::GetInstance()->GetCurrentTime().c_str());
+        DEBUG_PRINT("GetCurrentTime = %s\r\n", Util::RealTimeClock::GetInstance()->GetCurrentTime().c_str());
+        DEBUG_PRINT("TdsSensor = %d ppm\r\n", Drivers::TdsSensor::GetInstance()->GetLastReading());
     }
     Subsystems::TelegramBot::GetInstance()->Update();
 }

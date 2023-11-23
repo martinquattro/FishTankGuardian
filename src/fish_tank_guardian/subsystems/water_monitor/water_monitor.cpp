@@ -46,7 +46,7 @@ WaterMonitor* WaterMonitor::GetInstance()
 //-----------------------------------------------------------------------------
 void WaterMonitor::Update()
 {
-    // TODO: Update Drivers controlled by the WaterMonitor Subsystem
+    Drivers::TdsSensor::GetInstance()->Update();
 }
 
 //=====[Implementations of private functions]==================================

@@ -30,7 +30,7 @@ namespace Drivers {
             void Update(const float temperature = 25.0);
 
             //!
-            float Read();
+            int GetLastReading();
 
         private:
 
@@ -49,7 +49,7 @@ namespace Drivers {
             float mRef;
             float mAdcRange;
             float mKValue;
-
+            int   mLastReading;
     };
 
 } // namespace Drivers
