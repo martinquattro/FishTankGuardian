@@ -1,6 +1,3 @@
-// Copyright 2022 Matías Charrut
-// This code is licensed under MIT license (see LICENSE for details)
-
 #include <vector>
 #include "mbed.h"
 #include "memory.h"
@@ -67,7 +64,7 @@ uint16_t Memory::read(uint16_t address, std::vector<uint8_t> &vector) {
   return read_length;
 }
 
-// address_to no se lee.
+
 std::vector<uint8_t> Memory::read(uint16_t address_from, uint16_t address_to) {
   size_t read_length = address_to - address_from;
 
