@@ -11,8 +11,11 @@
 #define RTC_PIN_SDA        PB_11
 #define RTC_PIN_SCL        PB_10
 #define RTC_ADDRESS_ID     0x68
+#define RTC_EEPROM_ADDRESS 0x50
 
 #include "mbed.h"
+#include "memory.h"
+#include <string>
 
 namespace Util { 
 
@@ -27,15 +30,22 @@ namespace Util {
             static RealTimeClock* GetInstance();
 
             //!
-            tm GetCurrentTime();
+            std::string GetCurrentTime();
 
             //!
             void Sync();
 
+            //!
+            void SaveStringToEeprom(std::string str);
+
+            //!
+            std::string& ReadStringFromEeprom();
+
+
 
         private:
 
-            RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t address);
+            RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t address, uint8_t eepromAddr);
             ~RealTimeClock() = default;
             RealTimeClock(const RealTimeClock&) = delete;
             RealTimeClock& operator=(const RealTimeClock&) = delete;
@@ -51,11 +61,11 @@ namespace Util {
             uint8_t _Dec2Bcd(uint8_t num);
 
             static RealTimeClock* mInstance;
+
             I2C mRtcCom;
             const uint8_t mAddress;
-
-
-    };
+            Memory mMemory;
+};
 
 } // namespace Util
 

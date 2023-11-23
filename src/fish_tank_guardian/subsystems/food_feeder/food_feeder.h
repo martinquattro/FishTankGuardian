@@ -8,6 +8,8 @@
 #ifndef FOOD_FEEDER_H
 #define FOOD_FEEDER_H
 
+#include <vector>
+// #include "EEPROM.h"
 #include "mbed.h"
 
 namespace Subsystems { 
@@ -25,15 +27,24 @@ namespace Subsystems {
             //! Update subsystem
             void Update();
 
+            //! Add a new time to feed
+            bool AddFeedTime(std::string newFeedTime);
+
+            //! Read feed times currently saved in memory
+            std::vector<std::string> GetFeedTimes();
+
         private:
 
-            FoodFeeder() {}
+            FoodFeeder();
             ~FoodFeeder() = default;
             FoodFeeder(const FoodFeeder&) = delete;
             FoodFeeder& operator=(const FoodFeeder&) = delete;
 
             //!
-            bool _IsTimeToFeed(const tm currentTime);
+            bool _IsTimeToFeed(std::string currentTime);
+
+            // Function to validate the time format
+            bool _IsValidTimeFormat(const char* time);
 
             static FoodFeeder* mInstance;
     };

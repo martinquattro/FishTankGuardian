@@ -46,25 +46,77 @@ FoodFeeder* FoodFeeder::GetInstance()
 //-----------------------------------------------------------------------------
 void FoodFeeder::Update()
 {
-    tm currentTime = Util::RealTimeClock::GetInstance()->GetCurrentTime();
+    std::string currentTime = Util::RealTimeClock::GetInstance()->GetCurrentTime();
     if (_IsTimeToFeed(currentTime))
     {
         Drivers::Motor::GetInstance()->Rotate();
     }
 }
 
+//-----------------------------------------------------------------------------
+bool FoodFeeder::AddFeedTime(std::string newFeedTime)
+{
+    // Check if the length is correct
+    DEBUG_PRINT("newFeedTime = %s\r\n", newFeedTime.c_str());
+    if (newFeedTime.size() != 8 || !_IsValidTimeFormat(newFeedTime.c_str())) 
+    {
+        return false;
+    }
+    
+    Util::RealTimeClock::GetInstance()->SaveStringToEeprom(newFeedTime);
+
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+std::vector<std::string> FoodFeeder::GetFeedTimes()
+{
+    std::vector<std::string> feedTimes;
+
+    // Read the feed time from EEPROM
+    std::string feedTime = Util::RealTimeClock::GetInstance()->ReadStringFromEeprom();
+    feedTimes.push_back(feedTime);
+
+    return feedTimes;}
+
 //=====[Implementations of private functions]==================================
 
 //-----------------------------------------------------------------------------
-bool FoodFeeder::_IsTimeToFeed(const tm currentTime)
+FoodFeeder::FoodFeeder()
 {
-    std::string feedTimeStr = "20:45:0";
 
-    char buffer[80];
-    strftime(buffer, sizeof(buffer), "%H:%M:%S", &currentTime);
-    std::string currentIimeStr(buffer);
+}
 
-    return (!strcmp(feedTimeStr.c_str(), currentIimeStr.c_str()));
+//-----------------------------------------------------------------------------
+bool FoodFeeder::_IsValidTimeFormat(const char* time) 
+{
+    if (   std::isdigit(time[0]) && std::isdigit(time[1]) 
+        && time[2] == ':' 
+        && std::isdigit(time[3]) && std::isdigit(time[4])
+        && time[5] == ':' 
+        && std::isdigit(time[6]) && std::isdigit(time[7])) 
+    {
+        return true;
+    }
+
+    return false;
+}
+
+//-----------------------------------------------------------------------------
+bool FoodFeeder::_IsTimeToFeed(std::string currentTime)
+{
+
+    std::vector<std::string> feedTimes = Subsystems::FoodFeeder::GetInstance()->GetFeedTimes();
+
+    for (const auto& feedTimeStr : feedTimes)
+    {
+        if (!strcmp(feedTimeStr.c_str(), currentTime.c_str()))
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 } // namespace Subsystems

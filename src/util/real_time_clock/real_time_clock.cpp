@@ -27,10 +27,8 @@ void RealTimeClock::Init()
 
     if (mInstance == nullptr)
     {
-        mInstance = new RealTimeClock(RTC_PIN_SDA, RTC_PIN_SCL, RTC_ADDRESS_ID);
+        mInstance = new RealTimeClock(RTC_PIN_SDA, RTC_PIN_SCL, RTC_ADDRESS_ID, RTC_EEPROM_ADDRESS);
     }
-
-    mInstance->Sync();              // debug
 
     DEBUG_PRINT("RealTimeClock::Init() - Initiating Finished.\r\n");
 }
@@ -42,7 +40,7 @@ RealTimeClock* RealTimeClock::GetInstance()
 }
 
 //-----------------------------------------------------------------------------
-tm RealTimeClock::GetCurrentTime()
+std::string RealTimeClock::GetCurrentTime()
 {
     uint8_t seconds, minutes, hours, day, month, year;
 
@@ -64,15 +62,10 @@ tm RealTimeClock::GetCurrentTime()
 
     mRtcCom.stop();
 
-    tm currentTime;
-    currentTime.tm_sec  = seconds;
-    currentTime.tm_min  = minutes;
-    currentTime.tm_hour = hours;
-    currentTime.tm_mday = day;
-    currentTime.tm_mon  = month;
-    currentTime.tm_year = year;
+    char buffer[80];
+    std::sprintf(buffer, "%02d:%02d:%02d", hours, minutes, seconds);
 
-    return currentTime;
+    return std::string(buffer);
 }
 
 //-----------------------------------------------------------------------------
@@ -85,9 +78,9 @@ void RealTimeClock::Sync()
     rtcTime.tm_year = 123;
     rtcTime.tm_mon  = 11;
     rtcTime.tm_mday = 23;
-    rtcTime.tm_hour = 20;
-    rtcTime.tm_min  = 44;
-    rtcTime.tm_sec  = 45;
+    rtcTime.tm_hour = 21;
+    rtcTime.tm_min  = 00;
+    rtcTime.tm_sec  = 00;
     rtcTime.tm_isdst = -1;
 
     mktime(&rtcTime);
@@ -99,11 +92,27 @@ void RealTimeClock::Sync()
     DEBUG_PRINT("RealTimeClock::Sync() - Time synqued to %s\r\n", dateStr);
 }
 
+//-----------------------------------------------------------------------------
+void RealTimeClock::SaveStringToEeprom(std::string str) 
+{
+    mMemory.write(0, str);
+}
+
+//-----------------------------------------------------------------------------
+std::string& RealTimeClock::ReadStringFromEeprom() 
+{
+    std::string str;
+    mMemory.read(0, str);
+
+    return str;
+}
+
 //=====[Implementations of private functions]==================================
 
-RealTimeClock::RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t address)
+RealTimeClock::RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t address, uint8_t eepromAddr)
     : mRtcCom(sdaPin, sclPin)
     , mAddress(address << 1)
+    , mMemory(sdaPin, sclPin, eepromAddr)
 {
     mRtcCom.start();
     mRtcCom.write(mAddress | 0);
