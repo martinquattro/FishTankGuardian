@@ -7,16 +7,16 @@
 
 //=====[Declaration and initialization of public global objects]===============
 
-DigitalOut displayD0( D0 );
-DigitalOut displayD1( D1 );
-DigitalOut displayD2( D2 );
-DigitalOut displayD3( D3 );
-DigitalOut displayD4( D4 );
-DigitalOut displayD5( D5 );
-DigitalOut displayD6( D6 );
-DigitalOut displayD7( D7 );
-DigitalOut displayRs( D8 );
-DigitalOut displayEn( D9 );
+DigitalOut displayD0( D12 );
+DigitalOut displayD1( D13 );
+DigitalOut displayD2( D14 );
+DigitalOut displayD3( D15 );
+DigitalOut displayD4( D2 );
+DigitalOut displayD5( D3 );
+DigitalOut displayD6( D4 );
+DigitalOut displayD7( D5 );
+DigitalOut displayRs( D0 );
+DigitalOut displayEn( D1 );
 
 I2C i2cPcf8574( I2C1_SDA, I2C1_SCL ); 
 

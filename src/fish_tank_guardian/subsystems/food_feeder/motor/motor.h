@@ -10,10 +10,10 @@
 
 #include "mbed.h"
 
-#define MOTOR_PIN_1         D12
-#define MOTOR_PIN_2         D13
-#define MOTOR_PIN_3         D14
-#define MOTOR_PIN_4         D15
+#define MOTOR_PIN_1         D9
+#define MOTOR_PIN_2         D8
+#define MOTOR_PIN_3         D7
+#define MOTOR_PIN_4         D6
 #define MOTOR_TOTAL_STEPS   512
 #define MOTOR_SPEED         800
 

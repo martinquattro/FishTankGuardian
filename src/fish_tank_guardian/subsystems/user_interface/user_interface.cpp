@@ -42,7 +42,7 @@ void UserInterface::Init()
     displayCharPositionWrite (0,2);
     displayStringWrite("Temperature:");
     
-    displayCharPositionWrite (0,2);
+    displayCharPositionWrite (0,3);
     displayStringWrite("TDS:" );
 
     DEBUG_PRINT("UserInterface::Init() - Initiating Finished.\r\n");

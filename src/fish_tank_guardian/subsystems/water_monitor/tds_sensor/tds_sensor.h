@@ -11,7 +11,7 @@
 #include "mbed.h"
 #include <vector>
 
-#define TDS_SENSOR_PIN A1
+#define TDS_SENSOR_PIN A0
 #define TDS_SENSOR_NUM_AVG_SAMPLES 20
 
 namespace Drivers { 
