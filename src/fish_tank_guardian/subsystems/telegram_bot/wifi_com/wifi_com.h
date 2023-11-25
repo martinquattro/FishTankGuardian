@@ -17,6 +17,7 @@
 #define WIFI_BAUD_RATE          115200
 #define DELAY_10_SECONDS        10000
 #define DELAY_5_SECONDS         5000
+#define DELAY_2_SECONDS         2000
 
 namespace Drivers { 
 
@@ -38,33 +39,10 @@ namespace Drivers {
             enum class WIFI_STATE
             {
                 INIT,
-                SEND_AT,
-                WAIT_AT,
-                SEND_CWMODE,
-                WAIT_CWMODE,
-                SEND_CWJAP_IS_SET,
-                WAIT_CWJAP_IS_SET,
-                SEND_CWJAP_SET,
-                WAIT_CWJAP_SET_1,
-                WAIT_CWJAP_SET_2,
-                SEND_CIFSR,
-                WAIT_CIFSR,
-                LOAD_IP,
-                SEND_CIPMUX,
-                WAIT_CIPMUX,
-                SEND_CIPSERVER,
-                WAIT_CIPSERVER,
-                SEND_CIPSTATUS,
-                WAIT_CIPSTATUS_STATUS_3,
-                WAIT_CIPSTATUS,
-                WAIT_GET_ID,
-                WAIT_CIPSTATUS_OK,
-                SEND_CIPSEND,
-                WAIT_CIPSEND,
-                SEND_HTML,
-                WAIT_HTML,
-                SEND_CIPCLOSE,
-                WAIT_CIPCLOSE,
+                CHECK_STATUS,
+                WAIT_CHECK_STATUS_RESPONSE,
+                CONNECT_REQUEST,
+                WAIT_CONNECT_RESPONSE,
                 IDLE,
                 ERROR
             };
@@ -78,13 +56,13 @@ namespace Drivers {
             void _Write(const char* format, ...);
 
             //!
-            bool ReadCom(char* receivedChar);
+            bool _ReadCom(char* receivedChar);
 
             //!
-            bool IsExpectedResponse();
+            bool _IsExpectedResponse();
 
             static WiFiCom*     mInstance;
-            UnbufferedSerial    mSerial;
+            BufferedSerial      mSerial;
             WIFI_STATE          mState;
             Util::Delay         mWiFiComDelay;
             std::string         mExpectedResponse;
