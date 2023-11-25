@@ -47,13 +47,13 @@ void FishTankGuardian::Init()
 
 
     // debug ------------------------------------------------------------
-    Util::RealTimeClock::GetInstance()->Sync();
+    // Util::RealTimeClock::GetInstance()->Sync();
 
-    std:string feedTime = "21:00:15";
-    Subsystems::FoodFeeder::GetInstance()->AddFeedTime(feedTime);
+    // std:string feedTime = "21:00:15";
+    // Subsystems::FoodFeeder::GetInstance()->AddFeedTime(feedTime);
 
-    std::vector<std::string> feedTimes = Subsystems::FoodFeeder::GetInstance()->GetFeedTimes();
-    DEBUG_PRINT("GetFeedTimes = %s\r\n", feedTimes[0].c_str());
+    // std::vector<std::string> feedTimes = Subsystems::FoodFeeder::GetInstance()->GetFeedTimes();
+    // DEBUG_PRINT("GetFeedTimes = %s\r\n", feedTimes[0].c_str());
 }
 
 //----static-------------------------------------------------------------------
@@ -74,8 +74,8 @@ void FishTankGuardian::Update()
         // debug ---------------------------------
         // DEBUG_PRINT("tickCounter = %d\r\n", static_cast<int>(Util::Tick::GetTickCounter()));   
 
-        DEBUG_PRINT("GetCurrentTime = %s\r\n", Util::RealTimeClock::GetInstance()->GetCurrentTime().c_str());
-        DEBUG_PRINT("TdsSensor = %d ppm\r\n", Drivers::TdsSensor::GetInstance()->GetLastReading());
+        // DEBUG_PRINT("GetCurrentTime = %s\r\n", Util::RealTimeClock::GetInstance()->GetCurrentTime().c_str());
+        // DEBUG_PRINT("TdsSensor = %d ppm\r\n", Drivers::TdsSensor::GetInstance()->GetLastReading());
     }
     Subsystems::TelegramBot::GetInstance()->Update();
 }

@@ -40,7 +40,7 @@ void TdsSensor::Update(const float temperature /* = 25.0*/)
 {
     const float analogReading = mPin.read();
     (*mReadingsVectorIter) = analogReading;
-    DEBUG_PRINT("analogReading = %f\r\n", analogReading);
+    // DEBUG_PRINT("analogReading = %f\r\n", analogReading);
 
     if (mReadingsVectorIter++ >= mReadingsVector.end())
     {
