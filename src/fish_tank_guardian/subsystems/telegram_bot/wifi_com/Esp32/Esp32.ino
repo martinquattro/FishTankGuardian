@@ -10,7 +10,7 @@
 #define TXD2 17
 #define LED_WIFI_STATUS 2
 
-#define DEBUG_PRINT(format, ...) \
+#define DEBUG_PRINTLN(format, ...) \
     do { \
         char buffer[256]; \
         snprintf(buffer, sizeof(buffer), format, ##__VA_ARGS__); \
@@ -55,7 +55,7 @@ void loop()
 
         String strReceived = Serial2.readString();
         strReceived.trim();
-        DEBUG_PRINT("strReceived [%s]", strReceived.c_str());
+        DEBUG_PRINTLN("Command and parameters received [%s]", strReceived.c_str());
 
         std::vector<String> params = _ParseParameters(strReceived);
         String cmd = params[0];
@@ -64,14 +64,14 @@ void loop()
         {
             CommandFunction commandFunction = commandsMap[cmd];
             commandExecutionResult = commandFunction(params);
+
+            Serial2.print(commandExecutionResult.c_str());
+            DEBUG_PRINTLN("Result = [%s] sent to Nucleo Board", commandExecutionResult.c_str());
         } 
         else 
         {
-            DEBUG_PRINT("Command [%s] not found", cmd.c_str());
-            commandExecutionResult = RESULT_ERROR;
+            DEBUG_PRINTLN("Command [%s] not found", cmd.c_str());
         }
-
-        Serial2.println(commandExecutionResult);
     }
 }
 
@@ -85,11 +85,11 @@ String CommandConnectToWiFi(const std::vector<String>& params)
 
         WiFi.begin(ssid.c_str(), password.c_str());
 
-        DEBUG_PRINT("CommandConnectToWiFi - Connecting to WiFi: [%s]", ssid.c_str());
+        DEBUG_PRINTLN("CommandConnectToWiFi - Connecting to WiFi: [%s]", ssid.c_str());
 
         int attempts = 0;
 
-        while (WiFi.status() != WL_CONNECTED && attempts < 30) 
+        while ((WiFi.status() != WL_CONNECTED) && (attempts < 10)) 
         {
             delay(1000);
             Serial.print(".");
@@ -98,18 +98,18 @@ String CommandConnectToWiFi(const std::vector<String>& params)
 
         if (WiFi.status() == WL_CONNECTED) 
         {
-            DEBUG_PRINT("\nCommandConnectToWiFi - Connected to IP: [%s]", WiFi.localIP());
+            DEBUG_PRINTLN("\nCommandConnectToWiFi - Connected to IP: [%s]", WiFi.localIP().toString().c_str());
             return RESULT_OK;
         } 
         else 
         {
-            Serial.println("\nCommandConnectToWiFi - Error while connecting");
+            DEBUG_PRINTLN("CommandConnectToWiFi - Error while connecting");
             return RESULT_ERROR;
         }
     } 
     else 
     {
-        DEBUG_PRINT("CommandConnectToWiFi- Incorrect amount of parameters [%d]", (params.size() - 1));
+        DEBUG_PRINTLN("CommandConnectToWiFi- Incorrect amount of parameters [%d]", (params.size() - 1));
         return RESULT_ERROR;
     }
 }
@@ -124,11 +124,11 @@ String CommandPostToServer(const std::vector<String>& params)
 
         if (!_IsConnected()) 
         {
-            DEBUG_PRINT("CommandPostToServer - No Connection to WiFi");
+            DEBUG_PRINTLN("CommandPostToServer - No Connection to WiFi");
             return RESULT_ERROR;
         }
 
-        DEBUG_PRINT("CommandPostToServer - Post to server = [%s]\n%s", server.c_str(), request.c_str());
+        DEBUG_PRINTLN("CommandPostToServer - Post to server = [%s]\n%s", server.c_str(), request.c_str());
         
         HTTPClient http;
 
@@ -140,7 +140,7 @@ String CommandPostToServer(const std::vector<String>& params)
 
         if (httpResponseCode > 0) 
         {
-            DEBUG_PRINT("CommandPostToServer - Success\n[%d]\n[%s]", httpResponseCode, http.getString().c_str());
+            DEBUG_PRINTLN("CommandPostToServer - Success\n[%d]\n[%s]", httpResponseCode, http.getString().c_str());
             response = http.getString();
         } 
         else 
@@ -154,7 +154,7 @@ String CommandPostToServer(const std::vector<String>& params)
     } 
     else 
     {
-        DEBUG_PRINT("CommandPostToServer - Incorrect amount of parameters [%d]", (params.size() - 1));
+        DEBUG_PRINTLN("CommandPostToServer - Incorrect amount of parameters [%d]", (params.size() - 1));
         return RESULT_ERROR;
     }
 }
@@ -166,7 +166,7 @@ String CommandGet(const std::vector<String>& params)
     {
         if (!_IsConnected()) 
         {
-            DEBUG_PRINT("CommandGet - No Connection to WiFi");
+            DEBUG_PRINTLN("CommandGet - No Connection to WiFi");
             return RESULT_ERROR;
         }
 
@@ -180,7 +180,7 @@ String CommandGet(const std::vector<String>& params)
 
         if (httpResponseCode > 0) 
         {
-            DEBUG_PRINT("CommandGet - Success\n[%d]\n[%s]", httpResponseCode, http.getString().c_str());
+            DEBUG_PRINTLN("CommandGet - Success\n[%d]\n[%s]", httpResponseCode, http.getString().c_str());
             response = http.getString();
         } 
         else 
@@ -194,7 +194,7 @@ String CommandGet(const std::vector<String>& params)
     } 
     else 
     {
-        DEBUG_PRINT("CommandGet - Incorrect amount of parameters [%d]", (params.size() - 1));
+        DEBUG_PRINTLN("CommandGet - Incorrect amount of parameters [%d]", (params.size() - 1));
         return RESULT_ERROR;
     }
 }
@@ -208,7 +208,7 @@ String CommandStatus(const std::vector<String>& params)
     }
     else
     {
-        DEBUG_PRINT("CommandStatus - Incorrect amount of parameters [%d]", (params.size() - 1));
+        DEBUG_PRINTLN("CommandStatus - Incorrect amount of parameters [%d]", (params.size() - 1));
         return RESULT_ERROR;
     }
 }
