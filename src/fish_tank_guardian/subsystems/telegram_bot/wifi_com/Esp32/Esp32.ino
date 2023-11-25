@@ -229,7 +229,7 @@ std::vector<String> _ParseParameters(const String &input)
         parameters_size++;
     }
 
-    while ((index_from = input.indexOf(PARAM_SEPARATOR, index_from + 1)) >= 0) 
+    while ((index_from = input.indexOf(PARAM_SEPARATOR_CHAR, index_from + 1)) >= 0) 
     {
         parameters_size++;
     }
@@ -239,7 +239,7 @@ std::vector<String> _ParseParameters(const String &input)
     index_from = -1;
     for (size_t i = 0; i < parameters_size; i++) 
     {
-        index_to = input.indexOf(PARAM_SEPARATOR, index_from + 1);
+        index_to = input.indexOf(PARAM_SEPARATOR_CHAR, index_from + 1);
         
         if (index_to < 0)
         index_to = input.length();

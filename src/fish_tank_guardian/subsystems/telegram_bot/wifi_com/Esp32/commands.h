@@ -14,6 +14,7 @@ const char RESULT_OK[]                  = "OK";
 const char RESULT_CONNECTED[]           = "CONNECTED";
 const char RESULT_NOT_CONNECTED[]       = "NOT_CONNECTED";
 
-const char PARAM_SEPARATOR = '|';
+const char PARAM_SEPARATOR_CHAR         = '|';
+const char FINISH_RESPONSE_CHAR         = '~';
 
 #endif
