@@ -25,7 +25,7 @@ FoodFeeder* FoodFeeder::mInstance = nullptr;
 //----static-------------------------------------------------------------------
 void FoodFeeder::Init()
 {
-    DEBUG_PRINT("FoodFeeder::Init() - Initiating...\r\n");
+    DEBUG_PRINT("FoodFeeder - Initiating...\r\n");
 
     if (mInstance == nullptr)
     {
@@ -49,7 +49,7 @@ void FoodFeeder::Init()
     feedTime = "7:12:59";
     mInstance->EraseFeedTime(4);
 
-    DEBUG_PRINT("FoodFeeder::Init() - Initiating Finished.\r\n");
+    DEBUG_PRINT("FoodFeeder - [OK] Initialized\r\n");
 }
 
 //----static-------------------------------------------------------------------
@@ -62,34 +62,45 @@ FoodFeeder* FoodFeeder::GetInstance()
 void FoodFeeder::Update()
 {
     std::string currentHours, currentMinutes, currentSeconds;
-    Util::RealTimeClock::GetInstance()->GetCurrentTime(&currentHours, &currentMinutes, &currentSeconds);
+    const bool success = Subsystems::RealTimeClock::GetInstance()->GetCurrentTime(&currentHours, &currentMinutes, &currentSeconds);
     
-    std::string currentTime = currentHours + ":" + currentMinutes + ":" + currentSeconds;
-
-    int numFeeds;
-    if (_IsTimeToFeed(currentTime, &numFeeds))
+    if (success)
     {
-        Drivers::Motor::GetInstance()->Rotate(numFeeds);
+        std::string currentTime = currentHours + ":" + currentMinutes + ":" + currentSeconds;
+
+        int numFeeds;
+        if (_IsTimeToFeed(currentTime, &numFeeds))
+        {
+            DEBUG_PRINT("FoodFeeder - Initiating feeding at = [%currentTime] with [%d] feeds...\r\n", currentTime.c_str(), numFeeds);
+            Drivers::Motor::GetInstance()->Rotate(numFeeds);
+        }
     }
 }
 
 //-----------------------------------------------------------------------------
-void FoodFeeder::EraseFeedTime(const int feedTimeSlot)
+bool FoodFeeder::EraseFeedTime(const int feedTimeSlot)
 {
+    if ((feedTimeSlot < 0) || (feedTimeSlot >= FEED_TIMES_SLOTS_NUM))
+    {
+        DEBUG_PRINT("FoodFeeder - [ERROR] Invalid feed time slot to erase = [%d]\r\n", feedTimeSlot);
+        return false;
+    }
+
     std::string nullFeedTime = "----------";
 
     // Calculate the EEPROM position based on the slot size
     int eepromPosition = FEED_TIMES_EEPROM_START + (feedTimeSlot * FEED_TIME_BYTES);
 
     // Save the null feed time to EEPROM
-    Util::RealTimeClock::GetInstance()->SaveStringToEeprom(eepromPosition, nullFeedTime);
+    Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(eepromPosition, nullFeedTime);
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------
 bool FoodFeeder::AddFeedTime(std::string newFeedTime, const int numFeeds, const int feedTimeSlot)
 {
     // Valdiate if it is a valid feedtime, slot and num of feeds
-    DEBUG_PRINT("newFeedTime = %s\r\n", newFeedTime.c_str());
     if (newFeedTime.size() != 8 
         || !(_IsValidTimeFormat(newFeedTime.c_str()) )
         || (feedTimeSlot < 0) 
@@ -97,6 +108,7 @@ bool FoodFeeder::AddFeedTime(std::string newFeedTime, const int numFeeds, const 
         || (numFeeds < 1)
         || (numFeeds > MAX_NUM_FEEDS)) 
     {
+        DEBUG_PRINT("FoodFeeder - [ERROR] Invalid feed time [%s] or num feeds = [%d] or slot = [%d]\r\n", newFeedTime.c_str(), numFeeds, feedTimeSlot);
         return false;
     }
     
@@ -107,7 +119,9 @@ bool FoodFeeder::AddFeedTime(std::string newFeedTime, const int numFeeds, const 
     int eepromPosition = FEED_TIMES_EEPROM_START + (feedTimeSlot * FEED_TIME_BYTES);
 
     // Save the feed time to EEPROM
-    Util::RealTimeClock::GetInstance()->SaveStringToEeprom(eepromPosition, feedTimeStr);
+    Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(eepromPosition, feedTimeStr);
+
+    DEBUG_PRINT("FoodFeeder - [OK] New feed time added [%s]\r\n", newFeedTime.c_str());
 
     return true;
 }
@@ -120,7 +134,7 @@ std::vector<FoodFeeder::FeedTimeInfo> FoodFeeder::GetFeedTimes()
     for (int i = 0; i < FEED_TIMES_SLOTS_NUM; ++i)
     {
         const int slotEepromStartPosition = FEED_TIMES_EEPROM_START + (i * FEED_TIME_BYTES);
-        std::string feedTime = Util::RealTimeClock::GetInstance()->ReadStringFromEeprom(slotEepromStartPosition);
+        std::string feedTime = Subsystems::RealTimeClock::GetInstance()->ReadStringFromEeprom(slotEepromStartPosition);
 
         if (_IsValidTimeFormat(feedTime.c_str()))
         {
@@ -143,32 +157,38 @@ std::vector<FoodFeeder::FeedTimeInfo> FoodFeeder::GetFeedTimes()
 //-----------------------------------------------------------------------------
 std::string FoodFeeder::GetNextFeedTime()
 {
-    std::string currentHours, currentMinutes, currentSeconds;
-    Util::RealTimeClock::GetInstance()->GetCurrentTime(&currentHours, &currentMinutes, &currentSeconds);
-    std::string currentTime = currentHours + ":" + currentMinutes + ":" + currentSeconds;
-
-    std::vector<FeedTimeInfo> feedTimes = GetFeedTimes();
-
     std::string nextFeedTime = "";
-    for (const auto& feedTimeInfo : feedTimes)
-    {
-        if (feedTimeInfo.mFeedTime > currentTime && (nextFeedTime == "" || feedTimeInfo.mFeedTime < nextFeedTime))
-        {
-            nextFeedTime = feedTimeInfo.mFeedTime;
-        }
-    }
+    std::string currentHours, currentMinutes, currentSeconds;
 
-    if (nextFeedTime == "")
+    const bool success = Subsystems::RealTimeClock::GetInstance()->GetCurrentTime(&currentHours, &currentMinutes, &currentSeconds);
+
+    if (success)
     {
-        if (feedTimes.size())
+        std::string currentTime = currentHours + ":" + currentMinutes + ":" + currentSeconds;
+
+        std::vector<FeedTimeInfo> feedTimes = GetFeedTimes();
+
+        for (const auto& feedTimeInfo : feedTimes)
         {
-            // No more feeds today
-            nextFeedTime = "Tomorrow";
+            if (feedTimeInfo.mFeedTime > currentTime && (nextFeedTime == "" || feedTimeInfo.mFeedTime < nextFeedTime))
+            {
+                nextFeedTime = feedTimeInfo.mFeedTime;
+            }
         }
-        else
+
+        if (nextFeedTime == "")
         {
-            nextFeedTime = "None";
+            if (feedTimes.size())
+            {
+                // No more feeds today
+                nextFeedTime = "Tomorrow";
+            }
+            else
+            {
+                nextFeedTime = "None";
+            }
         }
+
     }
 
     return nextFeedTime;

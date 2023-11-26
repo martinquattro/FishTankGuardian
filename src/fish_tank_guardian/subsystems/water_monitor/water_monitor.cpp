@@ -24,7 +24,7 @@ WaterMonitor* WaterMonitor::mInstance = nullptr;
 //----static-------------------------------------------------------------------
 void WaterMonitor::Init()
 {
-    DEBUG_PRINT("WaterMonitor::Init() - Initiating...\r\n");
+    DEBUG_PRINT("WaterMonitor - Initiating...\r\n");
 
     if (mInstance == nullptr)
     {
@@ -34,7 +34,7 @@ void WaterMonitor::Init()
     Drivers::TemperatureSensor::Init();
     Drivers::TdsSensor::Init();
 
-    DEBUG_PRINT("WaterMonitor::Init() - Initiating Finished.\r\n");
+    DEBUG_PRINT("UserInterface - [OK] Initialized\r\n");
 }
 
 //----static-------------------------------------------------------------------

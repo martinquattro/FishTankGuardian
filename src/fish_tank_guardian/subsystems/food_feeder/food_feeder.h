@@ -43,7 +43,7 @@ namespace Subsystems {
             bool AddFeedTime(std::string newFeedTime, const int numFeeds, const int feedTimeSlot);
 
             //!
-            void EraseFeedTime(const int feedTimeSlot);
+            bool EraseFeedTime(const int feedTimeSlot);
 
             //!
             std::string GetNextFeedTime();

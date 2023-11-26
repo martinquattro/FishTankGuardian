@@ -12,6 +12,10 @@
 
 #include "mbed.h"
 
+#define DELAY_10_SECONDS        10000
+#define DELAY_5_SECONDS         5000
+#define DELAY_2_SECONDS         2000
+
 namespace Util { 
 
     typedef uint64_t tick_t;        

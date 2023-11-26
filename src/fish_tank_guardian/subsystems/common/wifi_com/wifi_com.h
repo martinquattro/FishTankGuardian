@@ -15,9 +15,6 @@
 #define WIFI_PIN_TX             PE_8
 #define WIFI_PIN_RX             PE_7
 #define WIFI_BAUD_RATE          115200
-#define DELAY_10_SECONDS        10000
-#define DELAY_5_SECONDS         5000
-#define DELAY_2_SECONDS         2000
 
 namespace Drivers { 
 
@@ -41,10 +38,7 @@ namespace Drivers {
             void Request(const std::string& url);
 
             //!
-            std::string GetResponse();
-
-            //!
-            bool IsPostResponseReady();
+            bool GetResponse(std::string* response);
 
             //! Udpate
             void Update();
@@ -60,6 +54,7 @@ namespace Drivers {
                 CMD_CONNECT_WAIT_RESPONSE,
                 CMD_GET_SEND,
                 CMD_GET_WAIT_RESPONSE,
+                CMD_GET_RESPONSE_READY,
                 CMD_POST_SEND,
                 CMD_POST_WAIT_RESPONSE,
                 CMD_POST_RESPONSE_READY,
@@ -90,7 +85,7 @@ namespace Drivers {
             std::string         mResponse;
             std::string         mServer;
             std::string         mRequest;
-            bool                mIsPostResponseReady;
+            bool                mIsResponseReady;
     };
 
 } // namespace Drivers

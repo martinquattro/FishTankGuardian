@@ -18,8 +18,7 @@
 #include "telegram_bot.h"
 #include "user_interface.h"
 #include "water_monitor.h"
-
-#include "tds_sensor.h"       // debug
+#include "wifi_com.h"
 
 namespace Subsystems {
 
@@ -39,21 +38,11 @@ void FishTankGuardian::Init()
   
     Util::PcSerialCom::Init();
     Util::Tick::Init();
-    Util::RealTimeClock::Init();
+    Subsystems::RealTimeClock::Init();
     Subsystems::FoodFeeder::Init();
     Subsystems::WaterMonitor::Init();
     Subsystems::TelegramBot::Init();
     Subsystems::UserInterface::Init();
-
-
-    // debug ------------------------------------------------------------
-    // Util::RealTimeClock::GetInstance()->Sync();
-
-    // std:string feedTime = "21:00:15";
-    // Subsystems::FoodFeeder::GetInstance()->AddFeedTime(feedTime);
-
-    // std::vector<std::string> feedTimes = Subsystems::FoodFeeder::GetInstance()->GetFeedTimes();
-    // DEBUG_PRINT("GetFeedTimes = %s\r\n", feedTimes[0].c_str());
 }
 
 //----static-------------------------------------------------------------------
@@ -67,15 +56,24 @@ void FishTankGuardian::Update()
 {
     if(mDelay.HasFinished()) 
     {
+        int initTickCounter = static_cast<int>(Util::Tick::GetTickCounter());
         Subsystems::FoodFeeder::GetInstance()->Update();
+        int endTickCounter = static_cast<int>(Util::Tick::GetTickCounter());
+        DEBUG_PRINT("FishTankGuardian - Time in FoodFeeder Update = [%d] ms\r\n", (endTickCounter - initTickCounter));
+
+        initTickCounter = endTickCounter;
         Subsystems::WaterMonitor::GetInstance()->Update();
+        endTickCounter = static_cast<int>(Util::Tick::GetTickCounter());
+        DEBUG_PRINT("FishTankGuardian - Time in WaterMonitor Update = [%d] ms\r\n", (endTickCounter - initTickCounter));
+
+        initTickCounter = endTickCounter;
         Subsystems::UserInterface::GetInstance()->Update();
+        endTickCounter = static_cast<int>(Util::Tick::GetTickCounter());
+        DEBUG_PRINT("FishTankGuardian - Time in UserInterface Update = [%d] ms\r\n", (endTickCounter - initTickCounter));
 
-        // debug ---------------------------------
-        DEBUG_PRINT("tickCounter = %d\r\n", static_cast<int>(Util::Tick::GetTickCounter()));
-
-        // DEBUG_PRINT("TdsSensor = %d ppm\r\n", Drivers::TdsSensor::GetInstance()->GetLastReading());
     }
+    Drivers::WiFiCom::GetInstance()->Update();
+    Subsystems::RealTimeClock::GetInstance()->Update();
     Subsystems::TelegramBot::GetInstance()->Update();
 }
 

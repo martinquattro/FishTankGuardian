@@ -23,7 +23,7 @@ TelegramBot* TelegramBot::mInstance = nullptr;
 //----static-------------------------------------------------------------------
 void TelegramBot::Init()
 {
-    DEBUG_PRINT("TelegramBot::Init() - Initiating...\r\n");
+    DEBUG_PRINT("TelegramBot - Initiating...\r\n");
 
     if (mInstance == nullptr)
     {
@@ -32,7 +32,7 @@ void TelegramBot::Init()
 
     Drivers::WiFiCom::Init();
 
-    DEBUG_PRINT("TelegramBot::Init() - Initiating Finished.\r\n");
+    DEBUG_PRINT("TelegramBot - [OK] Initialized\r\n");
 }
 
 //----static-------------------------------------------------------------------
@@ -46,22 +46,13 @@ void TelegramBot::Update()
 {
     TelegramMessage message;
 
-    Drivers::WiFiCom::GetInstance()->Update();
-
     if ((Drivers::WiFiCom::GetInstance()->IsBusy()) == false)
     {
-        // DEBUG_PRINT("TelegramBot::Update() - WiFi not busy\r\n");
         _RequestLastMessage();
     }
     else if (_IsLastMessageReady(&message))
     {
-        DEBUG_PRINT("TelegramBot::Update() - Message Obtained: mUpdateId = %lu - mFromId = %s - mFromName = %s - mFromUserName = %s - mMessage = %s\r\n", 
-            message.mUpdateId,
-            message.mFromId.c_str(),
-            message.mFromName.c_str(),
-            message.mFromUserName.c_str(),
-            message.mMessage.c_str()
-        );
+        DEBUG_PRINT("TelegramBot - Message Obtained: [%s] from [%s]\r\n", message.mMessage.c_str(), message.mFromUserName.c_str());
     }
 }
 
@@ -84,10 +75,10 @@ void TelegramBot::_SendMessage(const std::string chatId, const std::string messa
 bool TelegramBot::_IsLastMessageReady(TelegramMessage* message)
 {
     bool isReady = false;
+    std::string response;
 
-    if (Drivers::WiFiCom::GetInstance()->IsPostResponseReady())
+    if (Drivers::WiFiCom::GetInstance()->GetResponse(&response))
     {
-        std::string response = Drivers::WiFiCom::GetInstance()->GetResponse();
         isReady = _GetMessageFromResponse(message, response);
     }
 

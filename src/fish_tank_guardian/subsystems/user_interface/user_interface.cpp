@@ -26,7 +26,7 @@ UserInterface* UserInterface::mInstance = nullptr;
 //----static-------------------------------------------------------------------
 void UserInterface::Init()
 {
-    DEBUG_PRINT("UserInterface::Init() - Initiating...\r\n");
+    DEBUG_PRINT("UserInterface - Initiating...\r\n");
 
     if (mInstance == nullptr)
     {
@@ -48,7 +48,7 @@ void UserInterface::Init()
     Drivers::Display::WriteCharPosition(0,3);
     Drivers::Display::Write("TDS:    ppm|        ");
 
-    DEBUG_PRINT("UserInterface::Init() - Initiating Finished.\r\n");
+    DEBUG_PRINT("UserInterface - [OK] Initialized\r\n");
 }
 
 //----static-------------------------------------------------------------------
@@ -89,13 +89,20 @@ void UserInterface::Update()
     // Current Time
     {    
         std::string hours, minutes, seconds, currentTime;
-        Util::RealTimeClock::GetInstance()->GetCurrentTime(&hours, &minutes, &seconds);
+        const bool success = Subsystems::RealTimeClock::GetInstance()->GetCurrentTime(&hours, &minutes, &seconds);
 
-        currentTime += hours;
-        currentTime += ":";
-        currentTime += minutes;
-        currentTime += ":";
-        currentTime += seconds;
+        if (success)
+        {
+            currentTime += hours;
+            currentTime += ":";
+            currentTime += minutes;
+            currentTime += ":";
+            currentTime += seconds;
+        }
+        else
+        {
+            currentTime = "Syncing";
+        }
 
         Drivers::Display::WriteCharPosition(TIME_POSITION_X, TIME_POSITION_Y);
         Drivers::Display::Write(currentTime.c_str());

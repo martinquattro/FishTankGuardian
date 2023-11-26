@@ -12,12 +12,14 @@
 #define RTC_PIN_SCL        PB_10
 #define RTC_ADDRESS_ID     0x68
 #define RTC_EEPROM_ADDRESS 0x50
+#define RTC_GET_TIME_URL "https://www.timeapi.io/api/Time/current/zone?timeZone=America/Buenos_Aires"
 
 #include "mbed.h"
 #include "memory.h"
 #include <string>
+#include "delay.h"
 
-namespace Util { 
+namespace Subsystems { 
 
     class RealTimeClock 
     {
@@ -30,26 +32,35 @@ namespace Util {
             static RealTimeClock* GetInstance();
 
             //!
-            void GetCurrentTime(std::string* hours, std::string* minutes, std::string* seconds);
+            bool GetCurrentTime(std::string* hours, std::string* minutes, std::string* seconds);
 
             //!
-            void Sync();
+            void Update();
 
             //!
             void SaveStringToEeprom(const int position, std::string str);
 
             //!
-            std::string& ReadStringFromEeprom(const int position);
-
-
+            std::string ReadStringFromEeprom(const int position);
 
         private:
+
+            enum class RTC_STATE
+            {
+                START_SYNC,
+                WAITING_RESPONSE,
+                SYNCED,
+                NOT_SYNCED
+            };
 
             RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t address, uint8_t eepromAddr);
             ~RealTimeClock() = default;
             RealTimeClock(const RealTimeClock&) = delete;
             RealTimeClock& operator=(const RealTimeClock&) = delete;
 
+
+            //!
+            bool _SyncFromResponse(std::string response);
 
             //!
             void _Set(const tm time);
@@ -62,11 +73,13 @@ namespace Util {
 
             static RealTimeClock* mInstance;
 
-            I2C mRtcCom;
-            const uint8_t mAddress;
-            Memory mMemory;
+            I2C             mRtcCom;
+            RTC_STATE       mState;
+            const uint8_t   mAddress;
+            Memory          mMemory;
+            Util::Delay     mRtcDelay;
 };
 
-} // namespace Util
+} // namespace Subsystems
 
 #endif // REAL_TIME_CLOCK_H
