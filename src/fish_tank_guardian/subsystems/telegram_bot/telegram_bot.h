@@ -11,6 +11,9 @@
 #include "Json.h"
 #include <string>
 
+#define BOT_API_URL     "https://api.telegram.org/bot"
+#define BOT_TOKEN       "6738012692:AAFmeMoCUuZEGBGVwbxtFt8sC8f15o_aRgs"
+
 namespace Subsystems { 
 
     class TelegramBot 
@@ -30,26 +33,38 @@ namespace Subsystems {
 
             struct TelegramMessage 
             {
-                const std::string mUpdateId;
-                const std::string mFromId;
-                const std::string mFromUserName;
-                const std::string mFromName;
-                const std::string mMessage;
+                unsigned long mUpdateId;
+                std::string mFromId;
+                std::string mFromUserName;
+                std::string mFromName;
+                std::string mMessage;
             };
 
             //!
             void _SendMessage(const std::string chatId, const std::string message);
 
             //!
-            // TelegramMessage _GetMessage();
+            void _RequestLastMessage();
 
-            TelegramBot() {}
+            //!
+            bool _IsLastMessageReady(TelegramMessage* message);
+
+            //!
+            bool  _GetMessageFromResponse(TelegramMessage* messageconst, const std::string& response);
+
+            //!
+            TelegramMessage _GetLastMessage();
+
+
+            TelegramBot(const char* apiUrl, const char* token);
             ~TelegramBot() = default;
             TelegramBot(const TelegramBot&) = delete;
             TelegramBot& operator=(const TelegramBot&) = delete;
 
             static TelegramBot* mInstance;
-            std::string mToken;
+            const std::string mToken;
+            const std::string mBotUrl;
+            unsigned long mLastUpdateId;
     };
 
 } // namespace Subsystems

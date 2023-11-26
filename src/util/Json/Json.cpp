@@ -21,6 +21,20 @@
  */
 
 #include "Json.h"
+#include <stdio.h>
+#include <string>
+#include <vector>
+
+
+// Json::Json() : maxTokenCount ( 0 ), sourceLength ( 0 )
+// {
+    
+// }
+// Json::Json()  :maxTokenCount ( 0 ), source ( NULL ), sourceLength ( 0 )
+// {
+//  tokenCount = 0;
+//     tokens = NULL;
+// }
 
 Json::Json ( const char * jsonString, size_t length, unsigned int maxTokens )
         : maxTokenCount ( maxTokens ), source ( jsonString ), sourceLength ( length )
@@ -239,3 +253,73 @@ char * Json::unescape ( char * jsonString )
     
     return jsonString;
 }
+
+const char * Json::JsonParse(const char * jsonString, const char * key)
+{
+
+         Json json ( jsonString, strlen ( jsonString));
+        
+        if ( !json.isValidJson () )
+        {
+            printf( "Invalid JSON: %s", jsonString );
+         }
+
+        if ( json.type (0) != JSMN_OBJECT )
+        {
+          printf ( "Invalid JSON.  ROOT element is not Object: %s", jsonString );
+       }
+    
+       char *info1 = new char[32];
+
+        // ROOT object should have '0' tokenIndex, and -1 parentIndex
+        int KeyIndex = json.findKeyIndexIn(key,0);
+        
+        if (KeyIndex == -1)
+        {
+            // Error handling part ...
+            printf ( "Key does not exist");
+        }
+        else
+        {
+            // Find the first child index of key-node "info"
+            int ValueIndex = json.findChildIndexOf (KeyIndex, -1 );
+            if (ValueIndex > 0 )
+            {
+                const char * valueStart  = json.tokenAddress (ValueIndex );
+                int valueLength = json.tokenLength (ValueIndex );
+                strncpy ( info1, valueStart, valueLength );
+              //  info[valueLength] = 0; // NULL-terminate the string
+               // strcpy(info1, info);
+                //let's print the value.  It should be "San Jose"
+               // printf( "info: %s", info);
+            }
+        }
+        return info1;       
+}
+
+// Added by Matias Charrut
+std::string Json::tokenString(int tokenIndex) const {
+    if (tokenIndex < 0)
+        return "";
+
+    int length = tokenLength(tokenIndex);
+    std::vector<char> array(length+1);
+
+    const char * start = tokenAddress(tokenIndex);
+    memcpy(&array[0], start, length);
+
+    return std::string(&array[0]);
+}
+
+// plublic:
+// const char* getBar() const {
+// char * str = new char[_sBar.length()+1];
+// strcpy(str, _sBar.c_str());
+// return str;}
+// In main:
+
+// foo object;
+// ///some code
+// const char* bar = object.getBar();
+// ///some code
+// delete [] bar;

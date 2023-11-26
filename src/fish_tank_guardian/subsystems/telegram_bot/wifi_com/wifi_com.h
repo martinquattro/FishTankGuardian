@@ -31,6 +31,18 @@ namespace Drivers {
             //! Returns the module object
             static WiFiCom* GetInstance();
 
+            //! Returns the module object
+            bool IsBusy();
+
+            //!
+            void Post(const std::string& server, const std::string& request);
+
+            //!
+            std::string GetResponse();
+
+            //!
+            bool IsPostResponseReady();
+
             //! Udpate
             void Update();
 
@@ -39,10 +51,15 @@ namespace Drivers {
             enum class WIFI_STATE
             {
                 INIT,
-                CHECK_STATUS,
-                WAIT_CHECK_STATUS_RESPONSE,
-                CONNECT_REQUEST,
-                WAIT_CONNECT_RESPONSE,
+                CMD_STATUS_SEND,
+                CMD_STATUS_WAIT_RESPONSE,
+                CMD_CONNECT_SEND,
+                CMD_CONNECT_WAIT_RESPONSE,
+                CMD_GET_SEND,
+                CMD_GET_WAIT_RESPONSE,
+                CMD_POST_SEND,
+                CMD_POST_WAIT_RESPONSE,
+                CMD_POST_RESPONSE_READY,
                 IDLE,
                 ERROR
             };
@@ -56,18 +73,21 @@ namespace Drivers {
             void _Write(const char* format, ...);
 
             //!
-            bool _ReadCom(char* receivedChar);
+            bool _IsResponseCompleted();
 
             //!
-            bool _IsExpectedResponse();
+            bool _ReadCom(char* receivedChar);
 
             static WiFiCom*     mInstance;
             BufferedSerial      mSerial;
             WIFI_STATE          mState;
             Util::Delay         mWiFiComDelay;
-            std::string         mExpectedResponse;
             std::string         mApSsid;
             std::string         mApPassword;
+            std::string         mResponse;
+            std::string         mServer;
+            std::string         mRequest;
+            bool                mIsPostResponseReady;
     };
 
 } // namespace Drivers

@@ -24,8 +24,11 @@
 #define __JSON_LIB_CLASS_H_
 
 #include "jsmn.h"
+
 #include <stdlib.h>
 #include <string.h>
+#include <string>
+
 
 /**
  * C++ JSON wrapper over JSMN lib (https://github.com/zserge/jsmn).
@@ -91,52 +94,15 @@
     
     void main ()
     {
-        // Note that the JSON object is 'escaped'.  One doesn't get escaped JSON
-        // directly from the webservice, if the response type is APPLICATION/JSON
-        // Just a little thing to keep in mind.
-        const char * jsonSource = "{\"team\":\"Night Crue\",\"company\":\"TechShop\",\"city\":\"San Jose\",\"state\":\"California\",\"country\":\"USA\",\"zip\":95113,\"active\":true,\"members\":[{\"firstName\":\"John\",\"lastName\":\"Smith\",\"active\":false,\"hours\":18.5,\"age\":21},{\"firstName\":\"Foo\",\"lastName\":\"Bar\",\"active\":true,\"hours\":25,\"age\":21},{\"firstName\":\"Peter\",\"lastName\":\"Jones\",\"active\":false}]}";
-        
-        Json json ( jsonSource, strlen ( jsonSource ) );
-        
-        if ( !json.isValidJson () )
-        {
-            logError ( "Invalid JSON: %s", jsonSource );
-            return;
-        }
+         const char *jsonSource = "{\"team\":\"Night Crue\",\"company\":\"TechShop\",\"city\":\"San Jose\",\"info\":{\"name\":\"Amod\",\"age\":23}}";
 
-        if ( json.type (0) != JSMN_OBJECT )
-        {
-            logError ( "Invalid JSON.  ROOT element is not Object: %s", jsonSource );
-            return;
-        }
-        
-        // Let's get the value of key "city" in ROOT object, and copy into 
-        // cityValue
-        char cityValue [ 32 ];
-        
-        logInfo ( "Finding \"city\" Key ... " );
-        // ROOT object should have '0' tokenIndex, and -1 parentIndex
-        int cityKeyIndex = json.findKeyIndexIn ( "city", 0 );
-        if ( cityKeyIndex == -1 )
-        {
-            // Error handling part ...
-            logError ( "\"city\" does not exist ... do something!!" );
-        }
-        else
-        {
-            // Find the first child index of key-node "city"
-            int cityValueIndex = json.findChildIndexOf ( cityKeyIndex, -1 );
-            if ( cityValueIndex > 0 )
-            {
-                const char * valueStart  = json.tokenAddress ( cityValueIndex );
-                int          valueLength = json.tokenLength ( cityValueIndex );
-                strncpy ( cityValue, valueStart, valueLength );
-                cityValue [ valueLength ] = 0; // NULL-terminate the string
-                
-                //let's print the value.  It should be "San Jose"
-                logInfo ( "city: %s", cityValue );
-            }
-        }
+        Json json(jsonSource, strlen(jsonSource)); 
+        const char * a = json.JsonParse(jsonSource, "info");
+        logInfo("Information is %s",a);
+        const char * b = json.JsonParse(a, "name");
+        logInfo("Name is %s",b);
+        const char * c = json.JsonParse(a, "age");
+        logInfo("Age is %s",c);
         
         // More on this example to come, later.
     }
@@ -146,6 +112,8 @@
 
 class Json
 {
+
+
     private:
         const unsigned int maxTokenCount;
         const char * source;
@@ -155,7 +123,8 @@ class Json
 
         // Copy COntructor is intentionally kept private to enforce the caller
         // to use pointers/reference, and never pass-by-value
-        Json ( const Json & );
+         Json ( const Json & );
+
 
     public:
         /** The only constructor allowed.
@@ -167,7 +136,10 @@ class Json
          @param length length of the jsonString
          @param maxTokens optional maximum count of Tokens. Default is 32.
          */
+       // Json ();
         Json ( const char * jsonString, size_t length, unsigned int maxTokens = 32 );
+
+            // Json();
 
 
         /** Although there is no virtual function to this class, destructor is
@@ -334,7 +306,7 @@ class Json
                  and should never occur.  -1 will be returned in case of invalid
                  tokenIndex.
          */
-        inline int tokenLength ( const int tokenIndex ) const;
+        inline int  tokenLength ( const int tokenIndex ) const;
 
 
         /** tokenAddress returns the pointer that marks as the start of token
@@ -418,6 +390,11 @@ class Json
          @return pointer to unescaped JSON string.  This is exactly the same
                  pointer as jsonString parameter.
          */
+
+       const char * JsonParse(const char * jsonString, const char * key);
+
+       std::string tokenString(int) const;
+
         static char * unescape ( char * jsonString );
 };
 
@@ -497,4 +474,3 @@ inline const char * Json::tokenAddress ( const int tokenIndex ) const
 }
 
 #endif
-

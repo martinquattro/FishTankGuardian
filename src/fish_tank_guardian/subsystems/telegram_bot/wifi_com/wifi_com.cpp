@@ -51,22 +51,37 @@ WiFiCom* WiFiCom::GetInstance()
 }
 
 //-----------------------------------------------------------------------------
+bool WiFiCom::IsBusy()
+{
+    return (mState != WIFI_STATE::IDLE);
+}
+
+//-----------------------------------------------------------------------------
+void WiFiCom::Post(const std::string& server, const std::string& request)
+{
+    mState = WIFI_STATE::CMD_POST_SEND;
+    mServer = server;
+    mRequest = request;
+}
+
+//-----------------------------------------------------------------------------
+std::string WiFiCom::GetResponse()
+{
+    std::string responseAux = mResponse;
+    mResponse.clear();
+    mIsPostResponseReady = false;
+    return responseAux;
+}
+
+//-----------------------------------------------------------------------------
+bool WiFiCom::IsPostResponseReady()
+{
+    return (mState == WIFI_STATE::CMD_POST_RESPONSE_READY) /*&& (mIsResponseReady)*/;
+}
+
+//-----------------------------------------------------------------------------
 void WiFiCom::Update()
 {
-    // char command[100];
-    // bool waitingResponse;
-  
-    // char receivedCharLocal = '\0';
-    // while (ReadCom(&receivedCharLocal))
-    // {
-    //     DEBUG_PRINT("%c\r\n", receivedCharLocal);
-
-    //     if (receivedCharLocal == '|')
-    //     {
-    //         DEBUG_PRINT("\r\n");
-    //     }
-    // }
-
     std::string esp32Command;
 
     switch (mState) 
@@ -74,76 +89,163 @@ void WiFiCom::Update()
         case WIFI_STATE::INIT:
         {
             mWiFiComDelay.Start(DELAY_2_SECONDS);
-            mState = WIFI_STATE::CHECK_STATUS;
+            mState = WIFI_STATE::CMD_STATUS_SEND;
         }
         break;
 
-        case WIFI_STATE::CHECK_STATUS:
+        case WIFI_STATE::CMD_STATUS_SEND:
         {
             if (mWiFiComDelay.HasFinished())
             {
                 // sending status command to check if it's already connected to wifi
+                mResponse.clear();
+                mWiFiComDelay.Start(DELAY_2_SECONDS);
                 esp32Command = COMMAND_STATUS_STR;
                 _Write(esp32Command.c_str());
-                mExpectedResponse = RESULT_CONNECTED;
-                mWiFiComDelay.Start(DELAY_2_SECONDS);
-                mState = WIFI_STATE::WAIT_CHECK_STATUS_RESPONSE;
-                DEBUG_PRINT("WiFiCom::Update() - [%s] command Sent\r\n", esp32Command.c_str());
+                mState = WIFI_STATE::CMD_STATUS_WAIT_RESPONSE;
+                DEBUG_PRINT("WiFiCom::Update() - Sending [%s]\r\n", COMMAND_STATUS_STR);
             }
         }
         break;
 
-        case WIFI_STATE::WAIT_CHECK_STATUS_RESPONSE:
+        case WIFI_STATE::CMD_STATUS_WAIT_RESPONSE:
         {
-            if (_IsExpectedResponse()) 
+            const bool isResponseCompleted = _IsResponseCompleted();
+            if ((mWiFiComDelay.HasFinished()) || (isResponseCompleted && (mResponse.compare(RESULT_NOT_CONNECTED) == 0)))
+            {
+                mState = WIFI_STATE::CMD_CONNECT_SEND;
+                DEBUG_PRINT("WiFiCom::Update() - ERROR WiFi is not connected. Response = [%s] \r\n", mResponse.c_str());
+            }
+            else if (isResponseCompleted && (mResponse.compare(RESULT_CONNECTED) == 0))
             {
                 mState = WIFI_STATE::IDLE;
-                DEBUG_PRINT("WiFiCom::Update() - [%s] command responded wifi is already connected\r\n", COMMAND_STATUS_STR);
-            }
-            else if (mWiFiComDelay.HasFinished()) 
-            {
-                mState = WIFI_STATE::CONNECT_REQUEST;
-                DEBUG_PRINT("WiFiCom::Update() - [%s] command not responded correctly. Trying to connect now.\r\n", COMMAND_STATUS_STR);
+                DEBUG_PRINT("WiFiCom::Update() - WiFi is already connected.\r\n");
             }
         }
         break;
 
-        case WIFI_STATE::CONNECT_REQUEST:
+        case WIFI_STATE::CMD_CONNECT_SEND:
         {
             if (mWiFiComDelay.HasFinished())
             {
                 // sending connect command with wifi ssid and password
+                mResponse.clear();
+                mWiFiComDelay.Start(DELAY_5_SECONDS);
                 esp32Command = COMMAND_CONNECT_STR;
-                esp32Command += PARAM_SEPARATOR;
+                esp32Command += PARAM_SEPARATOR_CHAR;
                 esp32Command += mApSsid;
-                esp32Command += PARAM_SEPARATOR;
+                esp32Command += PARAM_SEPARATOR_CHAR;
                 esp32Command += mApPassword;
                 _Write(esp32Command.c_str());
-                mExpectedResponse = RESULT_OK;
-                mWiFiComDelay.Start(DELAY_5_SECONDS);
-                mState = WIFI_STATE::WAIT_CONNECT_RESPONSE;
-                DEBUG_PRINT("WiFiCom::Update() - [%s] command Sent\r\n", esp32Command.c_str());
+                mState = WIFI_STATE::CMD_CONNECT_WAIT_RESPONSE;
+                DEBUG_PRINT("WiFiCom::Update() - Sending [%s]\r\n", esp32Command.c_str());
             }
         }
         break;
 
-        case WIFI_STATE::WAIT_CONNECT_RESPONSE:
+        case WIFI_STATE::CMD_CONNECT_WAIT_RESPONSE:
         {
-            if (_IsExpectedResponse()) 
+            const bool isResponseCompleted = _IsResponseCompleted();
+            if ((mWiFiComDelay.HasFinished()) || (isResponseCompleted && (mResponse.compare(RESULT_ERROR) == 0)))
+            {
+                mState = WIFI_STATE::ERROR;
+                DEBUG_PRINT("WiFiCom::Update() - ERROR [%s] command not responded correctly. Wifi Not Connected. Response = [%s]\r\n", COMMAND_CONNECT_STR, mResponse.c_str());
+            }
+            else if (isResponseCompleted && (mResponse.compare(RESULT_OK) == 0))
             {
                 mState = WIFI_STATE::IDLE;
-                DEBUG_PRINT("WiFiCom::Update() - [%s] command responded correctly. Wifi connected.\r\n", COMMAND_CONNECT_STR);
+                DEBUG_PRINT("WiFiCom::Update() - Success. WiFi connected.\r\n");
+            }
+        }
+        break;
+
+        case WIFI_STATE::CMD_GET_SEND:
+        {
+            // sending get command with wifi ssid and password
+            mResponse.clear();
+            mWiFiComDelay.Start(DELAY_10_SECONDS);
+            esp32Command = COMMAND_GET_STR;
+            esp32Command += PARAM_SEPARATOR_CHAR;
+            esp32Command += "https://www.timeapi.io/api/Time/current/zone?timeZone=America/Buenos_Aires";
+            _Write(esp32Command.c_str());
+            mState = WIFI_STATE::CMD_GET_WAIT_RESPONSE;
+            DEBUG_PRINT("WiFiCom::Update() - Sending [%s]\r\n", esp32Command.c_str());
+        }
+        break;
+
+        case WIFI_STATE::CMD_GET_WAIT_RESPONSE:
+        {
+            const bool isResponseCompleted = _IsResponseCompleted();
+            if ((mWiFiComDelay.HasFinished()) || (isResponseCompleted && (mResponse.compare(RESULT_ERROR) == 0)))
+            {
+                mState = WIFI_STATE::ERROR;
+                DEBUG_PRINT("WiFiCom::Update() - [%s] command not responded correctly\r\n", COMMAND_GET_STR);
+            }
+            else if (isResponseCompleted)
+            {
+                mState = WIFI_STATE::IDLE;
+                DEBUG_PRINT("WiFiCom::Update() - Response obtained correctly.\r\n%s\r\n", mResponse.c_str());
+            }
+        }
+        break;
+
+        case WIFI_STATE::CMD_POST_SEND:
+        {
+            // sending get command with wifi ssid and password
+            mResponse.clear();  
+            mWiFiComDelay.Start(DELAY_10_SECONDS);
+            esp32Command = COMMAND_POST_STR;
+            esp32Command += PARAM_SEPARATOR_CHAR;
+            esp32Command += mServer;
+            esp32Command += PARAM_SEPARATOR_CHAR;
+            esp32Command += mRequest;
+            _Write(esp32Command.c_str());
+            mState = WIFI_STATE::CMD_POST_WAIT_RESPONSE;
+            // DEBUG_PRINT("WiFiCom::Update() - Sending [%s]\r\n", esp32Command.c_str());
+        }
+        break;
+
+        case WIFI_STATE::CMD_POST_WAIT_RESPONSE:
+        {
+            const bool isResponseCompleted = _IsResponseCompleted();
+            if ((mWiFiComDelay.HasFinished()) || (isResponseCompleted && (mResponse.compare(RESULT_ERROR) == 0)))
+            {
+                mState = WIFI_STATE::ERROR;
+                DEBUG_PRINT("WiFiCom::Update() - ERROR [%s] command not responded correctly\r\n", COMMAND_POST_STR);
+            }
+            else if (isResponseCompleted)
+            {
+                mState = WIFI_STATE::CMD_POST_RESPONSE_READY;
+                mWiFiComDelay.Start(DELAY_10_SECONDS);                  // a timeout is set to avoid a hang on
+                mIsPostResponseReady = true;
+                // DEBUG_PRINT("WiFiCom::Update() - [%s] responded correctly.\r\n", COMMAND_POST_STR);
+            }
+        }
+        break;
+
+        case WIFI_STATE::CMD_POST_RESPONSE_READY:
+        {
+            // Wait until the response is grabbed and clear or wait or the time out
+            if (!mIsPostResponseReady)
+            {
+                mState = WIFI_STATE::IDLE;
+                // DEBUG_PRINT("WiFiCom::Update() - Response grabbed.\r\n");
             }
             else if (mWiFiComDelay.HasFinished()) 
             {
                 mState = WIFI_STATE::ERROR;
-                DEBUG_PRINT("WiFiCom::Update() - [%s] command not responded correctly\r\n", COMMAND_CONNECT_STR);
+                mResponse.clear();
+                DEBUG_PRINT("WiFiCom::Update() - Response was never grabbed and it got lost\r\n");
             }
         }
         break;
 
-        case WIFI_STATE::IDLE:
         case WIFI_STATE::ERROR:
+        {
+            mState = WIFI_STATE::IDLE;
+        }
+        break;
+        case WIFI_STATE::IDLE:
         break;
     }
 }
@@ -184,6 +286,26 @@ void WiFiCom::_Write(const char* format, ...)
 }
 
 //-----------------------------------------------------------------------------
+bool WiFiCom::_IsResponseCompleted()
+{
+    char receivedChar;
+
+    if (_ReadCom(&receivedChar))
+    {
+        if (receivedChar == FINISH_RESPONSE_CHAR) 
+        {
+            return true;
+        } 
+        else 
+        {
+            mResponse += receivedChar;
+        }
+    }
+
+    return false;
+}
+
+//-----------------------------------------------------------------------------
 bool WiFiCom::_ReadCom(char* receivedChar)
 {
     char receivedCharLocal = '\0';
@@ -197,33 +319,6 @@ bool WiFiCom::_ReadCom(char* receivedChar)
     }
 
     return false;
-}
-
-//-----------------------------------------------------------------------------
-bool WiFiCom::_IsExpectedResponse()
-{
-    static int responseStringPositionIndex = 0;
-    char charReceived;
-    bool moduleResponse = false;
-
-    if(_ReadCom(&charReceived))
-    {
-        if (charReceived == mExpectedResponse[responseStringPositionIndex]) 
-        {
-            responseStringPositionIndex++;
-            if (mExpectedResponse[responseStringPositionIndex] == '\0') 
-            {
-                responseStringPositionIndex = 0;
-                moduleResponse = true;
-            }
-        } 
-        else 
-        {
-            responseStringPositionIndex = 0;
-        }
-    }
-
-    return moduleResponse;
 }
 
 } // namespace Drivers
