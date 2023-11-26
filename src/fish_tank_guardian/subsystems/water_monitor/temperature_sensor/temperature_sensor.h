@@ -8,6 +8,12 @@
 #ifndef TEMPERATURE_SENSOR_H
 #define TEMPERATURE_SENSOR_H
 
+#include <vector>
+#include "mbed.h"
+
+#define TEMP_SENSOR_NUM_AVG_SAMPLES 20
+#define TEMP_SENSOR_PIN A1
+
 namespace Drivers { 
 
     class TemperatureSensor 
@@ -20,17 +26,26 @@ namespace Drivers {
             //! Returns the sensor object
             static TemperatureSensor* GetInstance();
 
-            //! Obtain reading
-            void Read();
+            //! 
+            void Update();
+
+            //!
+            float GetLastReading();
 
         private:
 
-            TemperatureSensor() {}
+            using TempReadingsVec = vector<float>;
+
+            TemperatureSensor(const PinName pin);
             ~TemperatureSensor() = default;
             TemperatureSensor(const TemperatureSensor&) = delete;
             TemperatureSensor& operator=(const TemperatureSensor&) = delete;
 
             static TemperatureSensor* mInstance;
+            AnalogIn mPin;
+            TempReadingsVec mReadingsVector;
+            TempReadingsVec::iterator mReadingsVectorIter;
+            float mLastReading;
     };
 
 } // namespace Drivers

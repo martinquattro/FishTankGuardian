@@ -46,7 +46,20 @@ WaterMonitor* WaterMonitor::GetInstance()
 //-----------------------------------------------------------------------------
 void WaterMonitor::Update()
 {
-    Drivers::TdsSensor::GetInstance()->Update();
+    Drivers::TemperatureSensor::GetInstance()->Update();
+    Drivers::TdsSensor::GetInstance()->Update(GetTempReading());            // tds sensor uses temperature reading to have a better reading
+}
+
+//-----------------------------------------------------------------------------
+int WaterMonitor::GetTdsReading()
+{
+    return (Drivers::TdsSensor::GetInstance()->GetLastReading());
+}
+
+//-----------------------------------------------------------------------------
+float WaterMonitor::GetTempReading()
+{
+    return (Drivers::TemperatureSensor::GetInstance()->GetLastReading());
 }
 
 //=====[Implementations of private functions]==================================

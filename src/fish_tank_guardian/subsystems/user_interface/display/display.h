@@ -1,7 +1,12 @@
-//=====[#include guards - begin]===============================================
+/*!****************************************************************************
+ * @file tds_sensor.h
+ * @brief TODO
+ * @author Quattrone Martin
+ * @date Oct 2023
+ *******************************************************************************/
 
-#ifndef _DISPLAY_H_
-#define _DISPLAY_H_
+#ifndef DISPLAY_H
+#define DISPLAY_H
 
 #define DISPLAY_IR_CLEAR_DISPLAY   0b00000001
 #define DISPLAY_IR_ENTRY_MODE_SET  0b00000100
@@ -83,21 +88,6 @@
 #define ST7920_SPI_RW_WRITE 0b000000000
 #define ST7920_SPI_RW_READ  0b000000100
 
-//=====[Declaration of private data types]=====================================
-
-typedef struct{
-    int address;
-    char data;
-    bool displayPinRs;
-    bool displayPinRw; 
-    bool displayPinEn;
-    bool displayPinA;
-    bool displayPinD4;
-    bool displayPinD5;
-    bool displayPinD6;
-    bool displayPinD7;
-} pcf8574_t;
-
 //=====[Declaration of public data types]======================================
 
 typedef enum {
@@ -119,70 +109,38 @@ typedef enum {
 
 typedef struct {
    displayConnection_t connection;
-   displayType_t type;                                                                   
-   displayMode_t mode;                                                  
+   displayType_t type;
+   displayMode_t mode;
 } display_t;
+
+namespace Drivers { namespace Display {
+
+//=====[Declaration of private data types]=====================================
+
+typedef struct{
+    int address;
+    char data;
+    bool displayPinRs;
+    bool displayPinRw; 
+    bool displayPinEn;
+    bool displayPinA;
+    bool displayPinD4;
+    bool displayPinD5;
+    bool displayPinD6;
+    bool displayPinD7;
+} pcf8574_t;
 
 //=====[Declarations (prototypes) of public functions]=========================
 
-void displayInit( displayType_t type, displayConnection_t connection );
+void Init( displayType_t type, displayConnection_t connection );
  
-void displayCharPositionWrite( int charPositionX, int charPositionY );
+void WriteCharPosition( int charPositionX, int charPositionY );
 
-void displayStringWrite( const char * str );
+void Write( const char * str );
 
-void displayClear( void );
+void Clear( void );
 
-// GLCD display only
+}
+}
 
-void displayBitmapWrite( int* bitmap );
-
-//=====[#include guards - end]=================================================
-
-#endif // _DISPLAY_H_
-
-
-
-
-
-
-
-// /*!****************************************************************************
-//  * @file tds_sensor.h
-//  * @brief TODO
-//  * @author Quattrone Martin
-//  * @date Oct 2023
-//  *******************************************************************************/
-
-// #ifndef DISPLAY_H
-// #define DISPLAY_H
-
-// namespace Drivers { 
-
-//     class Display 
-//     {
-//         public:
-
-//             //! Initialize the sensor
-//             static void Init(int pin);
-
-//             //! Returns the sensor object
-//             static Display* GetInstance();
-
-//             //!
-//             void Read();
-
-//         private:
-
-//             Display(int pin) : mPin(pin) {}
-//             ~Display() = default;
-//             Display(const Display&) = delete;
-//             Display& operator=(const Display&) = delete;
-
-//             int mPin;
-//             static Display* mInstance;
-//     };
-
-// } // namespace Drivers
-
-// #endif // DISPLAY_H
+#endif // DISPLAY_H

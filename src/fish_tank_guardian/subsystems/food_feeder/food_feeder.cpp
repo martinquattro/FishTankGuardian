@@ -34,6 +34,9 @@ void FoodFeeder::Init()
 
     Drivers::Motor::Init();
 
+    std:string feedTime = "21:00:15";
+    mInstance->AddFeedTime(feedTime);
+
     DEBUG_PRINT("FoodFeeder::Init() - Initiating Finished.\r\n");
 }
 
@@ -46,11 +49,11 @@ FoodFeeder* FoodFeeder::GetInstance()
 //-----------------------------------------------------------------------------
 void FoodFeeder::Update()
 {
-    std::string currentTime = Util::RealTimeClock::GetInstance()->GetCurrentTime();
-    if (_IsTimeToFeed(currentTime))
-    {
-        Drivers::Motor::GetInstance()->Rotate();
-    }
+    // std::string currentTime = Util::RealTimeClock::GetInstance()->GetCurrentTime();
+    // if (_IsTimeToFeed(currentTime))
+    // {
+    //     Drivers::Motor::GetInstance()->Rotate();
+    // }
 }
 
 //-----------------------------------------------------------------------------
@@ -77,7 +80,8 @@ std::vector<std::string> FoodFeeder::GetFeedTimes()
     std::string feedTime = Util::RealTimeClock::GetInstance()->ReadStringFromEeprom();
     feedTimes.push_back(feedTime);
 
-    return feedTimes;}
+    return feedTimes;
+}
 
 //=====[Implementations of private functions]==================================
 

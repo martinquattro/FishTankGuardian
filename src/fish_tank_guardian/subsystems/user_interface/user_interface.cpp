@@ -11,6 +11,9 @@
 
 #include "arm_book_lib.h"
 #include "display.h"
+#include "real_time_clock.h"
+#include "water_monitor.h"
+#include "food_feeder.h"
 
 namespace Subsystems {
 
@@ -30,20 +33,20 @@ void UserInterface::Init()
         mInstance = new UserInterface();
     }
 
-    displayInit(DISPLAY_TYPE_LCD_HD44780, DISPLAY_CONNECTION_GPIO_4BITS);
-    displayClear();
+    Drivers::Display::Init(DISPLAY_TYPE_LCD_HD44780, DISPLAY_CONNECTION_GPIO_4BITS);
+    Drivers::Display::Clear();
 
-    displayCharPositionWrite (0,0);
-    displayStringWrite("Fish Tank Guardian");
+    Drivers::Display::WriteCharPosition(0,0);
+    Drivers::Display::Write(" FISH TANK GUARDIAN ");
 
-    displayCharPositionWrite (0,1);
-    displayStringWrite("Next Feed:" );
+    Drivers::Display::WriteCharPosition(0,1);
+    Drivers::Display::Write("Next Feed: 00:00");
 
-    displayCharPositionWrite (0,2);
-    displayStringWrite("Temperature:");
+    Drivers::Display::WriteCharPosition(0,2);
+    Drivers::Display::Write("Temp: 00.0'C   _____");
     
-    displayCharPositionWrite (0,3);
-    displayStringWrite("TDS:" );
+    Drivers::Display::WriteCharPosition(0,3);
+    Drivers::Display::Write("TDS: 000 ppm  |00:00" );
 
     DEBUG_PRINT("UserInterface::Init() - Initiating Finished.\r\n");
 }
@@ -57,7 +60,44 @@ UserInterface* UserInterface::GetInstance()
 //-----------------------------------------------------------------------------
 void UserInterface::Update()
 {
-    
+    char buffer[60];
+
+    // Next Feed Time
+    {
+        std::vector<std::string> feedTimes = Subsystems::FoodFeeder::GetInstance()->GetFeedTimes();
+
+        Drivers::Display::WriteCharPosition(FEED_FEED_POSITION_X, FEED_FEED_POSITION_Y);
+        Drivers::Display::Write(feedTimes[0].c_str());
+    }
+
+    // Temperature
+    {
+        const float tempReading = Subsystems::WaterMonitor::GetInstance()->GetTempReading();
+        std::sprintf(buffer, "%.1f", tempReading);
+        Drivers::Display::WriteCharPosition(TEMP_POSITION_X, TEMP_POSITION_Y);
+        Drivers::Display::Write(buffer);
+    }
+
+    // Tds
+    {
+        const int tdsReading = Subsystems::WaterMonitor::GetInstance()->GetTdsReading();
+        std::sprintf(buffer, "%03d", tdsReading);
+        Drivers::Display::WriteCharPosition(TDS_POSITION_X, TDS_POSITION_Y);
+        Drivers::Display::Write(buffer);
+    }
+
+    // Current Time
+    {    
+        std::string hours, minutes, seconds, currentTime;
+        Util::RealTimeClock::GetInstance()->GetCurrentTime(&hours, &minutes, &seconds);
+
+        currentTime += hours;
+        currentTime += ((stoi(seconds) % 2) ? " " : ":");       // to make the ":" blink every seconds passes
+        currentTime += minutes;
+
+        Drivers::Display::WriteCharPosition(TIME_POSITION_X, TIME_POSITION_Y);
+        Drivers::Display::Write(currentTime.c_str());
+    }
 }
 
 //=====[Implementations of private functions]==================================

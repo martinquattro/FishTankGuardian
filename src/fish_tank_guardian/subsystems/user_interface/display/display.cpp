@@ -1,9 +1,18 @@
+// /*!****************************************************************************
+//  * @file display.cpp
+//  * @brief TODO
+//  * @author Quattrone Martin
+//  * @date Oct 2023
+//  *******************************************************************************/
+
 //=====[Libraries]=============================================================
 
 #include "display.h"
 
 #include "arm_book_lib.h"
 #include "mbed.h"
+
+namespace Drivers { namespace Display {
 
 //=====[Declaration and initialization of public global objects]===============
 
@@ -31,14 +40,14 @@ static bool initial8BitCommunicationIsCompleted;
 
 //=====[Declarations (prototypes) of private functions]========================
 
-static void displayPinWrite( int pinName, int value );
-static void displayDataBusWrite( int dataByte );
-static void displayCodeWrite( bool type, int dataBus );
+static void PinWrite( int pinName, int value );
+static void DataBusWrite( int dataByte );
+static void CodeWrite( bool type, int dataBus );
 
 //=====[Implementations of public functions]===================================
 
 //-----------------------------------------------------------------------------
-void displayInit(displayType_t type, displayConnection_t connection)
+void Init(displayType_t type, displayConnection_t connection)
 {   
     display.type = type;
     display.connection = connection;
@@ -48,17 +57,17 @@ void displayInit(displayType_t type, displayConnection_t connection)
 
     delay( 50 );
     
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+    CodeWrite( DISPLAY_RS_INSTRUCTION, 
                       DISPLAY_IR_FUNCTION_SET | 
                       DISPLAY_IR_FUNCTION_SET_8BITS );
     delay( 5 );
             
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+    CodeWrite( DISPLAY_RS_INSTRUCTION, 
                       DISPLAY_IR_FUNCTION_SET | 
                       DISPLAY_IR_FUNCTION_SET_8BITS );
     delay( 1 ); 
 
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+    CodeWrite( DISPLAY_RS_INSTRUCTION, 
                       DISPLAY_IR_FUNCTION_SET | 
                       DISPLAY_IR_FUNCTION_SET_8BITS );
     delay( 1 );  
@@ -66,7 +75,7 @@ void displayInit(displayType_t type, displayConnection_t connection)
     switch( display.connection ) {
         case DISPLAY_CONNECTION_GPIO_8BITS:
         case DISPLAY_CONNECTION_SPI:
-            displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+            CodeWrite( DISPLAY_RS_INSTRUCTION, 
                               DISPLAY_IR_FUNCTION_SET | 
                               DISPLAY_IR_FUNCTION_SET_8BITS | 
                               DISPLAY_IR_FUNCTION_SET_2LINES |
@@ -76,14 +85,14 @@ void displayInit(displayType_t type, displayConnection_t connection)
         
         case DISPLAY_CONNECTION_GPIO_4BITS:
         case DISPLAY_CONNECTION_I2C_PCF8574_IO_EXPANDER:
-            displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+            CodeWrite( DISPLAY_RS_INSTRUCTION, 
                               DISPLAY_IR_FUNCTION_SET | 
                               DISPLAY_IR_FUNCTION_SET_4BITS );
             delay( 1 );  
 
             initial8BitCommunicationIsCompleted = true;  
 
-            displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+            CodeWrite( DISPLAY_RS_INSTRUCTION, 
                               DISPLAY_IR_FUNCTION_SET | 
                               DISPLAY_IR_FUNCTION_SET_4BITS | 
                               DISPLAY_IR_FUNCTION_SET_2LINES |
@@ -92,24 +101,24 @@ void displayInit(displayType_t type, displayConnection_t connection)
         break;
     }
 
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+    CodeWrite( DISPLAY_RS_INSTRUCTION, 
                       DISPLAY_IR_DISPLAY_CONTROL |
                       DISPLAY_IR_DISPLAY_CONTROL_DISPLAY_OFF |      
                       DISPLAY_IR_DISPLAY_CONTROL_CURSOR_OFF |       
                       DISPLAY_IR_DISPLAY_CONTROL_BLINK_OFF );       
     delay( 1 );          
 
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+    CodeWrite( DISPLAY_RS_INSTRUCTION, 
                       DISPLAY_IR_CLEAR_DISPLAY );       
     delay( 1 ); 
 
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+    CodeWrite( DISPLAY_RS_INSTRUCTION, 
                       DISPLAY_IR_ENTRY_MODE_SET |
                       DISPLAY_IR_ENTRY_MODE_SET_INCREMENT |       
                       DISPLAY_IR_ENTRY_MODE_SET_NO_SHIFT );                  
     delay( 1 );           
 
-    displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+    CodeWrite( DISPLAY_RS_INSTRUCTION, 
                       DISPLAY_IR_DISPLAY_CONTROL |
                       DISPLAY_IR_DISPLAY_CONTROL_DISPLAY_ON |      
                       DISPLAY_IR_DISPLAY_CONTROL_CURSOR_OFF |    
@@ -118,13 +127,13 @@ void displayInit(displayType_t type, displayConnection_t connection)
 }
 
 //-----------------------------------------------------------------------------
-void displayCharPositionWrite( int charPositionX, int charPositionY )
+void WriteCharPosition( int charPositionX, int charPositionY )
 {    
     if( display.type == DISPLAY_TYPE_LCD_HD44780 )
     {
         switch( charPositionY ) {
             case 0:
-                displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                CodeWrite( DISPLAY_RS_INSTRUCTION, 
                                   DISPLAY_IR_SET_DDRAM_ADDR |
                                   ( DISPLAY_20x4_LINE1_FIRST_CHARACTER_ADDRESS +
                                     charPositionX ) );
@@ -132,7 +141,7 @@ void displayCharPositionWrite( int charPositionX, int charPositionY )
             break;
         
             case 1:
-                displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                CodeWrite( DISPLAY_RS_INSTRUCTION, 
                                   DISPLAY_IR_SET_DDRAM_ADDR |
                                   ( DISPLAY_20x4_LINE2_FIRST_CHARACTER_ADDRESS +
                                     charPositionX ) );
@@ -140,7 +149,7 @@ void displayCharPositionWrite( int charPositionX, int charPositionY )
             break;
         
             case 2:
-                displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                CodeWrite( DISPLAY_RS_INSTRUCTION, 
                                   DISPLAY_IR_SET_DDRAM_ADDR |
                                   ( DISPLAY_20x4_LINE3_FIRST_CHARACTER_ADDRESS +
                                     charPositionX ) );
@@ -148,7 +157,7 @@ void displayCharPositionWrite( int charPositionX, int charPositionY )
             break;
 
             case 3:
-                displayCodeWrite( DISPLAY_RS_INSTRUCTION, 
+                CodeWrite( DISPLAY_RS_INSTRUCTION, 
                                   DISPLAY_IR_SET_DDRAM_ADDR |
                                   ( DISPLAY_20x4_LINE4_FIRST_CHARACTER_ADDRESS +
                                     charPositionX ) );
@@ -159,25 +168,25 @@ void displayCharPositionWrite( int charPositionX, int charPositionY )
 }
 
 //-----------------------------------------------------------------------------
-void displayStringWrite( const char * str )
+void Write( const char * str )
 {
     while (*str) 
     {
-        displayCodeWrite(DISPLAY_RS_DATA, *str++);
+        CodeWrite(DISPLAY_RS_DATA, *str++);
     }
 }
 
 //-----------------------------------------------------------------------------
-void displayClear( void )
+void Clear( void )
 {
-    displayCodeWrite(DISPLAY_RS_INSTRUCTION, DISPLAY_IR_CLEAR_DISPLAY);
+    CodeWrite(DISPLAY_RS_INSTRUCTION, DISPLAY_IR_CLEAR_DISPLAY);
     delay(2); 
 }
 
 //=====[Implementations of private functions]==================================
 
 //----static-------------------------------------------------------------------
-static void displayCodeWrite(bool type, int dataBus)
+static void CodeWrite(bool type, int dataBus)
 {
     switch(display.connection) 
     {
@@ -185,11 +194,11 @@ static void displayCodeWrite(bool type, int dataBus)
         case DISPLAY_CONNECTION_GPIO_4BITS:
         case DISPLAY_CONNECTION_I2C_PCF8574_IO_EXPANDER:    
             if (type == DISPLAY_RS_INSTRUCTION)
-                displayPinWrite( DISPLAY_PIN_RS, DISPLAY_RS_INSTRUCTION);
+                PinWrite( DISPLAY_PIN_RS, DISPLAY_RS_INSTRUCTION);
                 else
-                displayPinWrite( DISPLAY_PIN_RS, DISPLAY_RS_DATA);
-            displayPinWrite( DISPLAY_PIN_RW, DISPLAY_RW_WRITE );
-            displayDataBusWrite( dataBus );
+                PinWrite( DISPLAY_PIN_RS, DISPLAY_RS_DATA);
+            PinWrite( DISPLAY_PIN_RW, DISPLAY_RW_WRITE );
+            DataBusWrite( dataBus );
         break;
   
         case DISPLAY_CONNECTION_SPI:
@@ -212,7 +221,7 @@ static void displayCodeWrite(bool type, int dataBus)
 }
 
 //----static-------------------------------------------------------------------
-static void displayPinWrite( int pinName, int value )
+static void PinWrite( int pinName, int value )
 {
     switch( display.connection ) {
         case DISPLAY_CONNECTION_GPIO_8BITS:
@@ -288,95 +297,43 @@ static void displayPinWrite( int pinName, int value )
 }
 
 //----static-------------------------------------------------------------------
-static void displayDataBusWrite( int dataBus )
+static void DataBusWrite( int dataBus )
 {
-    displayPinWrite( DISPLAY_PIN_EN, OFF );
-    displayPinWrite( DISPLAY_PIN_D7, dataBus & 0b10000000 );
-    displayPinWrite( DISPLAY_PIN_D6, dataBus & 0b01000000 );
-    displayPinWrite( DISPLAY_PIN_D5, dataBus & 0b00100000 );
-    displayPinWrite( DISPLAY_PIN_D4, dataBus & 0b00010000 );
+    PinWrite( DISPLAY_PIN_EN, OFF );
+    PinWrite( DISPLAY_PIN_D7, dataBus & 0b10000000 );
+    PinWrite( DISPLAY_PIN_D6, dataBus & 0b01000000 );
+    PinWrite( DISPLAY_PIN_D5, dataBus & 0b00100000 );
+    PinWrite( DISPLAY_PIN_D4, dataBus & 0b00010000 );
     switch( display.connection ) {
         case DISPLAY_CONNECTION_GPIO_8BITS:
-            displayPinWrite( DISPLAY_PIN_D3, dataBus & 0b00001000 );
-            displayPinWrite( DISPLAY_PIN_D2, dataBus & 0b00000100 );  
-            displayPinWrite( DISPLAY_PIN_D1, dataBus & 0b00000010 );      
-            displayPinWrite( DISPLAY_PIN_D0, dataBus & 0b00000001 );
+            PinWrite( DISPLAY_PIN_D3, dataBus & 0b00001000 );
+            PinWrite( DISPLAY_PIN_D2, dataBus & 0b00000100 );  
+            PinWrite( DISPLAY_PIN_D1, dataBus & 0b00000010 );      
+            PinWrite( DISPLAY_PIN_D0, dataBus & 0b00000001 );
         break; 
               
         case DISPLAY_CONNECTION_GPIO_4BITS:
         case DISPLAY_CONNECTION_I2C_PCF8574_IO_EXPANDER:
             if ( initial8BitCommunicationIsCompleted == true) {
-                displayPinWrite( DISPLAY_PIN_EN, ON );         
+                PinWrite( DISPLAY_PIN_EN, ON );         
                 delay( 1 );
-                displayPinWrite( DISPLAY_PIN_EN, OFF );              
+                PinWrite( DISPLAY_PIN_EN, OFF );              
                 delay( 1 );        
-                displayPinWrite( DISPLAY_PIN_D7, dataBus & 0b00001000 );
-                displayPinWrite( DISPLAY_PIN_D6, dataBus & 0b00000100 );  
-                displayPinWrite( DISPLAY_PIN_D5, dataBus & 0b00000010 );      
-                displayPinWrite( DISPLAY_PIN_D4, dataBus & 0b00000001 );                
+                PinWrite( DISPLAY_PIN_D7, dataBus & 0b00001000 );
+                PinWrite( DISPLAY_PIN_D6, dataBus & 0b00000100 );  
+                PinWrite( DISPLAY_PIN_D5, dataBus & 0b00000010 );      
+                PinWrite( DISPLAY_PIN_D4, dataBus & 0b00000001 );                
             }
         break;
         
         case DISPLAY_CONNECTION_SPI:
         break;
     }
-    displayPinWrite( DISPLAY_PIN_EN, ON );              
+    PinWrite( DISPLAY_PIN_EN, ON );              
     delay( 1 );
-    displayPinWrite( DISPLAY_PIN_EN, OFF );  
+    PinWrite( DISPLAY_PIN_EN, OFF );  
     delay( 1 );                   
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// /*!****************************************************************************
-//  * @file display.cpp
-//  * @brief TODO
-//  * @author Quattrone Martin
-//  * @date Oct 2023
-//  *******************************************************************************/
-
-// //=====[Libraries]=============================================================
-
-// #include "mbed.h"
-// #include "display.h"
-
-// namespace Drivers {
-
-// //=====[Declaration and initialization of private global variables]============
-
-// Display* Display::mInstance = nullptr;
-
-// //=====[Implementations of public functions]===================================
-
-// //----static-------------------------------------------------------------------
-// void Display::Init(int pin)
-// {
-//     if (mInstance == nullptr)
-//     {
-//         mInstance = new Display(pin);
-//     }
-// }
-
-// //----static-------------------------------------------------------------------
-// Display* Display::GetInstance()
-// {
-//     return mInstance;
-// }
-
-// //=====[Implementations of private functions]==================================
-
-// } // namespace Drivers
+}
+}

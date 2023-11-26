@@ -30,7 +30,7 @@ namespace Util {
             static RealTimeClock* GetInstance();
 
             //!
-            std::string GetCurrentTime();
+            void GetCurrentTime(std::string* hours, std::string* minutes, std::string* seconds);
 
             //!
             void Sync();

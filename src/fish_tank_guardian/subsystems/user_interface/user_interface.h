@@ -8,6 +8,18 @@
 #ifndef USER_INTERFACE_H
 #define USER_INTERFACE_H
 
+#define FEED_FEED_POSITION_X        11
+#define FEED_FEED_POSITION_Y        1
+
+#define TEMP_POSITION_X             6
+#define TEMP_POSITION_Y             2
+
+#define TDS_POSITION_X              5
+#define TDS_POSITION_Y              3
+
+#define TIME_POSITION_X             15
+#define TIME_POSITION_Y             3
+
 namespace Subsystems { 
 
     class UserInterface 

@@ -72,7 +72,6 @@ TelegramBot::TelegramBot(const char* apiUrl, const char* token)
     , mToken(token)
 {
     mLastUpdateId = 0;
-    mIsFirstMessageRead = false;
 }
 
 //-----------------------------------------------------------------------------

@@ -30,6 +30,8 @@ void RealTimeClock::Init()
         mInstance = new RealTimeClock(RTC_PIN_SDA, RTC_PIN_SCL, RTC_ADDRESS_ID, RTC_EEPROM_ADDRESS);
     }
 
+    mInstance->Sync();
+
     DEBUG_PRINT("RealTimeClock::Init() - Initiating Finished.\r\n");
 }
 
@@ -40,9 +42,9 @@ RealTimeClock* RealTimeClock::GetInstance()
 }
 
 //-----------------------------------------------------------------------------
-std::string RealTimeClock::GetCurrentTime()
+void RealTimeClock::GetCurrentTime(std::string* hours, std::string* minutes, std::string* seconds)
 {
-    uint8_t seconds, minutes, hours, day, month, year;
+    uint8_t currentSeconds, currentMinutes, currentHours, currentDay, currentMonth, currentYear;
 
     mRtcCom.start();
     mRtcCom.write(mAddress | 0);
@@ -51,21 +53,27 @@ std::string RealTimeClock::GetCurrentTime()
     mRtcCom.start();
 
     mRtcCom.write(mAddress | 1);
-    seconds  = _Bcd2Dec(mRtcCom.read(1));
-    minutes  = _Bcd2Dec(mRtcCom.read(1));
-    hours    = _Bcd2Dec(mRtcCom.read(1));
+    currentSeconds  = _Bcd2Dec(mRtcCom.read(1));
+    currentMinutes  = _Bcd2Dec(mRtcCom.read(1));
+    currentHours    = _Bcd2Dec(mRtcCom.read(1));
 
     mRtcCom.read(1);
-    day      = _Bcd2Dec(mRtcCom.read(1));
-    month    = _Bcd2Dec(mRtcCom.read(1));
-    year     = _Bcd2Dec(mRtcCom.read(0));
+    currentDay      = _Bcd2Dec(mRtcCom.read(1));
+    currentMonth    = _Bcd2Dec(mRtcCom.read(1));
+    currentYear     = _Bcd2Dec(mRtcCom.read(0));
 
     mRtcCom.stop();
 
-    char buffer[80];
-    std::sprintf(buffer, "%02d:%02d:%02d", hours, minutes, seconds);
+    char buffer[60];
 
-    return std::string(buffer);
+    std::sprintf(buffer, "%02d", currentHours);
+    (*hours) = buffer;
+
+    std::sprintf(buffer, "%02d", currentMinutes);
+    (*minutes) = buffer;
+
+    std::sprintf(buffer, "%02d", currentSeconds);
+    (*seconds) = buffer;
 }
 
 //-----------------------------------------------------------------------------

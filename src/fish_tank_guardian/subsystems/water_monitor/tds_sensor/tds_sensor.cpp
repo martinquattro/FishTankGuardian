@@ -39,26 +39,31 @@ TdsSensor* TdsSensor::GetInstance()
 void TdsSensor::Update(const float temperature /* = 25.0*/)
 {
     const float analogReading = mPin.read();
-    (*mReadingsVectorIter) = analogReading;
-    // DEBUG_PRINT("analogReading = %f\r\n", analogReading);
 
+    // add reading to vector
+    (*mReadingsVectorIter) = analogReading;
+
+    // check if we were at last element of the readings vector
     if (mReadingsVectorIter++ >= mReadingsVector.end())
     {
         mReadingsVectorIter = mReadingsVector.begin();
     }
 
+    // obtaing average
     float tdsReadingSum = 0.0;
     for (TdsReadingsVec::iterator it = mReadingsVector.begin(); (it != mReadingsVector.end()) ; ++it) 
     {
         tdsReadingSum = tdsReadingSum + (*it);
     }
-
     float avgAnalogReading = (tdsReadingSum / TDS_SENSOR_NUM_AVG_SAMPLES);
-	const float voltage = avgAnalogReading * mRef;
-	const float ecValue = ((133.42 * voltage * voltage * voltage) - (255.86 * voltage * voltage) + (857.39 * voltage)) * mKValue;
-	const float ecValue25 = ecValue / (1.0 + 0.02 * (temperature - 25.0));  //temperature compensation
-	const int tdsValue = ecValue25 * 0.5;
 
+    // logic to transform reading to ppm units
+    const float voltage = avgAnalogReading * mRef;
+    const float ecValue = ((133.42 * voltage * voltage * voltage) - (255.86 * voltage * voltage) + (857.39 * voltage)) * mKValue;
+    const float ecValue25 = ecValue / (1.0 + 0.02 * (temperature - 25.0));  //temperature compensation
+    const int tdsValue = ecValue25 * 0.5;
+
+    // check if we are out of boundaries
     if (tdsValue < 0)
     {
         mLastReading = 0;

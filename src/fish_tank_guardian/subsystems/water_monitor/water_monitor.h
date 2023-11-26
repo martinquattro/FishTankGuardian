@@ -23,6 +23,12 @@ namespace Subsystems {
             //! Update subsystem
             void Update();
 
+            //! 
+            int GetTdsReading();
+
+            //!
+            float GetTempReading();
+
         private:
 
             WaterMonitor() {}
