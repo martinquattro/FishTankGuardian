@@ -30,7 +30,7 @@ namespace Drivers {
             static Motor* GetInstance();
            
             //! Start motor rotation
-            void Rotate();
+            void Rotate(const int numFullRotations);
 
         private:
 

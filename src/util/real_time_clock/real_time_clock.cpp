@@ -86,8 +86,8 @@ void RealTimeClock::Sync()
     rtcTime.tm_year = 123;
     rtcTime.tm_mon  = 11;
     rtcTime.tm_mday = 23;
-    rtcTime.tm_hour = 21;
-    rtcTime.tm_min  = 00;
+    rtcTime.tm_hour = 12;
+    rtcTime.tm_min  = 03;
     rtcTime.tm_sec  = 00;
     rtcTime.tm_isdst = -1;
 
@@ -101,16 +101,16 @@ void RealTimeClock::Sync()
 }
 
 //-----------------------------------------------------------------------------
-void RealTimeClock::SaveStringToEeprom(std::string str) 
+void RealTimeClock::SaveStringToEeprom(const int position, std::string str) 
 {
-    mMemory.write(0, str);
+    mMemory.write(position, str);
 }
 
 //-----------------------------------------------------------------------------
-std::string& RealTimeClock::ReadStringFromEeprom() 
+std::string& RealTimeClock::ReadStringFromEeprom(const int position) 
 {
     std::string str;
-    mMemory.read(0, str);
+    mMemory.read(position, str);
 
     return str;
 }

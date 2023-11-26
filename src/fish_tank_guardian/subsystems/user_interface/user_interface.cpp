@@ -40,13 +40,13 @@ void UserInterface::Init()
     Drivers::Display::Write(" FISH TANK GUARDIAN ");
 
     Drivers::Display::WriteCharPosition(0,1);
-    Drivers::Display::Write("Next Feed: 00:00");
+    Drivers::Display::Write("Next Feed: ");
 
     Drivers::Display::WriteCharPosition(0,2);
-    Drivers::Display::Write("Temp: 00.0'C   _____");
+    Drivers::Display::Write("Temp:     'C________");
     
     Drivers::Display::WriteCharPosition(0,3);
-    Drivers::Display::Write("TDS: 000 ppm  |00:00" );
+    Drivers::Display::Write("TDS:    ppm|        ");
 
     DEBUG_PRINT("UserInterface::Init() - Initiating Finished.\r\n");
 }
@@ -64,10 +64,10 @@ void UserInterface::Update()
 
     // Next Feed Time
     {
-        std::vector<std::string> feedTimes = Subsystems::FoodFeeder::GetInstance()->GetFeedTimes();
+        std::string nextFeedTime = Subsystems::FoodFeeder::GetInstance()->GetNextFeedTime();
 
         Drivers::Display::WriteCharPosition(FEED_FEED_POSITION_X, FEED_FEED_POSITION_Y);
-        Drivers::Display::Write(feedTimes[0].c_str());
+        Drivers::Display::Write(nextFeedTime.c_str());
     }
 
     // Temperature
@@ -92,8 +92,10 @@ void UserInterface::Update()
         Util::RealTimeClock::GetInstance()->GetCurrentTime(&hours, &minutes, &seconds);
 
         currentTime += hours;
-        currentTime += ((stoi(seconds) % 2) ? " " : ":");       // to make the ":" blink every seconds passes
+        currentTime += ":";
         currentTime += minutes;
+        currentTime += ":";
+        currentTime += seconds;
 
         Drivers::Display::WriteCharPosition(TIME_POSITION_X, TIME_POSITION_Y);
         Drivers::Display::Write(currentTime.c_str());

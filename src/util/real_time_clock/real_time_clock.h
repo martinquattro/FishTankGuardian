@@ -36,10 +36,10 @@ namespace Util {
             void Sync();
 
             //!
-            void SaveStringToEeprom(std::string str);
+            void SaveStringToEeprom(const int position, std::string str);
 
             //!
-            std::string& ReadStringFromEeprom();
+            std::string& ReadStringFromEeprom(const int position);
 
 
 

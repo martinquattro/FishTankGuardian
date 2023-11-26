@@ -34,8 +34,20 @@ void FoodFeeder::Init()
 
     Drivers::Motor::Init();
 
-    std:string feedTime = "21:00:15";
-    mInstance->AddFeedTime(feedTime);
+    std:string feedTime = "12:03:10";
+    mInstance->AddFeedTime(feedTime, 1, 0);
+
+    feedTime = "12:03:30";
+    mInstance->AddFeedTime(feedTime, 2, 1);
+
+    feedTime = "11:03:14";
+    mInstance->EraseFeedTime(3);
+
+    feedTime = "02:04:43";
+    mInstance->AddFeedTime(feedTime, 2, 3);
+
+    feedTime = "7:12:59";
+    mInstance->EraseFeedTime(4);
 
     DEBUG_PRINT("FoodFeeder::Init() - Initiating Finished.\r\n");
 }
@@ -49,38 +61,117 @@ FoodFeeder* FoodFeeder::GetInstance()
 //-----------------------------------------------------------------------------
 void FoodFeeder::Update()
 {
-    // std::string currentTime = Util::RealTimeClock::GetInstance()->GetCurrentTime();
-    // if (_IsTimeToFeed(currentTime))
-    // {
-    //     Drivers::Motor::GetInstance()->Rotate();
-    // }
+    std::string currentHours, currentMinutes, currentSeconds;
+    Util::RealTimeClock::GetInstance()->GetCurrentTime(&currentHours, &currentMinutes, &currentSeconds);
+    
+    std::string currentTime = currentHours + ":" + currentMinutes + ":" + currentSeconds;
+
+    int numFeeds;
+    if (_IsTimeToFeed(currentTime, &numFeeds))
+    {
+        Drivers::Motor::GetInstance()->Rotate(numFeeds);
+    }
 }
 
 //-----------------------------------------------------------------------------
-bool FoodFeeder::AddFeedTime(std::string newFeedTime)
+void FoodFeeder::EraseFeedTime(const int feedTimeSlot)
 {
-    // Check if the length is correct
+    std::string nullFeedTime = "----------";
+
+    // Calculate the EEPROM position based on the slot size
+    int eepromPosition = FEED_TIMES_EEPROM_START + (feedTimeSlot * FEED_TIME_BYTES);
+
+    // Save the null feed time to EEPROM
+    Util::RealTimeClock::GetInstance()->SaveStringToEeprom(eepromPosition, nullFeedTime);
+}
+
+//-----------------------------------------------------------------------------
+bool FoodFeeder::AddFeedTime(std::string newFeedTime, const int numFeeds, const int feedTimeSlot)
+{
+    // Valdiate if it is a valid feedtime, slot and num of feeds
     DEBUG_PRINT("newFeedTime = %s\r\n", newFeedTime.c_str());
-    if (newFeedTime.size() != 8 || !_IsValidTimeFormat(newFeedTime.c_str())) 
+    if (newFeedTime.size() != 8 
+        || !(_IsValidTimeFormat(newFeedTime.c_str()) )
+        || (feedTimeSlot < 0) 
+        || (feedTimeSlot >= FEED_TIMES_SLOTS_NUM)
+        || (numFeeds < 1)
+        || (numFeeds > MAX_NUM_FEEDS)) 
     {
         return false;
     }
     
-    Util::RealTimeClock::GetInstance()->SaveStringToEeprom(newFeedTime);
+    // Create the HH:MM:SS-X format to save in eeprom
+    std::string feedTimeStr = newFeedTime + '-' + std::to_string(numFeeds);
+
+    // Calculate the EEPROM position based on the slot size
+    int eepromPosition = FEED_TIMES_EEPROM_START + (feedTimeSlot * FEED_TIME_BYTES);
+
+    // Save the feed time to EEPROM
+    Util::RealTimeClock::GetInstance()->SaveStringToEeprom(eepromPosition, feedTimeStr);
 
     return true;
 }
 
 //-----------------------------------------------------------------------------
-std::vector<std::string> FoodFeeder::GetFeedTimes()
+std::vector<FoodFeeder::FeedTimeInfo> FoodFeeder::GetFeedTimes()
 {
-    std::vector<std::string> feedTimes;
+    std::vector<FeedTimeInfo> feedTimes;
+    
+    for (int i = 0; i < FEED_TIMES_SLOTS_NUM; ++i)
+    {
+        const int slotEepromStartPosition = FEED_TIMES_EEPROM_START + (i * FEED_TIME_BYTES);
+        std::string feedTime = Util::RealTimeClock::GetInstance()->ReadStringFromEeprom(slotEepromStartPosition);
 
-    // Read the feed time from EEPROM
-    std::string feedTime = Util::RealTimeClock::GetInstance()->ReadStringFromEeprom();
-    feedTimes.push_back(feedTime);
+        if (_IsValidTimeFormat(feedTime.c_str()))
+        {
+            size_t dashPos = feedTime.find('-');
+            std::string timePart = feedTime.substr(0, dashPos);
+            std::string feedsPart = feedTime.substr(dashPos + 1);
+
+            FeedTimeInfo feedTimeInfo;
+            feedTimeInfo.mSlot = i;
+            feedTimeInfo.mNumFeeds = stoi(feedsPart);
+            feedTimeInfo.mFeedTime = timePart;
+
+            feedTimes.push_back(feedTimeInfo);
+        }
+    }
 
     return feedTimes;
+}
+
+//-----------------------------------------------------------------------------
+std::string FoodFeeder::GetNextFeedTime()
+{
+    std::string currentHours, currentMinutes, currentSeconds;
+    Util::RealTimeClock::GetInstance()->GetCurrentTime(&currentHours, &currentMinutes, &currentSeconds);
+    std::string currentTime = currentHours + ":" + currentMinutes + ":" + currentSeconds;
+
+    std::vector<FeedTimeInfo> feedTimes = GetFeedTimes();
+
+    std::string nextFeedTime = "";
+    for (const auto& feedTimeInfo : feedTimes)
+    {
+        if (feedTimeInfo.mFeedTime > currentTime && (nextFeedTime == "" || feedTimeInfo.mFeedTime < nextFeedTime))
+        {
+            nextFeedTime = feedTimeInfo.mFeedTime;
+        }
+    }
+
+    if (nextFeedTime == "")
+    {
+        if (feedTimes.size())
+        {
+            // No more feeds today
+            nextFeedTime = "Tomorrow";
+        }
+        else
+        {
+            nextFeedTime = "None";
+        }
+    }
+
+    return nextFeedTime;
 }
 
 //=====[Implementations of private functions]==================================
@@ -107,15 +198,15 @@ bool FoodFeeder::_IsValidTimeFormat(const char* time)
 }
 
 //-----------------------------------------------------------------------------
-bool FoodFeeder::_IsTimeToFeed(std::string currentTime)
+bool FoodFeeder::_IsTimeToFeed(std::string currentTime, int* numFeeds)
 {
+    std::vector<FeedTimeInfo> feedTimes = GetFeedTimes();
 
-    std::vector<std::string> feedTimes = Subsystems::FoodFeeder::GetInstance()->GetFeedTimes();
-
-    for (const auto& feedTimeStr : feedTimes)
+    for (const auto& feedTimeInfo : feedTimes)
     {
-        if (!strcmp(feedTimeStr.c_str(), currentTime.c_str()))
+        if (feedTimeInfo.mFeedTime == currentTime)
         {
+            (*numFeeds) = feedTimeInfo.mNumFeeds;
             return true;
         }
     }

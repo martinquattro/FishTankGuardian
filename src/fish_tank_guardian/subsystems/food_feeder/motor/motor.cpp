@@ -36,14 +36,15 @@ Motor* Motor::GetInstance()
 }
 
 //-----------------------------------------------------------------------------
-void Motor::Rotate()
+void Motor::Rotate(const int numFullRotations)
 {
-    DEBUG_PRINT("Motor::Rotate() - Initiating rotation...\r\n");
+    DEBUG_PRINT("Motor::Rotate() - Initiating [%d] rotations...\r\n", numFullRotations);
     
-    _Rotate(MOTOR_TOTAL_STEPS);
+    _Rotate(numFullRotations * MOTOR_TOTAL_STEPS);
     _Denergize();
 
-    DEBUG_PRINT("Motor::Rotate() - Rotation finished\r\n");}
+    DEBUG_PRINT("Motor::Rotate() - Rotations finished\r\n");
+}
 
 //=====[Implementations of private functions]==================================
 
