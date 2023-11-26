@@ -38,6 +38,9 @@ namespace Drivers {
             void Post(const std::string& server, const std::string& request);
 
             //!
+            void Request(const std::string& url);
+
+            //!
             std::string GetResponse();
 
             //!
@@ -70,7 +73,7 @@ namespace Drivers {
             WiFiCom& operator=(const WiFiCom&) = delete;
 
             //!
-            void _Write(const char* format, ...);
+            void _SendCommand(const char* command);
 
             //!
             bool _IsResponseCompleted();

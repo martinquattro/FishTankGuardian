@@ -65,6 +65,13 @@ void WiFiCom::Post(const std::string& server, const std::string& request)
 }
 
 //-----------------------------------------------------------------------------
+void WiFiCom::Request(const std::string& url)
+{
+    mState = WIFI_STATE::CMD_GET_SEND;
+    mServer = url;
+}
+
+//-----------------------------------------------------------------------------
 std::string WiFiCom::GetResponse()
 {
     std::string responseAux = mResponse;
@@ -76,7 +83,7 @@ std::string WiFiCom::GetResponse()
 //-----------------------------------------------------------------------------
 bool WiFiCom::IsPostResponseReady()
 {
-    return (mState == WIFI_STATE::CMD_POST_RESPONSE_READY) /*&& (mIsResponseReady)*/;
+    return (mState == WIFI_STATE::CMD_POST_RESPONSE_READY);
 }
 
 //-----------------------------------------------------------------------------
@@ -101,7 +108,7 @@ void WiFiCom::Update()
                 mResponse.clear();
                 mWiFiComDelay.Start(DELAY_2_SECONDS);
                 esp32Command = COMMAND_STATUS_STR;
-                _Write(esp32Command.c_str());
+                _SendCommand(esp32Command.c_str());
                 mState = WIFI_STATE::CMD_STATUS_WAIT_RESPONSE;
                 DEBUG_PRINT("WiFiCom::Update() - Sending [%s]\r\n", COMMAND_STATUS_STR);
             }
@@ -136,7 +143,7 @@ void WiFiCom::Update()
                 esp32Command += mApSsid;
                 esp32Command += PARAM_SEPARATOR_CHAR;
                 esp32Command += mApPassword;
-                _Write(esp32Command.c_str());
+                _SendCommand(esp32Command.c_str());
                 mState = WIFI_STATE::CMD_CONNECT_WAIT_RESPONSE;
                 DEBUG_PRINT("WiFiCom::Update() - Sending [%s]\r\n", esp32Command.c_str());
             }
@@ -167,7 +174,7 @@ void WiFiCom::Update()
             esp32Command = COMMAND_GET_STR;
             esp32Command += PARAM_SEPARATOR_CHAR;
             esp32Command += "https://www.timeapi.io/api/Time/current/zone?timeZone=America/Buenos_Aires";
-            _Write(esp32Command.c_str());
+            _SendCommand(esp32Command.c_str());
             mState = WIFI_STATE::CMD_GET_WAIT_RESPONSE;
             DEBUG_PRINT("WiFiCom::Update() - Sending [%s]\r\n", esp32Command.c_str());
         }
@@ -199,7 +206,7 @@ void WiFiCom::Update()
             esp32Command += mServer;
             esp32Command += PARAM_SEPARATOR_CHAR;
             esp32Command += mRequest;
-            _Write(esp32Command.c_str());
+            _SendCommand(esp32Command.c_str());
             mState = WIFI_STATE::CMD_POST_WAIT_RESPONSE;
             // DEBUG_PRINT("WiFiCom::Update() - Sending [%s]\r\n", esp32Command.c_str());
         }
@@ -261,28 +268,10 @@ WiFiCom::WiFiCom(PinName txPin, PinName rxPin, const int baudRate)
 }
 
 //-----------------------------------------------------------------------------
-void WiFiCom::_Write(const char* format, ...)
+void WiFiCom::_SendCommand(const char* command)
 {
-    // Initialize the variable arguments list
-    va_list args;
-    va_start(args, format);
-
-    // Calculate the length of the formatted string
-    int length = vsnprintf(nullptr, 0, format, args);
-
-    // Allocate memory for the formatted string
-    char* buffer = new char[length + 1];
-
-    // Format the string and store it in the buffer
-    vsnprintf(buffer, length + 1, format, args);
-
-    // Clean up the variable arguments list
-    va_end(args);
-
-    // Write the string to the serial port
-    const int bytesWritten = mSerial.write(buffer, strlen(buffer));
-    
-    delete[] buffer;
+    std::string message = command + STOP_CHAR;
+    mSerial.write(message.c_str(), message.size());
 }
 
 //-----------------------------------------------------------------------------
@@ -292,7 +281,7 @@ bool WiFiCom::_IsResponseCompleted()
 
     if (_ReadCom(&receivedChar))
     {
-        if (receivedChar == FINISH_RESPONSE_CHAR) 
+        if (receivedChar == STOP_CHAR) 
         {
             return true;
         } 
