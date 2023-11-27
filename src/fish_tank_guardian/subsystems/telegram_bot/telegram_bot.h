@@ -12,6 +12,8 @@
 #include <string>
 #include "mbed.h"
 #include "delay.h"
+#include <map>
+#include <vector>
 
 #define BOT_API_URL     "https://api.telegram.org/bot"
 #define BOT_TOKEN       "6738012692:AAFmeMoCUuZEGBGVwbxtFt8sC8f15o_aRgs"
@@ -33,6 +35,8 @@ namespace Subsystems {
 
         private:
 
+            using CommandFunction = std::function<std::string(const std::vector<std::string>&)>;
+
             struct TelegramMessage 
             {
                 unsigned long mUpdateId;
@@ -44,12 +48,16 @@ namespace Subsystems {
 
             enum class BOT_STATE
             {
+                INIT,
                 IDLE,
                 REQUEST_LAST_MESSAGE,
                 WAITING_LAST_MESSAGE,
                 PROCESS_LAST_MESSAGE,
                 WAITING_RESPONSE,
             };
+
+            //!
+            std::vector<std::string> _ParseMessage(const std::string& message);
 
             //!
             void _SendMessage(const std::string chatId, const std::string message);
@@ -77,7 +85,7 @@ namespace Subsystems {
             TelegramMessage     mLastMessage;
             std::string         mResponse;
             Util::Delay         mBotDelay;
-
+            std::map<std::string, CommandFunction> mCommandsMap;
     };
 
 } // namespace Subsystems

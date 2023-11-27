@@ -15,6 +15,7 @@
 #define DELAY_10_SECONDS        10000
 #define DELAY_5_SECONDS         5000
 #define DELAY_2_SECONDS         2000
+#define DELAY_1_SECONDS         1000
 
 namespace Util { 
 

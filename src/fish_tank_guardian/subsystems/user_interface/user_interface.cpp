@@ -43,7 +43,7 @@ void UserInterface::Init()
     Drivers::Display::Write("Next Feed: ");
 
     Drivers::Display::WriteCharPosition(0,2);
-    Drivers::Display::Write("Temp:     'C________");
+    Drivers::Display::Write("Temp:     'C        ");
     
     Drivers::Display::WriteCharPosition(0,3);
     Drivers::Display::Write("TDS:    ppm|        ");

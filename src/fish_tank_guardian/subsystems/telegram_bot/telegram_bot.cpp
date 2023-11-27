@@ -11,6 +11,7 @@
 
 #include "arm_book_lib.h"
 #include "wifi_com.h"
+#include "commands.h"
 
 namespace Subsystems {
 
@@ -46,9 +47,19 @@ void TelegramBot::Update()
 {
     switch (mState)
     {
+        case BOT_STATE::INIT:
+        {
+            mBotDelay.Start(DELAY_1_SECONDS);
+            mState = BOT_STATE::IDLE;
+        }
+        break;
+
         case BOT_STATE::IDLE:
         {
-            mState = BOT_STATE::REQUEST_LAST_MESSAGE;
+            if (mBotDelay.HasFinished())
+            {
+                mState = BOT_STATE::REQUEST_LAST_MESSAGE;
+            }
         }
         break;
 
@@ -59,7 +70,6 @@ void TelegramBot::Update()
                 _RequestLastMessage();
                 mState = BOT_STATE::WAITING_LAST_MESSAGE;
                 mBotDelay.Start(DELAY_10_SECONDS);
-                DEBUG_PRINT("TelegramBot - Requesting last message\r\n");
             }
         }
         break;
@@ -69,19 +79,18 @@ void TelegramBot::Update()
             if (mBotDelay.HasFinished())
             {
                 mState = BOT_STATE::IDLE;
-                DEBUG_PRINT("TelegramBot - [ERROR] receiving last message\r\n");
             }
             else if (Drivers::WiFiCom::GetInstance()->GetResponse(&mResponse))
             {
-                const bool isValidMessage = _GetMessageFromResponse(&mLastMessage, mResponse);
-                if (isValidMessage)
+                const bool isNewMessage = _GetMessageFromResponse(&mLastMessage, mResponse);
+                if (isNewMessage)
                 {
-                    DEBUG_PRINT("TelegramBot - [OK] Message Obtained: [%s] from [%s] fromId = [%s]\r\n", mLastMessage.mMessage.c_str(), mLastMessage.mFromUserName.c_str(), mLastMessage.mFromId.c_str());
+                    DEBUG_PRINT("TelegramBot - [OK] Message Obtained: [%s] from [%s]\r\n", mLastMessage.mMessage.c_str(), mLastMessage.mFromUserName.c_str());
                     mState = BOT_STATE::PROCESS_LAST_MESSAGE;
                 }
                 else
                 {
-                    mState = BOT_STATE::IDLE;
+                    mState = BOT_STATE::INIT;
                 }
             }
         }
@@ -89,8 +98,24 @@ void TelegramBot::Update()
 
         case BOT_STATE::PROCESS_LAST_MESSAGE:
         {
-            std::string sendMessage = "Message Received : " + mLastMessage.mMessage;
-            _SendMessage(mLastMessage.mFromId, sendMessage);
+            std::string messageToSend;
+
+            std::vector<std::string> params = _ParseMessage(mLastMessage.mMessage);
+            std::string command = params[0];
+
+            if (mCommandsMap.find(command) != mCommandsMap.end()) 
+            {
+                // The corresponding command function is called
+                CommandFunction commandFunction = mCommandsMap[command];
+                messageToSend = commandFunction(params);
+            }
+            else
+            {
+                messageToSend = "Invalid command [" + command + "]";
+            }
+
+            // Every message received requires a response to the user
+            _SendMessage(mLastMessage.mFromId, messageToSend);
             mState = BOT_STATE::WAITING_RESPONSE;
             mBotDelay.Start(DELAY_10_SECONDS);
         }
@@ -98,15 +123,16 @@ void TelegramBot::Update()
 
         case BOT_STATE::WAITING_RESPONSE:
         {
-            if ((mBotDelay.HasFinished()))
+            const bool isResponseReady = Drivers::WiFiCom::GetInstance()->GetResponse(&mResponse);
+            if ((mBotDelay.HasFinished()) || (isResponseReady && mResponse.compare(RESULT_ERROR) == 0))
             {
-                mState = BOT_STATE::IDLE;
-                DEBUG_PRINT("TelegramBot - [ERROR] waiting for sent confirmation\r\n");
+                mState = BOT_STATE::INIT;
+                DEBUG_PRINT("TelegramBot - [ERROR] error in sent confirmation\r\n");
             }
             else if (Drivers::WiFiCom::GetInstance()->GetResponse(&mResponse))
             {
-                mState = BOT_STATE::IDLE;
-                DEBUG_PRINT("TelegramBot - [OK] Confirmation Obtained: [%s]\r\n", mResponse.c_str());
+                mState = BOT_STATE::INIT;
+                DEBUG_PRINT("TelegramBot - [OK] Sent confirmation Obtained: \r\n");
             }
         }
         break;
@@ -121,6 +147,42 @@ TelegramBot::TelegramBot(const char* apiUrl, const char* token)
     , mBotDelay(0)
 {
     mLastUpdateId = 0;
+}
+
+//-----------------------------------------------------------------------------
+std::vector<std::string> TelegramBot::_ParseMessage(const std::string& message)
+{
+    size_t parameters_size = 0;
+    int index_from = -1, index_to;
+    const char separatorChar = ' ';
+
+    if (message.length() > 0) 
+    {
+        parameters_size++;
+    }
+
+    while ((index_from = message.find_first_of(separatorChar, index_from + 1)) >= 0) 
+    {
+        parameters_size++;
+    }
+
+    std::vector<std::string> params(parameters_size);
+
+    index_from = -1;
+    for (size_t i = 0; i < parameters_size; i++) 
+    {
+        index_to = message.find_first_of(PARAM_SEPARATOR_CHAR, index_from + 1);
+        
+        if (index_to < 0)
+        {
+            index_to = message.length();
+        }
+
+        params[i] = message.substr(index_from + 1, index_to);
+        index_from = index_to;
+    }
+
+    return params;
 }
 
 //-----------------------------------------------------------------------------
@@ -151,6 +213,13 @@ bool TelegramBot::_GetMessageFromResponse(TelegramMessage* message, const std::s
 
                 if (updateId.compare("") && stoul(updateId) > mLastUpdateId)
                 {
+                    if (mLastUpdateId == 0)
+                    {
+                        // This is to avoid reading the last message that is in the conversation when rebooting or initiating
+                        mLastUpdateId = stoul(updateId);
+                        return false;
+                    }
+
                     mLastUpdateId = stoul(updateId);
 
                     int keyMessage = json.findKeyIndexIn("message", keyResult);

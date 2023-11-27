@@ -197,7 +197,7 @@ void WiFiCom::Update()
             else if (isResponseCompleted)
             {
                 mState = WIFI_STATE::CMD_GET_RESPONSE_READY;
-                mWiFiComDelay.Start(DELAY_10_SECONDS);                  // a timeout is set to avoid a hang on
+                mWiFiComDelay.Start(DELAY_5_SECONDS);                  // a timeout is set to avoid a hang on
                 mIsResponseReady = true;
             }
         }
@@ -223,7 +223,6 @@ void WiFiCom::Update()
         {
             // sending get command with wifi ssid and password
             mResponse.clear();  
-            mWiFiComDelay.Start(DELAY_10_SECONDS);
             esp32Command = COMMAND_POST_STR;
             esp32Command += PARAM_SEPARATOR_CHAR;
             esp32Command += mServer;
@@ -232,6 +231,7 @@ void WiFiCom::Update()
             esp32Command += STOP_CHAR;
             _SendCommand(esp32Command.c_str());
             mState = WIFI_STATE::CMD_POST_WAIT_RESPONSE;
+            mWiFiComDelay.Start(DELAY_5_SECONDS);
             // DEBUG_PRINT("WiFiCom - Making a [%s] request\r\n", COMMAND_POST_STR);
         }
         break;
@@ -241,13 +241,14 @@ void WiFiCom::Update()
             const bool isResponseCompleted = _IsResponseCompleted();
             if ((mWiFiComDelay.HasFinished()) || (isResponseCompleted && (mResponse.compare(RESULT_ERROR) == 0)))
             {
-                mState = WIFI_STATE::ERROR;
-                DEBUG_PRINT("WiFiCom - [ERROR] In the [%s] response\r\n", COMMAND_POST_STR);
+                mState = WIFI_STATE::CMD_POST_RESPONSE_READY;
+                mResponse = RESULT_ERROR;
+                // DEBUG_PRINT("WiFiCom - [ERROR] In the [%s] response\r\n", COMMAND_POST_STR);
             }
             else if (isResponseCompleted)
             {
                 mState = WIFI_STATE::CMD_POST_RESPONSE_READY;
-                mWiFiComDelay.Start(DELAY_10_SECONDS);                  // a timeout is set to avoid a hang on
+                mWiFiComDelay.Start(DELAY_5_SECONDS);                  // a timeout is set to avoid a hang on
                 mIsResponseReady = true;
             }
         }
