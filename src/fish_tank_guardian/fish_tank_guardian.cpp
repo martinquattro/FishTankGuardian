@@ -56,20 +56,9 @@ void FishTankGuardian::Update()
 {
     if(mDelay.HasFinished()) 
     {
-        int initTickCounter = static_cast<int>(Util::Tick::GetTickCounter());
         Subsystems::FoodFeeder::GetInstance()->Update();
-        int endTickCounter = static_cast<int>(Util::Tick::GetTickCounter());
-        DEBUG_PRINT("FishTankGuardian - Time in FoodFeeder Update = [%d] ms\r\n", (endTickCounter - initTickCounter));
-
-        initTickCounter = endTickCounter;
         Subsystems::WaterMonitor::GetInstance()->Update();
-        endTickCounter = static_cast<int>(Util::Tick::GetTickCounter());
-        DEBUG_PRINT("FishTankGuardian - Time in WaterMonitor Update = [%d] ms\r\n", (endTickCounter - initTickCounter));
-
-        initTickCounter = endTickCounter;
         Subsystems::UserInterface::GetInstance()->Update();
-        endTickCounter = static_cast<int>(Util::Tick::GetTickCounter());
-        DEBUG_PRINT("FishTankGuardian - Time in UserInterface Update = [%d] ms\r\n", (endTickCounter - initTickCounter));
 
     }
     Drivers::WiFiCom::GetInstance()->Update();

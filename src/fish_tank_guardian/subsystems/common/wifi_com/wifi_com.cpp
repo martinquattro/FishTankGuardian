@@ -182,7 +182,7 @@ void WiFiCom::Update()
             esp32Command += STOP_CHAR;
             _SendCommand(esp32Command.c_str());
             mState = WIFI_STATE::CMD_GET_WAIT_RESPONSE;
-            DEBUG_PRINT("WiFiCom - Making a [%s] request\r\n", COMMAND_GET_STR);
+            // DEBUG_PRINT("WiFiCom - Making a [%s] request\r\n", COMMAND_GET_STR);
         }
         break;
 
@@ -232,7 +232,7 @@ void WiFiCom::Update()
             esp32Command += STOP_CHAR;
             _SendCommand(esp32Command.c_str());
             mState = WIFI_STATE::CMD_POST_WAIT_RESPONSE;
-            DEBUG_PRINT("WiFiCom - Making a [%s] request\r\n", COMMAND_POST_STR);
+            // DEBUG_PRINT("WiFiCom - Making a [%s] request\r\n", COMMAND_POST_STR);
         }
         break;
 

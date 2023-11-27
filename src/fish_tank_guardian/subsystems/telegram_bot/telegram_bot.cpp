@@ -44,15 +44,72 @@ TelegramBot* TelegramBot::GetInstance()
 //-----------------------------------------------------------------------------
 void TelegramBot::Update()
 {
-    TelegramMessage message;
+    switch (mState)
+    {
+        case BOT_STATE::IDLE:
+        {
+            mState = BOT_STATE::REQUEST_LAST_MESSAGE;
+        }
+        break;
 
-    if ((Drivers::WiFiCom::GetInstance()->IsBusy()) == false)
-    {
-        _RequestLastMessage();
-    }
-    else if (_IsLastMessageReady(&message))
-    {
-        DEBUG_PRINT("TelegramBot - Message Obtained: [%s] from [%s]\r\n", message.mMessage.c_str(), message.mFromUserName.c_str());
+        case BOT_STATE::REQUEST_LAST_MESSAGE:
+        {
+            if ((Drivers::WiFiCom::GetInstance()->IsBusy()) == false)
+            {
+                _RequestLastMessage();
+                mState = BOT_STATE::WAITING_LAST_MESSAGE;
+                mBotDelay.Start(DELAY_10_SECONDS);
+                DEBUG_PRINT("TelegramBot - Requesting last message\r\n");
+            }
+        }
+        break;
+
+        case BOT_STATE::WAITING_LAST_MESSAGE:
+        {
+            if (mBotDelay.HasFinished())
+            {
+                mState = BOT_STATE::IDLE;
+                DEBUG_PRINT("TelegramBot - [ERROR] receiving last message\r\n");
+            }
+            else if (Drivers::WiFiCom::GetInstance()->GetResponse(&mResponse))
+            {
+                const bool isValidMessage = _GetMessageFromResponse(&mLastMessage, mResponse);
+                if (isValidMessage)
+                {
+                    DEBUG_PRINT("TelegramBot - [OK] Message Obtained: [%s] from [%s] fromId = [%s]\r\n", mLastMessage.mMessage.c_str(), mLastMessage.mFromUserName.c_str(), mLastMessage.mFromId.c_str());
+                    mState = BOT_STATE::PROCESS_LAST_MESSAGE;
+                }
+                else
+                {
+                    mState = BOT_STATE::IDLE;
+                }
+            }
+        }
+        break;
+
+        case BOT_STATE::PROCESS_LAST_MESSAGE:
+        {
+            std::string sendMessage = "Message Received : " + mLastMessage.mMessage;
+            _SendMessage(mLastMessage.mFromId, sendMessage);
+            mState = BOT_STATE::WAITING_RESPONSE;
+            mBotDelay.Start(DELAY_10_SECONDS);
+        }
+        break;
+
+        case BOT_STATE::WAITING_RESPONSE:
+        {
+            if ((mBotDelay.HasFinished()))
+            {
+                mState = BOT_STATE::IDLE;
+                DEBUG_PRINT("TelegramBot - [ERROR] waiting for sent confirmation\r\n");
+            }
+            else if (Drivers::WiFiCom::GetInstance()->GetResponse(&mResponse))
+            {
+                mState = BOT_STATE::IDLE;
+                DEBUG_PRINT("TelegramBot - [OK] Confirmation Obtained: [%s]\r\n", mResponse.c_str());
+            }
+        }
+        break;
     }
 }
 
@@ -61,6 +118,7 @@ void TelegramBot::Update()
 TelegramBot::TelegramBot(const char* apiUrl, const char* token)
     : mBotUrl(apiUrl)
     , mToken(token)
+    , mBotDelay(0)
 {
     mLastUpdateId = 0;
 }
@@ -68,21 +126,9 @@ TelegramBot::TelegramBot(const char* apiUrl, const char* token)
 //-----------------------------------------------------------------------------
 void TelegramBot::_SendMessage(const std::string chatId, const std::string message)
 {
-
-}
-
-//-----------------------------------------------------------------------------
-bool TelegramBot::_IsLastMessageReady(TelegramMessage* message)
-{
-    bool isReady = false;
-    std::string response;
-
-    if (Drivers::WiFiCom::GetInstance()->GetResponse(&response))
-    {
-        isReady = _GetMessageFromResponse(message, response);
-    }
-
-    return isReady;
+    std::string server = mBotUrl + mToken + "/sendmessage";
+    std::string request = "chat_id=" + chatId + "&text=" + message;
+    Drivers::WiFiCom::GetInstance()->Post(server, request);
 }
 
 //-----------------------------------------------------------------------------
@@ -102,11 +148,10 @@ bool TelegramBot::_GetMessageFromResponse(TelegramMessage* message, const std::s
             {
                 int keyResult = json.findChildIndexOf(keyIndexResultArray, 0);
                 std::string updateId = json.tokenString(json.findChildIndexOf(json.findKeyIndexIn("update_id", keyResult)));
-                unsigned long numberUpdateId = stoul(updateId);
 
-                if (numberUpdateId > mLastUpdateId)
+                if (updateId.compare("") && stoul(updateId) > mLastUpdateId)
                 {
-                    mLastUpdateId = numberUpdateId;
+                    mLastUpdateId = stoul(updateId);
 
                     int keyMessage = json.findKeyIndexIn("message", keyResult);
                     int keyFrom = json.findKeyIndexIn("from", json.findChildIndexOf(keyMessage));
@@ -115,7 +160,7 @@ bool TelegramBot::_GetMessageFromResponse(TelegramMessage* message, const std::s
                     int keyFromName = json.findChildIndexOf(json.findKeyIndexIn("first_name", json.findChildIndexOf(keyFrom)));
                     int keyFromUsername = json.findChildIndexOf(json.findKeyIndexIn("username", json.findChildIndexOf(keyFrom)));
 
-                    message->mUpdateId = numberUpdateId;
+                    message->mUpdateId = mLastUpdateId;
                     message->mFromId = json.tokenString(keyFromId);
                     message->mFromName = json.tokenString(keyFromName);
                     message->mFromUserName = (keyFromUsername >= 0) ? json.tokenString(keyFromUsername) : message->mFromId;
