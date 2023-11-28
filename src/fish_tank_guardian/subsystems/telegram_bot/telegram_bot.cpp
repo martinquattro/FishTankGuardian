@@ -14,6 +14,7 @@
 #include "commands.h"
 #include "food_feeder.h"
 #include <functional>
+#include "real_time_clock.h"
 
 namespace Subsystems {
 
@@ -154,6 +155,7 @@ TelegramBot::TelegramBot(const char* apiUrl, const char* token)
     mCommandsMap["/feeder_status"]      = std::bind(&TelegramBot::_CommandFeederStatus, this, std::placeholders::_1);
     mCommandsMap["/feeder_set"]         = std::bind(&TelegramBot::_CommandFeederSet, this, std::placeholders::_1);
     mCommandsMap["/feeder_delete"]      = std::bind(&TelegramBot::_CommandFeederDelete, this, std::placeholders::_1);
+    mCommandsMap["/timezone"]           = std::bind(&TelegramBot::_CommandTimezone, this, std::placeholders::_1);
 }
 
 //-----------------------------------------------------------------------------
@@ -368,7 +370,7 @@ std::string TelegramBot::_CommandFeederDelete(const std::vector<std::string>& pa
 
         if (Subsystems::FoodFeeder::GetInstance()->EraseFeedTime(slot))
         {
-            return ("[OK]\nFeeder time slot [%d] deleted correctly", slot);
+            return ("[OK]\nFeeder time slot [" + std::to_string(slot) + "] deleted correctly");
         }
         else
         {
@@ -378,6 +380,31 @@ std::string TelegramBot::_CommandFeederDelete(const std::vector<std::string>& pa
     
     return invalidParametersResponse;
 }
+
+//-----------------------------------------------------------------------------
+std::string TelegramBot::_CommandTimezone(const std::vector<std::string>& params)
+{
+    std::string invalidParametersResponse = "[ERROR]\n Invalid parameters for /timezone command.";
+
+    if (params.size() != 2) 
+    {
+        return invalidParametersResponse;
+    }
+
+    std::string timezone = params[1];
+
+    if (Subsystems::RealTimeClock::GetInstance()->SetTimeZone(timezone))
+    {
+        return ("[OK]\nValid Time Zone.\nStarting syncing...");
+    }
+    else
+    {
+        return invalidParametersResponse;
+    }
+    
+    return invalidParametersResponse;
+}
+
 
 //-----------------------------------------------------------------------------
 bool TelegramBot::_IsNumeric(const std::string& str) 

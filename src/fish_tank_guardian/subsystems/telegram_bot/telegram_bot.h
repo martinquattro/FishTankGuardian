@@ -86,6 +86,9 @@ namespace Subsystems {
             //!
             std::string _CommandFeederDelete(const std::vector<std::string>& params);
             
+            //!
+            std::string _CommandTimezone(const std::vector<std::string>& params);
+
 
             TelegramBot(const char* apiUrl, const char* token);
             ~TelegramBot() = default;

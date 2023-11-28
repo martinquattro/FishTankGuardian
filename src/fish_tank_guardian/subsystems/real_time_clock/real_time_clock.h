@@ -12,12 +12,13 @@
 #define RTC_PIN_SCL        PB_10
 #define RTC_ADDRESS_ID     0x68
 #define RTC_EEPROM_ADDRESS 0x50
-#define RTC_GET_TIME_URL "https://www.timeapi.io/api/Time/current/zone?timeZone=America/Buenos_Aires"
+#define RTC_GET_TIME_URL "https://www.timeapi.io/api/Time/current/zone?timeZone="
 
 #include "mbed.h"
 #include "memory.h"
 #include <string>
 #include "delay.h"
+#include <map>
 
 namespace Subsystems { 
 
@@ -36,6 +37,9 @@ namespace Subsystems {
 
             //!
             void Update();
+
+            //!
+            bool SetTimeZone(std::string timeZone);
 
             //!
             void SaveStringToEeprom(const int position, std::string str);
@@ -78,6 +82,8 @@ namespace Subsystems {
             const uint8_t   mAddress;
             Memory          mMemory;
             Util::Delay     mRtcDelay;
+            std::map<std::string, std::string> mTimeZonesMap;
+            std::string     mCurrentTimeZone;
 };
 
 } // namespace Subsystems

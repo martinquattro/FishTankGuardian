@@ -13,6 +13,7 @@
 #include "arm_book_lib.h"
 #include "wifi_com.h"
 #include "Json.h"
+#include "commands.h"
 
 namespace Subsystems {
 
@@ -50,7 +51,9 @@ void RealTimeClock::Update()
         {
             if ((Drivers::WiFiCom::GetInstance()->IsBusy()) == false)
             {
-                Drivers::WiFiCom::GetInstance()->Request(RTC_GET_TIME_URL);
+                Drivers::WiFiCom::GetInstance()->Request(RTC_GET_TIME_URL + mCurrentTimeZone);
+                DEBUG_PRINT("RealTimeClock - TC_GET_TIME_URL + mCurrentTimeZone = %s\r\n", (RTC_GET_TIME_URL + mCurrentTimeZone).c_str());
+
                 mState = RTC_STATE::WAITING_RESPONSE;
                 mRtcDelay.Start(DELAY_10_SECONDS);
             }
@@ -84,6 +87,21 @@ void RealTimeClock::Update()
         case RTC_STATE::NOT_SYNCED:
         break;
     }
+}
+
+//-----------------------------------------------------------------------------
+bool RealTimeClock::SetTimeZone(std::string timeZone)
+{
+    if (mTimeZonesMap.find(timeZone) != mTimeZonesMap.end())
+    {
+        mState = RTC_STATE::START_SYNC;
+        mCurrentTimeZone = mTimeZonesMap[timeZone];
+        DEBUG_PRINT("RealTimeClock - mCurrentTimeZone = [%s]\r\n", mCurrentTimeZone.c_str());
+
+        return true;
+    }
+
+    return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -160,14 +178,26 @@ RealTimeClock::RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t address, ui
     mRtcCom.write(0x07u);
     mRtcCom.write(0x00u);
     mRtcCom.stop();
+
+    // only time zones in America for now
+    mTimeZonesMap["-8"] = "America/Los_Angeles";
+    mTimeZonesMap["-7"] = "America/Denver";
+    mTimeZonesMap["-6"] = "America/Chicago";
+    mTimeZonesMap["-5"] = "America/Bogota";
+    mTimeZonesMap["-4"] = "America/Caracas";
+    mTimeZonesMap["-3"] = "America/Buenos_Aires";
+    mTimeZonesMap["-2"] = "America/Noronha";
+    mTimeZonesMap["-1"] = "America/Scoresbysund";
 }
 
 //-----------------------------------------------------------------------------
 bool RealTimeClock::_SyncFromResponse(std::string response)
 {
-    Json json(response.c_str(), response.length(), 30);
+    Json json(response.c_str(), response.length(), 100);
 
-    if (json.isValidJson())
+        DEBUG_PRINT("RealTimeClock - response = [%s]\r\n", response.c_str());
+
+    if (json.isValidJson() && (response.compare("\"Invalid Timezone\"") != 0) && (response.compare(RESULT_ERROR) != 0))
     {
         int seconds, minutes, hours, day, month, year;
 

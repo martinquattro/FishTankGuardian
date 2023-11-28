@@ -101,7 +101,7 @@ void UserInterface::Update()
         }
         else
         {
-            currentTime = "Syncing";
+            currentTime = "Syncing ";
         }
 
         Drivers::Display::WriteCharPosition(TIME_POSITION_X, TIME_POSITION_Y);
