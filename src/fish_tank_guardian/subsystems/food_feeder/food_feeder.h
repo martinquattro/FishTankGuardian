@@ -39,6 +39,9 @@ namespace Subsystems {
             //! Update subsystem
             void Update();
 
+            //!
+            bool Feed(const int numFeeds);
+
             //! Add a new time to feed
             bool AddFeedTime(std::string newFeedTime, const int numFeeds, const int feedTimeSlot);
 

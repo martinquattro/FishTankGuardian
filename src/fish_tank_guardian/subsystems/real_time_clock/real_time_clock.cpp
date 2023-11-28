@@ -153,7 +153,7 @@ RealTimeClock::RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t address, ui
     , mMemory(sdaPin, sclPin, eepromAddr)
     , mRtcDelay(0)
 {
-    mState = RTC_STATE::START_SYNC;
+    mState = RTC_STATE::SYNCED;
 
     mRtcCom.start();
     mRtcCom.write(mAddress | 0);

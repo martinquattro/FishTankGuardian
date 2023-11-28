@@ -71,10 +71,24 @@ void FoodFeeder::Update()
         int numFeeds;
         if (_IsTimeToFeed(currentTime, &numFeeds))
         {
-            DEBUG_PRINT("FoodFeeder - Initiating feeding at = [%currentTime] with [%d] feeds...\r\n", currentTime.c_str(), numFeeds);
-            Drivers::Motor::GetInstance()->Rotate(numFeeds);
+            Feed(numFeeds);
         }
     }
+}
+
+//-----------------------------------------------------------------------------
+bool FoodFeeder::Feed(const int numFeeds)
+{
+    if((numFeeds > 1) || (numFeeds <= MAX_NUM_FEEDS)) 
+    {
+        DEBUG_PRINT("FoodFeeder - Initiating feeding with [%d] units of food...\r\n", numFeeds);
+        Drivers::Motor::GetInstance()->Rotate(numFeeds);
+
+        return true;
+    }
+    
+    DEBUG_PRINT("FoodFeeder - [ERROR] Invalid [%d] units of food\r\n", numFeeds);
+    return false;
 }
 
 //-----------------------------------------------------------------------------

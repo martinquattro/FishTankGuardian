@@ -71,6 +71,18 @@ namespace Subsystems {
             //!
             TelegramMessage _GetLastMessage();
 
+            //!
+            bool _IsNumeric(const std::string& str);
+
+            //!
+            std::string _CommandFeed(const std::vector<std::string>& params);
+
+            //!
+            std::string _CommandFeederStatus(const std::vector<std::string>& params);
+
+            //!
+            std::string _CommandFeederSet(const std::vector<std::string>& params);
+            
 
             TelegramBot(const char* apiUrl, const char* token);
             ~TelegramBot() = default;

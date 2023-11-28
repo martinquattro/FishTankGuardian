@@ -12,6 +12,8 @@
 #include "arm_book_lib.h"
 #include "wifi_com.h"
 #include "commands.h"
+#include "food_feeder.h"
+#include <functional>
 
 namespace Subsystems {
 
@@ -49,7 +51,7 @@ void TelegramBot::Update()
     {
         case BOT_STATE::INIT:
         {
-            mBotDelay.Start(DELAY_1_SECONDS);
+            mBotDelay.Start(DELAY_5_SECONDS);
             mState = BOT_STATE::IDLE;
         }
         break;
@@ -147,39 +149,30 @@ TelegramBot::TelegramBot(const char* apiUrl, const char* token)
     , mBotDelay(0)
 {
     mLastUpdateId = 0;
+
+    mCommandsMap["/feed"]               = std::bind(&TelegramBot::_CommandFeed, this, std::placeholders::_1);
+    mCommandsMap["/feeder_status"]      = std::bind(&TelegramBot::_CommandFeederStatus, this, std::placeholders::_1);
+    mCommandsMap["/feeder_set"]         = std::bind(&TelegramBot::_CommandFeederSet, this, std::placeholders::_1);
 }
 
 //-----------------------------------------------------------------------------
 std::vector<std::string> TelegramBot::_ParseMessage(const std::string& message)
 {
-    size_t parameters_size = 0;
-    int index_from = -1, index_to;
-    const char separatorChar = ' ';
+    std::vector<std::string> params;
+    size_t start = 0;
+    size_t end = message.find(' ');
 
-    if (message.length() > 0) 
+    while (end != std::string::npos)
     {
-        parameters_size++;
+        params.push_back(message.substr(start, end - start));
+        start = end + 1;
+        end = message.find(' ', start);
     }
 
-    while ((index_from = message.find_first_of(separatorChar, index_from + 1)) >= 0) 
+    // Agregar el último parámetro (si existe)
+    if (start < message.length())
     {
-        parameters_size++;
-    }
-
-    std::vector<std::string> params(parameters_size);
-
-    index_from = -1;
-    for (size_t i = 0; i < parameters_size; i++) 
-    {
-        index_to = message.find_first_of(PARAM_SEPARATOR_CHAR, index_from + 1);
-        
-        if (index_to < 0)
-        {
-            index_to = message.length();
-        }
-
-        params[i] = message.substr(index_from + 1, index_to);
-        index_from = index_to;
+        params.push_back(message.substr(start));
     }
 
     return params;
@@ -250,6 +243,117 @@ void TelegramBot::_RequestLastMessage()
     std::string server = mBotUrl + mToken + "/getUpdates";
     std::string request = "offset=-1";
     Drivers::WiFiCom::GetInstance()->Post(server, request);
+}
+
+//-----------------------------------------------------------------------------
+std::string TelegramBot::_CommandFeed(const std::vector<std::string>& params) 
+{
+    std::string invalidParametersResponse = "[ERROR] Invalid parameters for /feed command.";
+
+    if (params.size() != 2) 
+    {
+        return invalidParametersResponse;
+    }
+
+    std::string numFeedsParam = params[1];
+    DEBUG_PRINT("TelegramBot - numFeedsParam Obtained: %s \r\n", numFeedsParam.c_str());
+
+    if (_IsNumeric(numFeedsParam))
+    {
+        int feedNumber = std::stoi(numFeedsParam);
+
+        if (Subsystems::FoodFeeder::GetInstance()->Feed(feedNumber))
+        {
+            return ("[OK]\nI feeded [" + std::to_string(feedNumber) + "] units of food.");
+        }
+        else
+        {
+            return invalidParametersResponse;
+        }
+    }
+    
+    return invalidParametersResponse;
+}
+
+//-----------------------------------------------------------------------------
+std::string TelegramBot::_CommandFeederStatus(const std::vector<std::string>& params)
+{
+    std::string invalidParametersResponse = "[ERROR] Invalid parameters for /feederstatus command.";
+
+    if (params.size() != 1) 
+    {
+        return invalidParametersResponse;
+    }
+
+    std::vector<FoodFeeder::FeedTimeInfo> feedTimesInfoList = Subsystems::FoodFeeder::GetInstance()->GetFeedTimes();
+
+    if (feedTimesInfoList.empty()) 
+    {
+        return "[OK]\nNo feeding times available.";
+    }
+
+    std::string response = "[OK]\nFeeding Times:\n";
+
+    for (const auto& feedTimeInfo : feedTimesInfoList) 
+    {
+        response += "Slot ";
+        response += std::to_string(feedTimeInfo.mSlot);
+        response += " - ";
+        response += feedTimeInfo.mFeedTime;
+        response += " with ";
+        response += std::to_string(feedTimeInfo.mNumFeeds);
+        response += " food units\n";
+    }
+
+    return response;
+}
+
+//-----------------------------------------------------------------------------
+std::string TelegramBot::_CommandFeederSet(const std::vector<std::string>& params)
+{
+    std::string invalidParametersResponse = "[ERROR] Invalid parameters for /feeder_set command.";
+
+    if (params.size() != 4) 
+    {
+        return invalidParametersResponse;
+    }
+
+    std::string slotParam = params[1];
+    std::string timeParam = params[2];
+    std::string numFeedsParam = params[3];
+
+    if (_IsNumeric(slotParam) && _IsNumeric(numFeedsParam))
+    {
+        int slot = std::stoi(slotParam);
+        int numFeeds = std::stoi(numFeedsParam);
+
+        if (Subsystems::FoodFeeder::GetInstance()->AddFeedTime(timeParam, numFeeds, slot))
+        {
+            std::string response = "[OK]\nFeed time added:\n";
+
+            response += "Slot ";
+            response += std::to_string(slot);
+            response += " - ";
+            response += timeParam;
+            response += " with ";
+            response += std::to_string(numFeeds);
+            response += " food units\n";
+
+            return response;
+        }
+        else
+        {
+            return invalidParametersResponse;
+        }
+    }
+
+    return invalidParametersResponse;
+}
+
+//-----------------------------------------------------------------------------
+bool TelegramBot::_IsNumeric(const std::string& str) 
+{
+    return (!str.empty()) && (std::all_of(str.begin(), str.end(), ::isdigit));
 }
 
 } // namespace Subsystems
