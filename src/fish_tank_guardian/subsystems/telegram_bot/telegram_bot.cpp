@@ -113,7 +113,7 @@ void TelegramBot::Update()
             }
             else
             {
-                messageToSend = "Invalid command [" + command + "]";
+                messageToSend = "[ERROR]\nInvalid command [" + command + "]";
             }
 
             // Every message received requires a response to the user
@@ -150,9 +150,10 @@ TelegramBot::TelegramBot(const char* apiUrl, const char* token)
 {
     mLastUpdateId = 0;
 
-    mCommandsMap["/feed"]               = std::bind(&TelegramBot::_CommandFeed, this, std::placeholders::_1);
+    mCommandsMap["/feeder_feed"]        = std::bind(&TelegramBot::_CommandFeederFeed, this, std::placeholders::_1);
     mCommandsMap["/feeder_status"]      = std::bind(&TelegramBot::_CommandFeederStatus, this, std::placeholders::_1);
     mCommandsMap["/feeder_set"]         = std::bind(&TelegramBot::_CommandFeederSet, this, std::placeholders::_1);
+    mCommandsMap["/feeder_delete"]      = std::bind(&TelegramBot::_CommandFeederDelete, this, std::placeholders::_1);
 }
 
 //-----------------------------------------------------------------------------
@@ -246,9 +247,9 @@ void TelegramBot::_RequestLastMessage()
 }
 
 //-----------------------------------------------------------------------------
-std::string TelegramBot::_CommandFeed(const std::vector<std::string>& params) 
+std::string TelegramBot::_CommandFeederFeed(const std::vector<std::string>& params) 
 {
-    std::string invalidParametersResponse = "[ERROR] Invalid parameters for /feed command.";
+    std::string invalidParametersResponse = "[ERROR]\n Invalid parameters for /feeder_feed command.";
 
     if (params.size() != 2) 
     {
@@ -256,7 +257,6 @@ std::string TelegramBot::_CommandFeed(const std::vector<std::string>& params)
     }
 
     std::string numFeedsParam = params[1];
-    DEBUG_PRINT("TelegramBot - numFeedsParam Obtained: %s \r\n", numFeedsParam.c_str());
 
     if (_IsNumeric(numFeedsParam))
     {
@@ -278,7 +278,7 @@ std::string TelegramBot::_CommandFeed(const std::vector<std::string>& params)
 //-----------------------------------------------------------------------------
 std::string TelegramBot::_CommandFeederStatus(const std::vector<std::string>& params)
 {
-    std::string invalidParametersResponse = "[ERROR] Invalid parameters for /feederstatus command.";
+    std::string invalidParametersResponse = "[ERROR]\nInvalid parameters for /feederstatus command.";
 
     if (params.size() != 1) 
     {
@@ -311,7 +311,7 @@ std::string TelegramBot::_CommandFeederStatus(const std::vector<std::string>& pa
 //-----------------------------------------------------------------------------
 std::string TelegramBot::_CommandFeederSet(const std::vector<std::string>& params)
 {
-    std::string invalidParametersResponse = "[ERROR] Invalid parameters for /feeder_set command.";
+    std::string invalidParametersResponse = "[ERROR]\nInvalid parameters for /feeder_set command.";
 
     if (params.size() != 4) 
     {
@@ -347,6 +347,35 @@ std::string TelegramBot::_CommandFeederSet(const std::vector<std::string>& param
         }
     }
 
+    return invalidParametersResponse;
+}
+
+//-----------------------------------------------------------------------------
+std::string TelegramBot::_CommandFeederDelete(const std::vector<std::string>& params)
+{
+    std::string invalidParametersResponse = "[ERROR]\nInvalid parameters for /feeder_delete command.";
+
+    if (params.size() != 2) 
+    {
+        return invalidParametersResponse;
+    }
+
+    std::string slotToDelete = params[1];
+
+    if (_IsNumeric(slotToDelete))
+    {
+        int slot = std::stoi(slotToDelete);
+
+        if (Subsystems::FoodFeeder::GetInstance()->EraseFeedTime(slot))
+        {
+            return ("[OK]\nFeeder time slot [%d] deleted correctly", slot);
+        }
+        else
+        {
+            return invalidParametersResponse;
+        }
+    }
+    
     return invalidParametersResponse;
 }
 

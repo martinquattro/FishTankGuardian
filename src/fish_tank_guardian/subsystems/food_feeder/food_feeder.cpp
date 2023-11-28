@@ -34,21 +34,6 @@ void FoodFeeder::Init()
 
     Drivers::Motor::Init();
 
-    std:string feedTime = "12:03:10";
-    mInstance->AddFeedTime(feedTime, 1, 0);
-
-    feedTime = "12:03:30";
-    mInstance->AddFeedTime(feedTime, 2, 1);
-
-    feedTime = "11:03:14";
-    mInstance->EraseFeedTime(3);
-
-    feedTime = "02:04:43";
-    mInstance->AddFeedTime(feedTime, 2, 3);
-
-    feedTime = "7:12:59";
-    mInstance->EraseFeedTime(4);
-
     DEBUG_PRINT("FoodFeeder - [OK] Initialized\r\n");
 }
 
