@@ -49,23 +49,28 @@ void TemperatureSensor::Update()
 
     // obtaing average
     float tempReadingSum = 0.0;
+    int amounfOfReadings = 0;
     for (TempReadingsVec::iterator it = mReadingsVector.begin(); (it != mReadingsVector.end()) ; ++it) 
     {
-        tempReadingSum = tempReadingSum + (*it);
+        if ((*it) > 0.0)
+        {
+            tempReadingSum = tempReadingSum + (*it);
+            ++amounfOfReadings;
+        }
     }
-    float avgAnalogReading = (tempReadingSum / TEMP_SENSOR_NUM_AVG_SAMPLES);
+    float avgAnalogReading = (tempReadingSum / amounfOfReadings);
 
     // logic to transform reading to celcius degrees
     const float tempValue = avgAnalogReading;
 
     // check if we are out of boundaries
-    if (tempValue < 0)
+    if (tempValue < MIN_TEMP_VALUE)
     {
-        mLastReading = 0;
+        mLastReading = MIN_TEMP_VALUE;
     }
-    else if (tempValue > 99.9)
+    else if (tempValue > MAX_TEMP_VALUE)
     {
-        mLastReading = 99.9;
+        mLastReading = MAX_TEMP_VALUE;
     }
     else
     {
@@ -83,7 +88,7 @@ float TemperatureSensor::GetLastReading()
 
 TemperatureSensor::TemperatureSensor(const PinName pin)
     : mPin(pin)
-    , mReadingsVector(TEMP_SENSOR_NUM_AVG_SAMPLES, 0.0)
+    , mReadingsVector(TEMP_SENSOR_NUM_AVG_SAMPLES, -1.0)
     , mReadingsVectorIter(mReadingsVector.begin())
 {
     mLastReading = 0.0;

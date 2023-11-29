@@ -75,9 +75,24 @@ void WiFiCom::Request(const std::string& url)
 }
 
 //-----------------------------------------------------------------------------
-bool WiFiCom::GetResponse(std::string* response)
+bool WiFiCom::GetPostResponse(std::string* response)
 {
-    if ((mState == WIFI_STATE::CMD_POST_RESPONSE_READY) || (mState == WIFI_STATE::CMD_GET_RESPONSE_READY))
+    if (mState == WIFI_STATE::CMD_POST_RESPONSE_READY)
+    {
+        (*response) = mResponse;
+        mResponse.clear();
+        mIsResponseReady = false;
+
+        return true;
+    }
+
+    return false;
+}
+
+//-----------------------------------------------------------------------------
+bool WiFiCom::GetGetResponse(std::string* response)
+{
+    if (mState == WIFI_STATE::CMD_GET_RESPONSE_READY)
     {
         (*response) = mResponse;
         mResponse.clear();

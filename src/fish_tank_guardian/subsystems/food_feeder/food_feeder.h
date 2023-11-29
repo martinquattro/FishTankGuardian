@@ -14,7 +14,7 @@
 
 #define FEED_TIMES_EEPROM_START     0
 #define FEED_TIMES_SLOTS_NUM        5
-#define FEED_TIME_BYTES             32      // HH:MM:SS-X where X is the amount of feeds
+#define FEED_TIME_BYTES             32
 #define MAX_NUM_FEEDS               3
 
 namespace Subsystems { 

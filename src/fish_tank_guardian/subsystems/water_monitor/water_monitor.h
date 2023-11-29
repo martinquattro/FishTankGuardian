@@ -8,6 +8,11 @@
 #ifndef WATER_MONITOR_H
 #define WATER_MONITOR_H
 
+#define TEMP_LIMITS_EEPROM_START        160
+#define TDS_LIMITS_EEPROM_START         182
+#define MIN_TEMP                        0
+#define MAX_TEMP                        85
+
 namespace Subsystems { 
 
     class WaterMonitor 
@@ -29,6 +34,18 @@ namespace Subsystems {
             //!
             float GetTempReading();
 
+            //!
+            bool SetTemperatureLimits(const int lowerLimit, const int upperLimit);
+
+            //!
+            bool SetTdsLimits(const int lowerLimit, const int upperLimit);
+
+            //!
+            bool GetTemperatureLimits(int* lowerLimit, int* upperLimit);
+
+            //!
+            bool GetTdsLimits(int* lowerLimit, int* upperLimit);
+
         private:
 
             WaterMonitor() {}
@@ -37,6 +54,10 @@ namespace Subsystems {
             WaterMonitor& operator=(const WaterMonitor&) = delete;
 
             static WaterMonitor* mInstance;
+
+            //!
+            bool _GetSensorLimits(const int eepromPosition, int* lowerLimit, int* upperLimit);
+
     };
 
 } // namespace Subsystems

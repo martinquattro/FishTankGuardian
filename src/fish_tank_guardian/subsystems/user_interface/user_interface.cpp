@@ -40,13 +40,13 @@ void UserInterface::Init()
     Drivers::Display::Write(" FISH TANK GUARDIAN ");
 
     Drivers::Display::WriteCharPosition(0,1);
-    Drivers::Display::Write("Next Feed: ");
+    Drivers::Display::Write("Next Feed:          ");
 
     Drivers::Display::WriteCharPosition(0,2);
-    Drivers::Display::Write("Temp:     'C        ");
+    Drivers::Display::Write("Temp: --.-'C        ");
     
     Drivers::Display::WriteCharPosition(0,3);
-    Drivers::Display::Write("TDS:    ppm|        ");
+    Drivers::Display::Write("TDS: ---ppm|--:--:--");
 
     DEBUG_PRINT("UserInterface - [OK] Initialized\r\n");
 }

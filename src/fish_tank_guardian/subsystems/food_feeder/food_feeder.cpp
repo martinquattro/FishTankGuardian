@@ -180,11 +180,11 @@ std::string FoodFeeder::GetNextFeedTime()
             if (feedTimes.size())
             {
                 // No more feeds today
-                nextFeedTime = "Tomorrow";
+                nextFeedTime = "Tomorrow ";
             }
             else
             {
-                nextFeedTime = "None";
+                nextFeedTime = "None     ";
             }
         }
 

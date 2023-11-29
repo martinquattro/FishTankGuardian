@@ -51,11 +51,16 @@ void TdsSensor::Update(const float temperature /* = 25.0*/)
 
     // obtaing average
     float tdsReadingSum = 0.0;
+    int amounfOfReadings = 0;
     for (TdsReadingsVec::iterator it = mReadingsVector.begin(); (it != mReadingsVector.end()) ; ++it) 
     {
-        tdsReadingSum = tdsReadingSum + (*it);
+        if ((*it) > 0.0)
+        {
+            tdsReadingSum = tdsReadingSum + (*it);
+            ++amounfOfReadings;
+        }
     }
-    float avgAnalogReading = (tdsReadingSum / TDS_SENSOR_NUM_AVG_SAMPLES);
+    float avgAnalogReading = (tdsReadingSum / amounfOfReadings);
 
     // logic to transform reading to ppm units
     const float voltage = avgAnalogReading * mRef;
@@ -64,13 +69,13 @@ void TdsSensor::Update(const float temperature /* = 25.0*/)
     const int tdsValue = ecValue25 * 0.5;
 
     // check if we are out of boundaries
-    if (tdsValue < 0)
+    if (tdsValue < MIN_TDS_VALUE)
     {
-        mLastReading = 0;
+        mLastReading = MIN_TDS_VALUE;
     }
-    else if (tdsValue > 999)
+    else if (tdsValue > MAX_TDS_VALUE)
     {
-        mLastReading = 999;
+        mLastReading = MAX_TDS_VALUE;
     }
     else
     {
@@ -88,7 +93,7 @@ int TdsSensor::GetLastReading()
 
 TdsSensor::TdsSensor(const PinName pin)
     : mPin(pin, 1024.0)
-    , mReadingsVector(TDS_SENSOR_NUM_AVG_SAMPLES, 0.0)
+    , mReadingsVector(TDS_SENSOR_NUM_AVG_SAMPLES, -1.0)
     , mReadingsVectorIter(mReadingsVector.begin())
 {
     mTemperature = 25.0;

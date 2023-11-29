@@ -13,6 +13,8 @@
 
 #define TDS_SENSOR_PIN A0
 #define TDS_SENSOR_NUM_AVG_SAMPLES 20
+#define MIN_TDS_VALUE  0.0
+#define MAX_TDS_VALUE  999
 
 namespace Drivers { 
 

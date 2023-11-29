@@ -38,7 +38,10 @@ namespace Drivers {
             void Request(const std::string& url);
 
             //!
-            bool GetResponse(std::string* response);
+            bool GetPostResponse(std::string* response);
+
+            //!
+            bool GetGetResponse(std::string* response);
 
             //! Udpate
             void Update();
@@ -77,7 +80,7 @@ namespace Drivers {
             bool _ReadCom(char* receivedChar);
 
             static WiFiCom*     mInstance;
-            BufferedSerial      mSerial;
+            UnbufferedSerial    mSerial;
             WIFI_STATE          mState;
             Util::Delay         mWiFiComDelay;
             std::string         mApSsid;

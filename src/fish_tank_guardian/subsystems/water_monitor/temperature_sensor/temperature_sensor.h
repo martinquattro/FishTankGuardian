@@ -13,6 +13,8 @@
 
 #define TEMP_SENSOR_NUM_AVG_SAMPLES 20
 #define TEMP_SENSOR_PIN A1
+#define MIN_TEMP_VALUE  0.0
+#define MAX_TEMP_VALUE  99.9
 
 namespace Drivers { 
 

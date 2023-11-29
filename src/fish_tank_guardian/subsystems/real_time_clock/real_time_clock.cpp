@@ -52,8 +52,6 @@ void RealTimeClock::Update()
             if ((Drivers::WiFiCom::GetInstance()->IsBusy()) == false)
             {
                 Drivers::WiFiCom::GetInstance()->Request(RTC_GET_TIME_URL + mCurrentTimeZone);
-                DEBUG_PRINT("RealTimeClock - TC_GET_TIME_URL + mCurrentTimeZone = %s\r\n", (RTC_GET_TIME_URL + mCurrentTimeZone).c_str());
-
                 mState = RTC_STATE::WAITING_RESPONSE;
                 mRtcDelay.Start(DELAY_10_SECONDS);
             }
@@ -67,7 +65,7 @@ void RealTimeClock::Update()
                 mState = RTC_STATE::NOT_SYNCED;
                 DEBUG_PRINT("RealTimeClock - [ERROR] Not able to synced\r\n");
             }
-            else if (Drivers::WiFiCom::GetInstance()->GetResponse(&response))
+            else if (Drivers::WiFiCom::GetInstance()->GetGetResponse(&response))
             {
                 if (_SyncFromResponse(response))
                 {
@@ -171,7 +169,8 @@ RealTimeClock::RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t address, ui
     , mMemory(sdaPin, sclPin, eepromAddr)
     , mRtcDelay(0)
 {
-    mState = RTC_STATE::SYNCED;
+    mState = RTC_STATE::START_SYNC;
+    mCurrentTimeZone = "America/Buenos_Aires";         // debug
 
     mRtcCom.start();
     mRtcCom.write(mAddress | 0);

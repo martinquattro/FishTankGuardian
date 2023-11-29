@@ -8,12 +8,12 @@
 #ifndef TELEGRAM_BOT_H
 #define TELEGRAM_BOT_H
 
-#include "Json.h"
-#include <string>
-#include "mbed.h"
-#include "delay.h"
 #include <map>
+#include <string>
 #include <vector>
+#include "delay.h"
+#include "Json.h"
+#include "mbed.h"
 
 #define BOT_API_URL     "https://api.telegram.org/bot"
 #define BOT_TOKEN       "6738012692:AAFmeMoCUuZEGBGVwbxtFt8sC8f15o_aRgs"
@@ -71,24 +71,14 @@ namespace Subsystems {
             //!
             TelegramMessage _GetLastMessage();
 
-            //!
-            bool _IsNumeric(const std::string& str);
-
-            //!
             std::string _CommandFeederFeed(const std::vector<std::string>& params);
-
-            //!
             std::string _CommandFeederStatus(const std::vector<std::string>& params);
-
-            //!
             std::string _CommandFeederSet(const std::vector<std::string>& params);
-            
-            //!
             std::string _CommandFeederDelete(const std::vector<std::string>& params);
-            
-            //!
+            std::string _CommandMonitorStatus(const std::vector<std::string>& params);
+            std::string _CommandMonitorSetTempLimits(const std::vector<std::string>& params);
+            std::string _CommandMonitorSetTdsLimits(const std::vector<std::string>& params);
             std::string _CommandTimezone(const std::vector<std::string>& params);
-
 
             TelegramBot(const char* apiUrl, const char* token);
             ~TelegramBot() = default;

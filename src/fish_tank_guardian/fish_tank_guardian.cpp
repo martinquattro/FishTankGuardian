@@ -19,6 +19,7 @@
 #include "user_interface.h"
 #include "water_monitor.h"
 #include "wifi_com.h"
+#include "util.h"
 
 namespace Subsystems {
 
@@ -41,8 +42,8 @@ void FishTankGuardian::Init()
     Subsystems::RealTimeClock::Init();
     Subsystems::FoodFeeder::Init();
     Subsystems::WaterMonitor::Init();
-    Subsystems::TelegramBot::Init();
     Subsystems::UserInterface::Init();
+    Subsystems::TelegramBot::Init();
 }
 
 //----static-------------------------------------------------------------------
