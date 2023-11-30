@@ -53,7 +53,7 @@ void loop()
     {
         String commandExecutionResult;
 
-        String strReceived = Serial2.readString();
+        String strReceived = Serial2.readStringUntil(STOP_CHAR);
         strReceived.trim();
         DEBUG_PRINTLN("Command and parameters received [%s]", strReceived.c_str());
 
@@ -66,6 +66,8 @@ void loop()
             commandExecutionResult = commandFunction(params);
 
             Serial2.print(commandExecutionResult.c_str());
+            Serial2.print(STOP_CHAR);
+
             DEBUG_PRINTLN("Result = [%s] sent to Nucleo Board", commandExecutionResult.c_str());
         } 
         else 
@@ -140,8 +142,8 @@ String CommandPostToServer(const std::vector<String>& params)
 
         if (httpResponseCode > 0) 
         {
-            DEBUG_PRINTLN("CommandPostToServer - Success\n[%d]\n[%s]", httpResponseCode, http.getString().c_str());
             response = http.getString();
+            DEBUG_PRINTLN("CommandPostToServer - Success\n[%d]\n[%s]", httpResponseCode, response.c_str());
         } 
         else 
         {
@@ -180,8 +182,8 @@ String CommandGet(const std::vector<String>& params)
 
         if (httpResponseCode > 0) 
         {
-            DEBUG_PRINTLN("CommandGet - Success\n[%d]\n[%s]", httpResponseCode, http.getString().c_str());
             response = http.getString();
+            DEBUG_PRINTLN("CommandGet - Success\n[%d]\n[%s]", httpResponseCode, response.c_str());
         } 
         else 
         {
@@ -223,7 +225,7 @@ std::vector<String> _ParseParameters(const String &input)
 {
     size_t parameters_size = 0;
     int index_from = -1, index_to;
-    
+
     if (input.length() > 0) 
     {
         parameters_size++;
