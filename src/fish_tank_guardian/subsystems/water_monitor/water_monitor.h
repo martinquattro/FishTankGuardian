@@ -9,7 +9,7 @@
 #define WATER_MONITOR_H
 
 #define TEMP_LIMITS_EEPROM_START        160
-#define TDS_LIMITS_EEPROM_START         182
+#define TDS_LIMITS_EEPROM_START         192
 #define MIN_TEMP                        0
 #define MAX_TEMP                        85
 
@@ -27,6 +27,9 @@ namespace Subsystems {
 
             //! Update subsystem
             void Update();
+
+            //!
+            bool GetWaterState();
 
             //! 
             int GetTdsReading();

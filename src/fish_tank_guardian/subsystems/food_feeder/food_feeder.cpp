@@ -184,7 +184,7 @@ std::string FoodFeeder::GetNextFeedTime()
             }
             else
             {
-                nextFeedTime = "None     ";
+                nextFeedTime = "None set ";
             }
         }
 

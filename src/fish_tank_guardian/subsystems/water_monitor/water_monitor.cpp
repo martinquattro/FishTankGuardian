@@ -36,8 +36,8 @@ void WaterMonitor::Init()
     Drivers::TemperatureSensor::Init();
     Drivers::TdsSensor::Init();
 
-    mInstance->SetTemperatureLimits(MIN_TEMP_VALUE, MAX_TEMP_VALUE);
-    mInstance->SetTdsLimits(MIN_TDS_VALUE, MAX_TDS_VALUE);
+    mInstance->SetTemperatureLimits(static_cast<int>(MIN_TEMP_VALUE), static_cast<int>(MAX_TEMP_VALUE));
+    mInstance->SetTdsLimits(static_cast<int>(MIN_TDS_VALUE), static_cast<int>(MAX_TDS_VALUE));
 
     DEBUG_PRINT("UserInterface - [OK] Initialized\r\n");
 }
@@ -53,6 +53,32 @@ void WaterMonitor::Update()
 {
     Drivers::TemperatureSensor::GetInstance()->Update();
     Drivers::TdsSensor::GetInstance()->Update(GetTempReading());            // tds sensor uses temperature reading to have a better measure
+}
+
+//-----------------------------------------------------------------------------
+bool WaterMonitor::GetWaterState()
+{
+    int tempLowerLimit, tempUpperLimit, tdsLowerLimit, tdsUpperLimit;
+    const int tdsReading = GetTdsReading();
+    const int tempReading = GetTempReading();
+
+    if (GetTemperatureLimits(&tempLowerLimit, &tempUpperLimit))
+    {
+        if (tempReading < tempLowerLimit || tempReading > tempUpperLimit)
+        {
+            return false;
+        }
+    }
+
+    if (GetTdsLimits(&tdsLowerLimit, &tdsUpperLimit))
+    {
+        if (tdsReading < tdsLowerLimit || tdsReading > tdsUpperLimit)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------

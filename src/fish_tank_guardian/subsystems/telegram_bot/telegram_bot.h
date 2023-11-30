@@ -17,6 +17,7 @@
 
 #define BOT_API_URL     "https://api.telegram.org/bot"
 #define BOT_TOKEN       "6738012692:AAFmeMoCUuZEGBGVwbxtFt8sC8f15o_aRgs"
+#define USER_ID_EEPROM_START       224
 
 namespace Subsystems { 
 
@@ -49,12 +50,35 @@ namespace Subsystems {
             enum class BOT_STATE
             {
                 INIT,
-                IDLE,
+                MONITOR,
+                SEND_ALERT,
                 REQUEST_LAST_MESSAGE,
                 WAITING_LAST_MESSAGE,
                 PROCESS_LAST_MESSAGE,
                 WAITING_RESPONSE,
             };
+
+            std::string _CommandStart(const std::vector<std::string>& params);
+            std::string _CommandFeederFeed(const std::vector<std::string>& params);
+            std::string _CommandFeederStatus(const std::vector<std::string>& params);
+            std::string _CommandFeederSet(const std::vector<std::string>& params);
+            std::string _CommandFeederDelete(const std::vector<std::string>& params);
+            std::string _CommandMonitorStatus(const std::vector<std::string>& params);
+            std::string _CommandMonitorSetTempLimits(const std::vector<std::string>& params);
+            std::string _CommandMonitorSetTdsLimits(const std::vector<std::string>& params);
+            std::string _CommandTimezone(const std::vector<std::string>& params);
+
+            //!
+            std::string _GetMonitorStatusResponse();
+
+            //!
+            void _RegisterUser(std::string userId);
+
+            //!
+            bool _IsValidUser(std::string userId);
+
+            //! 
+            std::string _GetUserId();
 
             //!
             std::vector<std::string> _ParseMessage(const std::string& message);
@@ -71,15 +95,6 @@ namespace Subsystems {
             //!
             TelegramMessage _GetLastMessage();
 
-            std::string _CommandFeederFeed(const std::vector<std::string>& params);
-            std::string _CommandFeederStatus(const std::vector<std::string>& params);
-            std::string _CommandFeederSet(const std::vector<std::string>& params);
-            std::string _CommandFeederDelete(const std::vector<std::string>& params);
-            std::string _CommandMonitorStatus(const std::vector<std::string>& params);
-            std::string _CommandMonitorSetTempLimits(const std::vector<std::string>& params);
-            std::string _CommandMonitorSetTdsLimits(const std::vector<std::string>& params);
-            std::string _CommandTimezone(const std::vector<std::string>& params);
-
             TelegramBot(const char* apiUrl, const char* token);
             ~TelegramBot() = default;
             TelegramBot(const TelegramBot&) = delete;
@@ -93,6 +108,7 @@ namespace Subsystems {
             TelegramMessage     mLastMessage;
             std::string         mResponse;
             Util::Delay         mBotDelay;
+            Util::Delay         mBotAlertsDelay;
             std::map<std::string, CommandFunction> mCommandsMap;
     };
 

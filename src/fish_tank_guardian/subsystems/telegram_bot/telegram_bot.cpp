@@ -55,23 +55,46 @@ void TelegramBot::Update()
     {
         case BOT_STATE::INIT:
         {
-            mBotDelay.Start(DELAY_2_SECONDS);
-            mState = BOT_STATE::IDLE;
+            if (!(Drivers::WiFiCom::GetInstance()->IsBusy()))
+            {
+                mState = BOT_STATE::MONITOR;
+            }
         }
         break;
 
-        case BOT_STATE::IDLE:
+        case BOT_STATE::MONITOR:
         {
-            if (mBotDelay.HasFinished())
+            if (mBotAlertsDelay.HasFinished() && !(Subsystems::WaterMonitor::GetInstance()->GetWaterState()))
+            {
+                mState = BOT_STATE::SEND_ALERT;
+            }
+            else
             {
                 mState = BOT_STATE::REQUEST_LAST_MESSAGE;
+                mBotDelay.Start(DELAY_2_SECONDS);
+            }
+        }
+        break;
+        
+        case BOT_STATE::SEND_ALERT:
+        {
+            if (!(Drivers::WiFiCom::GetInstance()->IsBusy()))
+            {
+                std::string messageToSend = ALERT_OUT_OF_LIMITS;
+                messageToSend += "\n";
+                messageToSend += _GetMonitorStatusResponse();
+                std::string userId = _GetUserId();
+                _SendMessage(userId, messageToSend);
+                mState = BOT_STATE::WAITING_RESPONSE;
+                mBotDelay.Start(DELAY_10_SECONDS);
+                mBotAlertsDelay.Start(DELAY_10_SECONDS);
             }
         }
         break;
 
         case BOT_STATE::REQUEST_LAST_MESSAGE:
         {
-            if ((Drivers::WiFiCom::GetInstance()->IsBusy()) == false)
+            if (!(Drivers::WiFiCom::GetInstance()->IsBusy()))
             {
                 _RequestLastMessage();
                 mState = BOT_STATE::WAITING_LAST_MESSAGE;
@@ -84,14 +107,14 @@ void TelegramBot::Update()
         {
             if (mBotDelay.HasFinished())
             {
-                mState = BOT_STATE::IDLE;
+                mState = BOT_STATE::INIT;
             }
             else if (Drivers::WiFiCom::GetInstance()->GetPostResponse(&mResponse))
             {
                 const bool isNewMessage = _GetMessageFromResponse(&mLastMessage, mResponse);
                 if (isNewMessage)
                 {
-                    DEBUG_PRINT("TelegramBot - [OK] Message Obtained: [%s] from [%s]\r\n", mLastMessage.mMessage.c_str(), mLastMessage.mFromUserName.c_str());
+                    DEBUG_PRINT("TelegramBot - [OK] Message Obtained: [%s] from [%s]\r\n", mLastMessage.mMessage.c_str(), mLastMessage.mFromName.c_str());
                     mState = BOT_STATE::PROCESS_LAST_MESSAGE;
                 }
                 else
@@ -105,20 +128,27 @@ void TelegramBot::Update()
         case BOT_STATE::PROCESS_LAST_MESSAGE:
         {
             std::string messageToSend;
-
             std::vector<std::string> params = _ParseMessage(mLastMessage.mMessage);
             std::string command = params[0];
 
-            if (mCommandsMap.find(command) != mCommandsMap.end()) 
+            if ((_IsValidUser(mLastMessage.mFromId)) || (command.compare(COMMAND_START) == 0))
             {
-                // The corresponding command function is called
-                CommandFunction commandFunction = mCommandsMap[command];
-                messageToSend = commandFunction(params);
+                if (mCommandsMap.find(command) != mCommandsMap.end()) 
+                {
+                    // The corresponding command function is called
+                    CommandFunction commandFunction = mCommandsMap[command];
+                    messageToSend = commandFunction(params);
+                }
+                else
+                {
+                    messageToSend = Utilities::FormatString(ERROR_INVALID_COMMAND, command.c_str());
+                }
             }
             else
             {
-                std::string messageToSend = Utilities::FormatString(ERROR_INVALID_COMMAND, command.c_str());
+                messageToSend = ERROR_INVALID_USER;
             }
+
 
             // Every message received requires a response to the user
             _SendMessage(mLastMessage.mFromId, messageToSend);
@@ -149,9 +179,11 @@ TelegramBot::TelegramBot(const char* apiUrl, const char* token)
     : mBotUrl(apiUrl)
     , mToken(token)
     , mBotDelay(0)
+    , mBotAlertsDelay(0)
 {
     mLastUpdateId = 0;
 
+    mCommandsMap[COMMAND_START]                      = std::bind(&TelegramBot::_CommandStart, this, std::placeholders::_1);
     mCommandsMap[COMMAND_FEEDER_FEED]                = std::bind(&TelegramBot::_CommandFeederFeed, this, std::placeholders::_1);
     mCommandsMap[COMMAND_FEEDER_STATUS]              = std::bind(&TelegramBot::_CommandFeederStatus, this, std::placeholders::_1);
     mCommandsMap[COMMAND_FEEDER_SET]                 = std::bind(&TelegramBot::_CommandFeederSet, this, std::placeholders::_1);
@@ -161,6 +193,19 @@ TelegramBot::TelegramBot(const char* apiUrl, const char* token)
     mCommandsMap[COMMAND_MONITOR_SET_TEMP_LIMITS]    = std::bind(&TelegramBot::_CommandMonitorSetTempLimits, this, std::placeholders::_1);
     mCommandsMap[COMMAND_MONITOR_SET_TDS_LIMITS]     = std::bind(&TelegramBot::_CommandMonitorSetTdsLimits, this, std::placeholders::_1);
 }
+
+//-----------------------------------------------------------------------------
+std::string TelegramBot::_CommandStart(const std::vector<std::string>& params)
+{
+    if (params.size() == 1) 
+    {
+        _RegisterUser(mLastMessage.mFromId);
+        return (Utilities::FormatString("User registered correctly\nHi %s, I'm the Guardian\r\n", mLastMessage.mFromName.c_str()));
+    }
+
+    return (Utilities::FormatString(ERROR_INVALID_PARAMETERS, COMMAND_START));
+}
+
 
 //-----------------------------------------------------------------------------
 std::string TelegramBot::_CommandFeederFeed(const std::vector<std::string>& params) 
@@ -262,21 +307,7 @@ std::string TelegramBot::_CommandMonitorStatus(const std::vector<std::string>& p
 {
     if (params.size() == 1) 
     {
-        int tempLowerLimit, tempUpperLimit, tdsLowerLimit, tdsUpperLimit;
-        if (Subsystems::WaterMonitor::GetInstance()->GetTemperatureLimits(&tempLowerLimit, &tempUpperLimit)
-            && Subsystems::WaterMonitor::GetInstance()->GetTdsLimits(&tdsLowerLimit, &tdsUpperLimit))
-        {
-            const float temp = Subsystems::WaterMonitor::GetInstance()->GetTempReading();
-            const int tds = Subsystems::WaterMonitor::GetInstance()->GetTdsReading();
-
-            return Utilities::FormatString("[OK]\n"
-                                           "- Temperature: [%.1f°C]\n"
-                                           "- Temperature Limits: [%d°C - %d°C]\n"
-                                           "- Tds Reading: [%03d PPM]\n"
-                                           "- Tds Limits: [%03d PPM - %03d PPM]",
-                                           temp, tempLowerLimit, tempUpperLimit,
-                                           tds, tdsLowerLimit, tdsUpperLimit);
-        }
+        return _GetMonitorStatusResponse();
     }
 
     return Utilities::FormatString(ERROR_INVALID_PARAMETERS, COMMAND_MONITOR_STATUS);
@@ -342,6 +373,44 @@ std::string TelegramBot::_CommandTimezone(const std::vector<std::string>& params
     }
 
     return Utilities::FormatString(ERROR_INVALID_PARAMETERS, COMMAND_TIMEZONE);
+}
+
+//-----------------------------------------------------------------------------
+std::string TelegramBot::_GetMonitorStatusResponse()
+{
+    int tempLowerLimit, tempUpperLimit, tdsLowerLimit, tdsUpperLimit;
+    Subsystems::WaterMonitor::GetInstance()->GetTemperatureLimits(&tempLowerLimit, &tempUpperLimit);
+    Subsystems::WaterMonitor::GetInstance()->GetTdsLimits(&tdsLowerLimit, &tdsUpperLimit);
+
+    const float temp = Subsystems::WaterMonitor::GetInstance()->GetTempReading();
+    const int tds = Subsystems::WaterMonitor::GetInstance()->GetTdsReading();
+
+    return Utilities::FormatString( "- Temperature: [%.1f°C]\n"
+                                    "- Temperature Limits: [%d°C - %d°C]\n"
+                                    "- Tds Reading: [%03d PPM]\n"
+                                    "- Tds Limits: [%03d PPM - %03d PPM]",
+                                    temp, tempLowerLimit, tempUpperLimit,
+                                    tds, tdsLowerLimit, tdsUpperLimit);
+}
+
+//-----------------------------------------------------------------------------
+void TelegramBot::_RegisterUser(std::string userId)
+{
+    Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(USER_ID_EEPROM_START, userId);
+}
+
+//-----------------------------------------------------------------------------
+bool TelegramBot::_IsValidUser(std::string userId)
+{
+    std::string userIdInEeprom = Subsystems::RealTimeClock::GetInstance()->ReadStringFromEeprom(USER_ID_EEPROM_START);
+
+    return (userIdInEeprom.compare(userId) == 0);
+}
+
+//-----------------------------------------------------------------------------
+std::string TelegramBot::_GetUserId()
+{
+    return (Subsystems::RealTimeClock::GetInstance()->ReadStringFromEeprom(USER_ID_EEPROM_START));
 }
 
 //-----------------------------------------------------------------------------
