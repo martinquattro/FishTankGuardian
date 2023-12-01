@@ -74,7 +74,7 @@ namespace Drivers {
             void _SendCommand(const char* command);
 
             //!
-            bool _IsResponseCompleted();
+            bool _IsResponseCompleted(std::string* response);
 
             //!
             bool _ReadCom(char* receivedChar);
@@ -86,9 +86,11 @@ namespace Drivers {
             std::string         mApSsid;
             std::string         mApPassword;
             std::string         mResponse;
+            std::string         mCommandGetResponse;
             std::string         mServer;
             std::string         mRequest;
             bool                mIsResponseReady;
+            bool                mIsGetResponseReady;
     };
 
 } // namespace Drivers

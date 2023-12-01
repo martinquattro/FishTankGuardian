@@ -29,8 +29,8 @@ bool Delay::HasFinished()
     } 
     else 
     {
-      elapsedTime = Tick::GetTickCounter() - mStartTime;
-      if (elapsedTime >= mDuration) 
+        elapsedTime = Tick::GetTickCounter() - mStartTime;
+        if (elapsedTime >= mDuration) 
         {
             timeArrived = true;
             mIsRunning = false;

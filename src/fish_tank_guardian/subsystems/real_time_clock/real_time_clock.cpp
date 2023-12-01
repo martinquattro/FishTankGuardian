@@ -43,39 +43,57 @@ RealTimeClock* RealTimeClock::GetInstance()
 }
 
 //-----------------------------------------------------------------------------
+bool RealTimeClock::IsReady()
+{
+    return (mState == RTC_STATE::SYNCED || mState == RTC_STATE::NOT_SYNCED);
+}
+
+//-----------------------------------------------------------------------------
 void RealTimeClock::Update()
 {
+    static int sStartDelayTick;
+    static int sDelayDuration;
+
     switch(mState)
     {
+        case RTC_STATE::INIT:
+        {
+            mState = RTC_STATE::START_SYNC;
+        }
+        break;
+
         case RTC_STATE::START_SYNC:
         {
             if ((Drivers::WiFiCom::GetInstance()->IsBusy()) == false)
             {
                 Drivers::WiFiCom::GetInstance()->Request(RTC_GET_TIME_URL + mCurrentTimeZone);
                 mState = RTC_STATE::WAITING_RESPONSE;
-                mRtcDelay.Start(DELAY_10_SECONDS);
+                sStartDelayTick = Util::Tick::GetTickCounter();     // for some unknown reason, the delay was not working in this class
+                sDelayDuration = 3000;                              // so it was forced to manually create the non blocking delay
             }
         }
         break;
+
         case RTC_STATE::WAITING_RESPONSE:
         {
             std::string response;
-            if (mRtcDelay.HasFinished())
+            if (Drivers::WiFiCom::GetInstance()->GetGetResponse(&response) && _SyncFromResponse(response))
             {
-                mState = RTC_STATE::NOT_SYNCED;
-                DEBUG_PRINT("RealTimeClock - [ERROR] Not able to synced\r\n");
+                mNumSyncAtempts = 0;
+                mState = RTC_STATE::SYNCED;
             }
-            else if (Drivers::WiFiCom::GetInstance()->GetGetResponse(&response))
+            else if ((Util::Tick::GetTickCounter() - sStartDelayTick) > sDelayDuration)
             {
-                if (_SyncFromResponse(response))
+                if (++mNumSyncAtempts > MAX_SYNC_ATTEMPTS)
                 {
-                    mState = RTC_STATE::SYNCED;
-                    DEBUG_PRINT("RealTimeClock - [OK] Synced correctly\r\n");
+                    mNumSyncAtempts = 0;
+                    mState = RTC_STATE::NOT_SYNCED;
+                    DEBUG_PRINT("RealTimeClock - [ERROR] Not able to synced\r\n");
                 }
                 else
                 {
-                    mState = RTC_STATE::NOT_SYNCED;
-                    DEBUG_PRINT("RealTimeClock - [ERROR] Something went wrong. Not synqued\r\n");
+                    mState = RTC_STATE::INIT;
+                    DEBUG_PRINT("RealTimeClock - [ERROR] Fail to sync in [%d] attempt. Trying to sync again...\r\n", mNumSyncAtempts);
                 }
             }
         }
@@ -94,7 +112,6 @@ bool RealTimeClock::SetTimeZone(std::string timeZone)
     {
         mState = RTC_STATE::START_SYNC;
         mCurrentTimeZone = mTimeZonesMap[timeZone];
-        DEBUG_PRINT("RealTimeClock - mCurrentTimeZone = [%s]\r\n", mCurrentTimeZone.c_str());
 
         return true;
     }
@@ -168,8 +185,9 @@ RealTimeClock::RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t address, ui
     , mAddress(address << 1)
     , mMemory(sdaPin, sclPin, eepromAddr)
     , mRtcDelay(0)
+    , mNumSyncAtempts(0)
 {
-    mState = RTC_STATE::START_SYNC;
+    mState = RTC_STATE::INIT;
     mCurrentTimeZone = "America/Buenos_Aires";         // debug
 
     mRtcCom.start();
@@ -194,8 +212,6 @@ bool RealTimeClock::_SyncFromResponse(std::string response)
 {
     Json json(response.c_str(), response.length(), 100);
 
-        DEBUG_PRINT("RealTimeClock - response = [%s]\r\n", response.c_str());
-
     if (json.isValidJson() && (response.compare("\"Invalid Timezone\"") != 0) && (response.compare(RESULT_ERROR) != 0))
     {
         int seconds, minutes, hours, day, month, year;
@@ -207,8 +223,13 @@ bool RealTimeClock::_SyncFromResponse(std::string response)
         json.tokenIntegerValue(json.findChildIndexOf(json.findKeyIndex("month")),       month);
         json.tokenIntegerValue(json.findChildIndexOf(json.findKeyIndex("year")),        year);
 
-        struct tm rtcTime;
+        if (year > 2024 || month > 12 || day > 31 || hours > 24 || minutes > 60 || seconds > 60
+         || year < 0 || month < 0 || day < 0 || hours< 0 || minutes < 0 || seconds < 0)
+        {
+            return false;
+        }
 
+        struct tm rtcTime;
         rtcTime.tm_year = year;
         rtcTime.tm_mon  = month;
         rtcTime.tm_mday = day;

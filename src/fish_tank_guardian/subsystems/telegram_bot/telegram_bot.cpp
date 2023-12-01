@@ -55,7 +55,7 @@ void TelegramBot::Update()
     {
         case BOT_STATE::INIT:
         {
-            if (!(Drivers::WiFiCom::GetInstance()->IsBusy()))
+            if (!(Drivers::WiFiCom::GetInstance()->IsBusy()) && (Subsystems::RealTimeClock::GetInstance()->IsReady()))
             {
                 mState = BOT_STATE::MONITOR;
             }
@@ -78,7 +78,7 @@ void TelegramBot::Update()
         
         case BOT_STATE::SEND_ALERT:
         {
-            if (!(Drivers::WiFiCom::GetInstance()->IsBusy()))
+            if (mBotAlertsDelay.HasFinished() && !(Drivers::WiFiCom::GetInstance()->IsBusy()))
             {
                 std::string messageToSend = ALERT_OUT_OF_LIMITS;
                 messageToSend += "\n";
@@ -86,7 +86,7 @@ void TelegramBot::Update()
                 std::string userId = _GetUserId();
                 _SendMessage(userId, messageToSend);
                 mState = BOT_STATE::WAITING_RESPONSE;
-                mBotDelay.Start(DELAY_10_SECONDS);
+                mBotDelay.Start(DELAY_5_SECONDS);
                 mBotAlertsDelay.Start(DELAY_10_SECONDS);
             }
         }
@@ -94,11 +94,11 @@ void TelegramBot::Update()
 
         case BOT_STATE::REQUEST_LAST_MESSAGE:
         {
-            if (!(Drivers::WiFiCom::GetInstance()->IsBusy()))
+            if (mBotDelay.HasFinished() && !(Drivers::WiFiCom::GetInstance()->IsBusy()))
             {
                 _RequestLastMessage();
                 mState = BOT_STATE::WAITING_LAST_MESSAGE;
-                mBotDelay.Start(DELAY_10_SECONDS);
+                mBotDelay.Start(DELAY_5_SECONDS);
             }
         }
         break;
@@ -149,11 +149,10 @@ void TelegramBot::Update()
                 messageToSend = ERROR_INVALID_USER;
             }
 
-
             // Every message received requires a response to the user
             _SendMessage(mLastMessage.mFromId, messageToSend);
             mState = BOT_STATE::WAITING_RESPONSE;
-            mBotDelay.Start(DELAY_10_SECONDS);
+            mBotDelay.Start(DELAY_5_SECONDS);
         }
         break;
 

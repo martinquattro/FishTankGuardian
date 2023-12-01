@@ -13,6 +13,7 @@
 #define RTC_ADDRESS_ID     0x68
 #define RTC_EEPROM_ADDRESS 0x50
 #define RTC_GET_TIME_URL "https://www.timeapi.io/api/Time/current/zone?timeZone="
+#define MAX_SYNC_ATTEMPTS  5
 
 #include "mbed.h"
 #include "memory.h"
@@ -39,6 +40,9 @@ namespace Subsystems {
             void Update();
 
             //!
+            bool IsReady();
+
+            //!
             bool SetTimeZone(std::string timeZone);
 
             //!
@@ -51,6 +55,7 @@ namespace Subsystems {
 
             enum class RTC_STATE
             {
+                INIT,
                 START_SYNC,
                 WAITING_RESPONSE,
                 SYNCED,
@@ -84,6 +89,7 @@ namespace Subsystems {
             Util::Delay     mRtcDelay;
             std::map<std::string, std::string> mTimeZonesMap;
             std::string     mCurrentTimeZone;
+            int             mNumSyncAtempts;
 };
 
 } // namespace Subsystems
