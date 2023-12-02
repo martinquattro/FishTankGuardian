@@ -40,8 +40,8 @@ void WiFiCom::Init()
     }
 
     mInstance->mState = WIFI_STATE::INIT;
-    mInstance->mApSsid = "Cuchitril 2.4GHz";
-    mInstance->mApPassword = "Defensa5232022";
+    mInstance->mSsid = "";
+    mInstance->mPassword = "";
 }
 
 //----static-------------------------------------------------------------------
@@ -108,6 +108,8 @@ bool WiFiCom::GetGetResponse(std::string* response)
 void WiFiCom::Update()
 {
     std::string esp32Command;
+    static int sStartDelayTick;
+    static int sDelayDuration;
 
     switch (mState) 
     {
@@ -161,14 +163,14 @@ void WiFiCom::Update()
                 mResponse.clear();
                 esp32Command = COMMAND_CONNECT_STR;
                 esp32Command += PARAM_SEPARATOR_CHAR;
-                esp32Command += mApSsid;
+                esp32Command += mSsid;
                 esp32Command += PARAM_SEPARATOR_CHAR;
-                esp32Command += mApPassword;
+                esp32Command += mPassword;
                 esp32Command += STOP_CHAR;
                 _SendCommand(esp32Command.c_str());
                 mState = WIFI_STATE::CMD_CONNECT_WAIT_RESPONSE;
-                DEBUG_PRINT("WiFiCom - Sending request to connect to WiFi Network [%s]...\r\n", mApSsid.c_str());
-                mWiFiComDelay.Start(DELAY_3_SECONDS);
+                DEBUG_PRINT("WiFiCom - Sending request to connect to WiFi Network [%s]...\r\n", mSsid.c_str());
+                mWiFiComDelay.Start(DELAY_10_SECONDS);                        // so it was forced to manually create the non blocking delay
             }
         }
         break;
@@ -178,8 +180,9 @@ void WiFiCom::Update()
             const bool isResponseCompleted = _IsResponseCompleted(&mResponse);
             if ((mWiFiComDelay.HasFinished()) || (isResponseCompleted && (mResponse.compare(RESULT_ERROR) == 0)))
             {
-                mState = WIFI_STATE::ERROR;
                 DEBUG_PRINT("WiFiCom - [ERROR] WiFi Not Connected. Response = [%s]\r\n", mResponse.c_str());
+                mState = WIFI_STATE::CMD_ACCESSPOINT_SEND;
+                mWiFiComDelay.Start(DELAY_2_SECONDS);
             }
             else if (isResponseCompleted && (mResponse.compare(RESULT_OK) == 0))
             {
@@ -189,9 +192,50 @@ void WiFiCom::Update()
         }
         break;
 
+        case WIFI_STATE::CMD_ACCESSPOINT_SEND:
+        {
+            if (mWiFiComDelay.HasFinished())
+            {
+                mResponse.clear();
+                esp32Command = COMMAND_ACCESSPOINT_STR;
+                esp32Command += STOP_CHAR;
+                _SendCommand(esp32Command.c_str());
+                mState = WIFI_STATE::CMD_ACCESSPOINT_WAIT_RESPONSE;
+                DEBUG_PRINT("WiFiCom - Sending request to set AccessPoint\r\n");
+            }
+        }
+        break;
+
+        case WIFI_STATE::CMD_ACCESSPOINT_WAIT_RESPONSE:
+        {
+            const bool isResponseCompleted = _IsResponseCompleted(&mResponse);
+            if (isResponseCompleted && (mResponse.compare(RESULT_ERROR) == 0))
+            {
+                mState = WIFI_STATE::CMD_ACCESSPOINT_SEND;
+                DEBUG_PRINT("WiFiCom - [ERROR] Access Point returned error\r\n");
+            }
+            else if (isResponseCompleted)
+            {
+                int paramIndex = mResponse.find(PARAM_SEPARATOR_CHAR);
+                if (paramIndex != std::string::npos)
+                {
+                    DEBUG_PRINT("WiFiCom - [OK] Success. Response to [%s] obtained\r\n", COMMAND_ACCESSPOINT_STR);
+                    mSsid       = mResponse.substr(0, paramIndex);
+                    mPassword   = mResponse.substr(paramIndex + 1, mResponse.length());
+                    mWiFiComDelay.Start(DELAY_2_SECONDS);
+                    mState = WIFI_STATE::CMD_CONNECT_SEND;
+                }
+                else
+                {
+                    DEBUG_PRINT("WiFiCom - [ERROR] Invalid Response to [%s] obtained\r\n", COMMAND_ACCESSPOINT_STR);
+                    mState = WIFI_STATE::CMD_ACCESSPOINT_SEND;
+                }
+            }
+        }
+        break;
+
         case WIFI_STATE::CMD_GET_SEND:
         {
-            // sending get command with wifi ssid and password
             mCommandGetResponse.clear();
             esp32Command = COMMAND_GET_STR;
             esp32Command += PARAM_SEPARATOR_CHAR;
@@ -308,12 +352,16 @@ WiFiCom::WiFiCom(PinName txPin, PinName rxPin, const int baudRate)
     : mSerial(txPin, rxPin, baudRate)
     , mWiFiComDelay(0)
 {
+    mSerial.enable_output(false);
 }
 
 //-----------------------------------------------------------------------------
 void WiFiCom::_SendCommand(const char* command)
 {
+    DEBUG_PRINT("_SendCommand - [%s]\r\n", command);
+    mSerial.enable_output(true);
     mSerial.write(command, strlen(command));
+    mSerial.enable_output(false);
 }
 
 //-----------------------------------------------------------------------------

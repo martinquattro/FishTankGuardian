@@ -1,9 +1,11 @@
 #include <Arduino.h>
+#include <functional>
+#include <HTTPClient.h>
 #include <map>
 #include <vector>
-#include <functional>
 #include <WiFi.h>
-#include <HTTPClient.h>
+#include <WebServer.h>
+
 #include "commands.h"
 
 #define RXD2 16
@@ -38,10 +40,11 @@ void setup()
 
     pinMode(LED_WIFI_STATUS,OUTPUT);
 
-    commandsMap[COMMAND_CONNECT_STR]    = CommandConnectToWiFi;
-    commandsMap[COMMAND_POST_STR]       = CommandPostToServer;
-    commandsMap[COMMAND_GET_STR]        = CommandGet;
-    commandsMap[COMMAND_STATUS_STR]     = CommandStatus;
+    commandsMap[COMMAND_CONNECT_STR]        = CommandConnectToWiFi;
+    commandsMap[COMMAND_POST_STR]           = CommandPostToServer;
+    commandsMap[COMMAND_GET_STR]            = CommandGet;
+    commandsMap[COMMAND_STATUS_STR]         = CommandStatus;
+    commandsMap[COMMAND_ACCESSPOINT_STR]    = CommandAccessPoint;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -53,7 +56,7 @@ void loop()
     {
         String commandExecutionResult;
 
-        String strReceived = Serial2.readString();
+        String strReceived = Serial2.readStringUntil(STOP_CHAR);
         strReceived.trim();
         DEBUG_PRINTLN("Command and parameters received [%s]", strReceived.c_str());
 
@@ -65,7 +68,10 @@ void loop()
             CommandFunction commandFunction = commandsMap[cmd];
             commandExecutionResult = commandFunction(params);
 
+            Serial2.flush();
             Serial2.print(commandExecutionResult.c_str());
+            Serial2.print(STOP_CHAR);
+
             DEBUG_PRINTLN("Result = [%s] sent to Nucleo Board", commandExecutionResult.c_str());
         } 
         else 
@@ -140,8 +146,8 @@ String CommandPostToServer(const std::vector<String>& params)
 
         if (httpResponseCode > 0) 
         {
-            DEBUG_PRINTLN("CommandPostToServer - Success\n[%d]\n[%s]", httpResponseCode, http.getString().c_str());
             response = http.getString();
+            DEBUG_PRINTLN("CommandPostToServer - Success\n[%d]\n[%s]", httpResponseCode, response.c_str());
         } 
         else 
         {
@@ -180,8 +186,8 @@ String CommandGet(const std::vector<String>& params)
 
         if (httpResponseCode > 0) 
         {
-            DEBUG_PRINTLN("CommandGet - Success\n[%d]\n[%s]", httpResponseCode, http.getString().c_str());
             response = http.getString();
+            DEBUG_PRINTLN("CommandGet - Success\n[%d]\n[%s]", httpResponseCode, response.c_str());
         } 
         else 
         {
@@ -214,6 +220,95 @@ String CommandStatus(const std::vector<String>& params)
 }
 
 // ---------------------------------------------------------------------------------------
+String CommandAccessPoint(const std::vector<String>& params)
+{
+    static bool formSubmitted = false;
+    static String network = "";
+    static String password = "";
+
+    if (params.size() == 1) 
+    {
+        WiFi.softAP(apSsid, apPassword);
+
+        WiFiServer server(80);
+        server.begin();
+
+        DEBUG_PRINTLN("Access Point configured. Connect to WiFi network: %s | Password: %s", apSsid, apPassword);
+        DEBUG_PRINTLN("Open a web browser and go to http://%s/ to view the HTML page", WiFi.softAPIP().toString().c_str());
+
+        // Bucle principal para manejar múltiples clientes
+        while (true)
+        {
+            WiFiClient client = server.available();
+            if (client)
+            {
+                DEBUG_PRINTLN("Client Connected");
+                
+                client.println("HTTP/1.1 200 OK");
+                client.println("Content-type:text/html");
+                client.println();
+                client.println(guardianHtml);
+
+                // Procesar todas las solicitudes disponibles
+                while (client.connected() && client.available())
+                {
+                    String request = client.readStringUntil('\r');
+                    if (request.indexOf("/connect") != -1)
+                    {
+                       
+                        network = _GetValueFromRequest(request, "ssid_string");
+                        password = _GetValueFromRequest(request, "pwd_string");
+
+                        // Cierra la conexión después de procesar la solicitud
+                        // client.stop();
+
+                        return (network + PARAM_SEPARATOR_CHAR + password);
+                    }
+                }
+
+                // Descartar las líneas adicionales después de procesar la solicitud
+                while (client.available() && client.read() != -1) {}
+
+                // Cierra la conexión si no se procesó ninguna solicitud
+                client.stop();
+                DEBUG_PRINTLN("Client Disconnected");
+            }
+        }
+    }
+    else 
+    {
+        DEBUG_PRINTLN("CommandAccessPoint- Incorrect amount of parameters [%d]", (params.size() - 1));
+        return RESULT_ERROR;
+    }
+}
+
+// ---------------------------------------------------------------------------------------
+String _GetValueFromRequest(String data, String key)
+{
+    String value = "";
+    int index = data.indexOf(key + "=");
+    if (index != -1)
+    {
+        index += key.length() + 1;
+        int endIndex = data.indexOf("&", index);
+        
+        if (endIndex == -1)
+        {
+            endIndex = data.indexOf(" ", index);
+            if (endIndex == -1)
+            {
+                endIndex = data.length();
+            }
+        }
+        
+        value = data.substring(index, endIndex);
+        value.replace("+", " ");
+    }
+
+    return value;
+}
+
+// ---------------------------------------------------------------------------------------
 bool _IsConnected()
 {
     return (WiFi.status() == WL_CONNECTED);
@@ -223,7 +318,7 @@ std::vector<String> _ParseParameters(const String &input)
 {
     size_t parameters_size = 0;
     int index_from = -1, index_to;
-    
+
     if (input.length() > 0) 
     {
         parameters_size++;

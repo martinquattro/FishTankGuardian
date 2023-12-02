@@ -55,6 +55,8 @@ namespace Drivers {
                 CMD_STATUS_WAIT_RESPONSE,
                 CMD_CONNECT_SEND,
                 CMD_CONNECT_WAIT_RESPONSE,
+                CMD_ACCESSPOINT_SEND,
+                CMD_ACCESSPOINT_WAIT_RESPONSE,
                 CMD_GET_SEND,
                 CMD_GET_WAIT_RESPONSE,
                 CMD_GET_RESPONSE_READY,
@@ -83,8 +85,8 @@ namespace Drivers {
             UnbufferedSerial    mSerial;
             WIFI_STATE          mState;
             Util::Delay         mWiFiComDelay;
-            std::string         mApSsid;
-            std::string         mApPassword;
+            std::string         mSsid;
+            std::string         mPassword;
             std::string         mResponse;
             std::string         mCommandGetResponse;
             std::string         mServer;
