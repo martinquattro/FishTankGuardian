@@ -133,8 +133,7 @@ void WiFiCom::Update()
                 _SendCommand(esp32Command.c_str());
                 mState = WIFI_STATE::CMD_STATUS_WAIT_RESPONSE;
                 DEBUG_PRINT("WiFiCom - Checking WiFi status\r\n");
-                mWiFiComDelay.Start(DELAY_2_SECONDS);
-
+                mWiFiComDelay.Start(DELAY_3_SECONDS);
             }
         }
         break;
@@ -172,7 +171,7 @@ void WiFiCom::Update()
                 _SendCommand(esp32Command.c_str());
                 mState = WIFI_STATE::CMD_CONNECT_WAIT_RESPONSE;
                 DEBUG_PRINT("WiFiCom - Sending request to connect to WiFi Network [%s]...\r\n", mSsid.c_str());
-                mWiFiComDelay.Start(DELAY_10_SECONDS);                        // so it was forced to manually create the non blocking delay
+                mWiFiComDelay.Start(DELAY_10_SECONDS);
             }
         }
         break;
@@ -203,7 +202,7 @@ void WiFiCom::Update()
                 esp32Command += STOP_CHAR;
                 _SendCommand(esp32Command.c_str());
                 mState = WIFI_STATE::CMD_ACCESSPOINT_WAIT_RESPONSE;
-                DEBUG_PRINT("WiFiCom - Sending request to set AccessPoint\r\n");
+                DEBUG_PRINT("WiFiCom - Setting AccessPoint\r\n");
             }
         }
         break;
@@ -358,7 +357,6 @@ WiFiCom::WiFiCom(PinName txPin, PinName rxPin, const int baudRate)
 //-----------------------------------------------------------------------------
 void WiFiCom::_SendCommand(const char* command)
 {
-    DEBUG_PRINT("_SendCommand - [%s]\r\n", command);
     mSerial.enable_output(true);
     mSerial.write(command, strlen(command));
     mSerial.enable_output(false);

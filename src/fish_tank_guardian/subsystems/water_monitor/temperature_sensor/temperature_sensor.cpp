@@ -26,7 +26,7 @@ void TemperatureSensor::Init()
         mInstance = new TemperatureSensor(TEMP_SENSOR_PIN);
     }
 
-    mLastReading = 0.0;
+    mInstance->mLastReading = 0.0;
 }
 
 //----static-------------------------------------------------------------------

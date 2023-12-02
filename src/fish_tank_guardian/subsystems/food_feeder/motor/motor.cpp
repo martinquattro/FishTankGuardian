@@ -28,7 +28,7 @@ void Motor::Init()
         mInstance = new Motor(MOTOR_PIN_1, MOTOR_PIN_2, MOTOR_PIN_3, MOTOR_PIN_4, MOTOR_SPEED);
     }
 
-    _Denergize();
+    mInstance->_Denergize();
 }
 
 //----static-------------------------------------------------------------------
