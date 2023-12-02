@@ -36,7 +36,7 @@ TemperatureSensor* TemperatureSensor::GetInstance()
 //-----------------------------------------------------------------------------
 void TemperatureSensor::Update()
 {
-    float analogReading = 25.0;
+    float analogReading = mPin.read();
 
     // add reading to vector
     (*mReadingsVectorIter) = analogReading;
@@ -60,8 +60,9 @@ void TemperatureSensor::Update()
     }
     float avgAnalogReading = (tempReadingSum / amounfOfReadings);
 
+
     // logic to transform reading to celcius degrees
-    const float tempValue = avgAnalogReading;
+    const float tempValue = (avgAnalogReading * 3.3 / 0.01);
 
     // check if we are out of boundaries
     if (tempValue < MIN_TEMP_VALUE)

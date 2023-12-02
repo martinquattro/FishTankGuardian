@@ -1,5 +1,5 @@
 ROOT=.
-DEVICE_ID[/home/studio/workspace/fishtankguardian]=066AFF505567494867104618
-DEVICE_TYPE[/home/studio/workspace/fishtankguardian]=connected
 TARGET=NUCLEO_F429ZI
 TARGET_CODE=0796
+DEVICE_ID[/home/studio/workspace/fishtankguardian]=066AFF505567494867104618
+DEVICE_TYPE[/home/studio/workspace/fishtankguardian]=connected
