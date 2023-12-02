@@ -36,9 +36,6 @@ void WaterMonitor::Init()
     Drivers::TemperatureSensor::Init();
     Drivers::TdsSensor::Init();
 
-    mInstance->SetTemperatureLimits(static_cast<int>(MIN_TEMP_VALUE), static_cast<int>(MAX_TEMP_VALUE));
-    mInstance->SetTdsLimits(static_cast<int>(MIN_TDS_VALUE), static_cast<int>(MAX_TDS_VALUE));
-
     DEBUG_PRINT("UserInterface - [OK] Initialized\r\n");
 }
 

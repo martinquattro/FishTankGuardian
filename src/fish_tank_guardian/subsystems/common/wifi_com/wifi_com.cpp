@@ -39,9 +39,11 @@ void WiFiCom::Init()
         mInstance = new WiFiCom(WIFI_PIN_TX, WIFI_PIN_RX, WIFI_BAUD_RATE);
     }
 
+    // set init state
     mInstance->mState = WIFI_STATE::INIT;
     mInstance->mSsid = "";
     mInstance->mPassword = "";
+    mInstance->mSerial.enable_output(false);
 }
 
 //----static-------------------------------------------------------------------
@@ -352,9 +354,7 @@ WiFiCom::WiFiCom(PinName txPin, PinName rxPin, const int baudRate)
     : mSerial(txPin, rxPin, baudRate)
     , mWiFiComDelay(0)
 {
-    mSerial.enable_output(false);
 }
-
 //-----------------------------------------------------------------------------
 void WiFiCom::_SendCommand(const char* command)
 {

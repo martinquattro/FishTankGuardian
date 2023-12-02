@@ -25,6 +25,8 @@ void TemperatureSensor::Init()
     {
         mInstance = new TemperatureSensor(TEMP_SENSOR_PIN);
     }
+
+    mLastReading = 0.0;
 }
 
 //----static-------------------------------------------------------------------
@@ -92,7 +94,6 @@ TemperatureSensor::TemperatureSensor(const PinName pin)
     , mReadingsVector(TEMP_SENSOR_NUM_AVG_SAMPLES, -1.0)
     , mReadingsVectorIter(mReadingsVector.begin())
 {
-    mLastReading = 0.0;
 }
 
 } // namespace Drivers

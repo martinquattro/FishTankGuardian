@@ -33,6 +33,27 @@ void RealTimeClock::Init()
         mInstance = new RealTimeClock(RTC_PIN_SDA, RTC_PIN_SCL, RTC_ADDRESS_ID, RTC_EEPROM_ADDRESS);
     }
 
+    mInstance->mState = RTC_STATE::INIT;
+
+    // By default the time is set to GMT until the user sets its timezone
+    mInstance->mCurrentTimeZone = "Etc/GMT";
+
+    mInstance->mRtcCom.start();
+    mInstance->mRtcCom.write(mInstance->mAddress | 0);
+    mInstance->mRtcCom.write(0x07u);
+    mInstance->mRtcCom.write(0x00u);
+    mInstance->mRtcCom.stop();
+
+    // Init timezones map. Only time zones in America for now
+    mInstance->mTimeZonesMap["-8"] = "America/Los_Angeles";
+    mInstance->mTimeZonesMap["-7"] = "America/Denver";
+    mInstance->mTimeZonesMap["-6"] = "America/Chicago";
+    mInstance->mTimeZonesMap["-5"] = "America/Bogota";
+    mInstance->mTimeZonesMap["-4"] = "America/Caracas";
+    mInstance->mTimeZonesMap["-3"] = "America/Buenos_Aires";
+    mInstance->mTimeZonesMap["-2"] = "America/Noronha";
+    mInstance->mTimeZonesMap["-1"] = "America/Scoresbysund";
+
     DEBUG_PRINT("RealTimeClock - [OK] Initialized\r\n");
 }
 
@@ -186,26 +207,7 @@ RealTimeClock::RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t address, ui
     , mMemory(sdaPin, sclPin, eepromAddr)
     , mRtcDelay(0)
     , mNumSyncAtempts(0)
-{
-    mState = RTC_STATE::INIT;
-    mCurrentTimeZone = "America/Buenos_Aires";         // debug
-
-    mRtcCom.start();
-    mRtcCom.write(mAddress | 0);
-    mRtcCom.write(0x07u);
-    mRtcCom.write(0x00u);
-    mRtcCom.stop();
-
-    // only time zones in America for now
-    mTimeZonesMap["-8"] = "America/Los_Angeles";
-    mTimeZonesMap["-7"] = "America/Denver";
-    mTimeZonesMap["-6"] = "America/Chicago";
-    mTimeZonesMap["-5"] = "America/Bogota";
-    mTimeZonesMap["-4"] = "America/Caracas";
-    mTimeZonesMap["-3"] = "America/Buenos_Aires";
-    mTimeZonesMap["-2"] = "America/Noronha";
-    mTimeZonesMap["-1"] = "America/Scoresbysund";
-}
+{}
 
 //-----------------------------------------------------------------------------
 bool RealTimeClock::_SyncFromResponse(std::string response)

@@ -27,6 +27,11 @@ void TdsSensor::Init()
         mInstance = new TdsSensor(TDS_SENSOR_PIN);
     }
 
+    mInstance->mTemperature = 25.0;
+    mInstance->mAdcRange = 1024.0;
+    mInstance->mRef = 5.0;
+    mInstance->mKValue = 1.0;
+    mInstance->mLastReading = 0;
 }
 
 //----static-------------------------------------------------------------------
@@ -96,10 +101,6 @@ TdsSensor::TdsSensor(const PinName pin)
     , mReadingsVector(TDS_SENSOR_NUM_AVG_SAMPLES, -1.0)
     , mReadingsVectorIter(mReadingsVector.begin())
 {
-    mTemperature = 25.0;
-    mAdcRange = 1024.0;
-    mRef = 5.0;
-    mKValue = 1.0;
 }
 
 } // namespace Drivers

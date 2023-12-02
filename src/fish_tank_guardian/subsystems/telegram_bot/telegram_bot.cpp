@@ -37,6 +37,18 @@ void TelegramBot::Init()
         mInstance = new TelegramBot(BOT_API_URL, BOT_TOKEN);
     }
 
+    mLastUpdateId = 0;
+
+    mCommandsMap[COMMAND_START]                      = std::bind(&TelegramBot::_CommandStart, this, std::placeholders::_1);
+    mCommandsMap[COMMAND_FEEDER_FEED]                = std::bind(&TelegramBot::_CommandFeederFeed, this, std::placeholders::_1);
+    mCommandsMap[COMMAND_FEEDER_STATUS]              = std::bind(&TelegramBot::_CommandFeederStatus, this, std::placeholders::_1);
+    mCommandsMap[COMMAND_FEEDER_SET]                 = std::bind(&TelegramBot::_CommandFeederSet, this, std::placeholders::_1);
+    mCommandsMap[COMMAND_FEEDER_DELETE]              = std::bind(&TelegramBot::_CommandFeederDelete, this, std::placeholders::_1);
+    mCommandsMap[COMMAND_TIMEZONE]                   = std::bind(&TelegramBot::_CommandTimezone, this, std::placeholders::_1);
+    mCommandsMap[COMMAND_MONITOR_STATUS]             = std::bind(&TelegramBot::_CommandMonitorStatus, this, std::placeholders::_1);
+    mCommandsMap[COMMAND_MONITOR_SET_TEMP_LIMITS]    = std::bind(&TelegramBot::_CommandMonitorSetTempLimits, this, std::placeholders::_1);
+    mCommandsMap[COMMAND_MONITOR_SET_TDS_LIMITS]     = std::bind(&TelegramBot::_CommandMonitorSetTdsLimits, this, std::placeholders::_1);
+
     Drivers::WiFiCom::Init();
 
     DEBUG_PRINT("TelegramBot - [OK] Initialized\r\n");
@@ -179,19 +191,7 @@ TelegramBot::TelegramBot(const char* apiUrl, const char* token)
     , mToken(token)
     , mBotDelay(0)
     , mBotAlertsDelay(0)
-{
-    mLastUpdateId = 0;
-
-    mCommandsMap[COMMAND_START]                      = std::bind(&TelegramBot::_CommandStart, this, std::placeholders::_1);
-    mCommandsMap[COMMAND_FEEDER_FEED]                = std::bind(&TelegramBot::_CommandFeederFeed, this, std::placeholders::_1);
-    mCommandsMap[COMMAND_FEEDER_STATUS]              = std::bind(&TelegramBot::_CommandFeederStatus, this, std::placeholders::_1);
-    mCommandsMap[COMMAND_FEEDER_SET]                 = std::bind(&TelegramBot::_CommandFeederSet, this, std::placeholders::_1);
-    mCommandsMap[COMMAND_FEEDER_DELETE]              = std::bind(&TelegramBot::_CommandFeederDelete, this, std::placeholders::_1);
-    mCommandsMap[COMMAND_TIMEZONE]                   = std::bind(&TelegramBot::_CommandTimezone, this, std::placeholders::_1);
-    mCommandsMap[COMMAND_MONITOR_STATUS]             = std::bind(&TelegramBot::_CommandMonitorStatus, this, std::placeholders::_1);
-    mCommandsMap[COMMAND_MONITOR_SET_TEMP_LIMITS]    = std::bind(&TelegramBot::_CommandMonitorSetTempLimits, this, std::placeholders::_1);
-    mCommandsMap[COMMAND_MONITOR_SET_TDS_LIMITS]     = std::bind(&TelegramBot::_CommandMonitorSetTdsLimits, this, std::placeholders::_1);
-}
+{}
 
 //-----------------------------------------------------------------------------
 std::string TelegramBot::_CommandStart(const std::vector<std::string>& params)
