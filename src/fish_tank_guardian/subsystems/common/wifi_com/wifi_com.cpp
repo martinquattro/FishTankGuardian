@@ -39,6 +39,9 @@ void WiFiCom::Init()
         mInstance = new WiFiCom(WIFI_PIN_TX, WIFI_PIN_RX, WIFI_BAUD_RATE);
     }
 
+    Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(WIFI_SSID_EEPROM_START, "");       // debug
+    Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(WIFI_PASS_EEPROM_START, "");       // debug
+
     // set init state
     mInstance->mState = WIFI_STATE::INIT;
     mInstance->mSsid = (Subsystems::RealTimeClock::GetInstance()->ReadStringFromEeprom(WIFI_SSID_EEPROM_START));
@@ -168,7 +171,7 @@ void WiFiCom::Update()
                 esp32Command += STOP_CHAR;
                 _SendCommand(esp32Command.c_str());
                 mState = WIFI_STATE::CMD_CONNECT_WAIT_RESPONSE;
-                DEBUG_PRINT("WiFiCom - Sending request to connect to WiFi Network [%s][%s]...\r\n", mSsid.c_str(), mPassword.c_str());
+                DEBUG_PRINT("WiFiCom - Sending request to connect to WiFi Network [%s]...\r\n", mSsid.c_str());
                 mWiFiComDelay.Start(DELAY_10_SECONDS);
             }
         }
