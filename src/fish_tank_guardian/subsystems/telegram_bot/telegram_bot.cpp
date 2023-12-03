@@ -1,11 +1,12 @@
 /*!****************************************************************************
- * @file telegram_bot.cpp
- * @brief TODO
- * @author Quattrone Martin
- * @date Oct 2023
- *******************************************************************************/
+ * @file    telegram_bot.cpp
+ * @brief   Implementation of the TelegramBot class
+ * @details This file contains the implementation of the TelegramBot class,
+ *          which is responsible for handling interactions with the Telegram Bot API.
+ * @author  Quattrone Martin
+ * @date    Oct 2023
+ ******************************************************************************/
 
-//=====[Libraries]=============================================================
 
 #include "telegram_bot.h"
 #include "telegram_bot_lib.h"
@@ -25,7 +26,7 @@ namespace Subsystems {
 
 TelegramBot* TelegramBot::mInstance = nullptr;
 
-//=====[Implementations of public functions]===================================
+//=====[Implementations of public methods]=====================================
 
 //----static-------------------------------------------------------------------
 void TelegramBot::Init()
@@ -186,15 +187,16 @@ void TelegramBot::Update()
     }
 }
 
-//=====[Implementations of private functions]==================================
+//=====[Implementations of private methods]====================================
 
+//----private------------------------------------------------------------------
 TelegramBot::TelegramBot(const char* apiUrl, const char* token)
     : mBotUrl(apiUrl)
     , mToken(token)
     , mBotDelay(0)
 {}
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 std::string TelegramBot::_CommandStart(const std::vector<std::string>& params)
 {
     if (params.size() == 1) 
@@ -207,7 +209,7 @@ std::string TelegramBot::_CommandStart(const std::vector<std::string>& params)
 }
 
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 std::string TelegramBot::_CommandFeederFeed(const std::vector<std::string>& params) 
 {
     if (params.size() == 2) 
@@ -228,7 +230,7 @@ std::string TelegramBot::_CommandFeederFeed(const std::vector<std::string>& para
     return (Utilities::FormatString(ERROR_INVALID_PARAMETERS, COMMAND_FEEDER_FEED));
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 std::string TelegramBot::_CommandFeederStatus(const std::vector<std::string>& params)
 {
     if (params.size() == 1) 
@@ -255,7 +257,7 @@ std::string TelegramBot::_CommandFeederStatus(const std::vector<std::string>& pa
     return (Utilities::FormatString(ERROR_INVALID_PARAMETERS, COMMAND_FEEDER_STATUS));
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 std::string TelegramBot::_CommandFeederSet(const std::vector<std::string>& params)
 {
     if (params.size() == 4) 
@@ -281,7 +283,7 @@ std::string TelegramBot::_CommandFeederSet(const std::vector<std::string>& param
     return (Utilities::FormatString(ERROR_INVALID_PARAMETERS, COMMAND_FEEDER_SET));
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 std::string TelegramBot::_CommandFeederDelete(const std::vector<std::string>& params)
 {
     if (params.size() == 2) 
@@ -302,7 +304,7 @@ std::string TelegramBot::_CommandFeederDelete(const std::vector<std::string>& pa
     return (Utilities::FormatString(ERROR_INVALID_PARAMETERS, COMMAND_FEEDER_DELETE));
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 std::string TelegramBot::_CommandMonitorStatus(const std::vector<std::string>& params)
 {
     if (params.size() == 1) 
@@ -313,7 +315,7 @@ std::string TelegramBot::_CommandMonitorStatus(const std::vector<std::string>& p
     return Utilities::FormatString(ERROR_INVALID_PARAMETERS, COMMAND_MONITOR_STATUS);
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 std::string TelegramBot::_CommandMonitorSetTempLimits(const std::vector<std::string>& params)
 {
     if (params.size() == 3) 
@@ -336,7 +338,7 @@ std::string TelegramBot::_CommandMonitorSetTempLimits(const std::vector<std::str
     return Utilities::FormatString(ERROR_INVALID_PARAMETERS, COMMAND_MONITOR_SET_TEMP_LIMITS);
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 std::string TelegramBot::_CommandMonitorSetTdsLimits(const std::vector<std::string>& params)
 {
     if (params.size() == 3) 
@@ -359,7 +361,7 @@ std::string TelegramBot::_CommandMonitorSetTdsLimits(const std::vector<std::stri
     return Utilities::FormatString(ERROR_INVALID_PARAMETERS, COMMAND_MONITOR_SET_TDS_LIMITS);
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 std::string TelegramBot::_CommandTimezone(const std::vector<std::string>& params)
 {
     if (params.size() == 2) 
@@ -375,7 +377,7 @@ std::string TelegramBot::_CommandTimezone(const std::vector<std::string>& params
     return Utilities::FormatString(ERROR_INVALID_PARAMETERS, COMMAND_TIMEZONE);
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 std::string TelegramBot::_GetMonitorStatusResponse()
 {
     int tempLowerLimit, tempUpperLimit, tdsLowerLimit, tdsUpperLimit;
@@ -393,13 +395,13 @@ std::string TelegramBot::_GetMonitorStatusResponse()
                                     tds, tdsLowerLimit, tdsUpperLimit);
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 void TelegramBot::_RegisterUser(std::string userId)
 {
     Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(USER_ID_EEPROM_START, userId);
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 bool TelegramBot::_IsValidUser(std::string userId)
 {
     std::string userIdInEeprom = Subsystems::RealTimeClock::GetInstance()->ReadStringFromEeprom(USER_ID_EEPROM_START);
@@ -407,13 +409,14 @@ bool TelegramBot::_IsValidUser(std::string userId)
     return (userIdInEeprom.compare(userId) == 0);
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
+
 std::string TelegramBot::_GetUserId()
 {
     return (Subsystems::RealTimeClock::GetInstance()->ReadStringFromEeprom(USER_ID_EEPROM_START));
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 std::vector<std::string> TelegramBot::_ParseMessage(const std::string& message)
 {
     std::vector<std::string> params;
@@ -436,7 +439,7 @@ std::vector<std::string> TelegramBot::_ParseMessage(const std::string& message)
     return params;
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 void TelegramBot::_SendMessage(const std::string chatId, const std::string message)
 {
     std::string server = mBotUrl + mToken + "/sendmessage";
@@ -445,7 +448,7 @@ void TelegramBot::_SendMessage(const std::string chatId, const std::string messa
     Drivers::WiFiCom::GetInstance()->Post(server, request);
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 bool TelegramBot::_GetMessageFromResponse(TelegramMessage* message, const std::string& response)
 {
     Json json(response.c_str(), response.length(), 1000);
@@ -497,7 +500,7 @@ bool TelegramBot::_GetMessageFromResponse(TelegramMessage* message, const std::s
     return false;
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 void TelegramBot::_RequestLastMessage()
 {
     std::string server = mBotUrl + mToken + "/getUpdates";
