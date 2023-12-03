@@ -200,7 +200,7 @@ std::string FoodFeeder::GetNextFeedTime()
     return nextFeedTime;
 }
 
-//=====[Implementations of private functions]==================================
+//=====[Implementations of private methods]====================================
 
 //----private------------------------------------------------------------------
 FoodFeeder::FoodFeeder()

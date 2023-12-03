@@ -1,9 +1,11 @@
 /*!****************************************************************************
- * @file real_time_clock.cpp
- * @brief TODO
- * @author Quattrone Martin
- * @date Oct 2023
- *******************************************************************************/
+ * @file    real_time_clock.cpp
+ * @brief   RealTimeClock class implementation file. Methods and logic for
+ *          RTC tiny module with EEPROM integrated.
+ * @author  Quattrone Martin
+ * @date    Oct 2023
+ ******************************************************************************/
+
 
 //=====[Libraries]=============================================================
 
@@ -21,7 +23,7 @@ namespace Subsystems {
 
 RealTimeClock* RealTimeClock::mInstance = nullptr;
 
-//=====[Implementations of public functions]===================================
+//=====[Implementations of public methods]=====================================
 
 //----static-------------------------------------------------------------------
 void RealTimeClock::Init()
@@ -62,12 +64,6 @@ void RealTimeClock::Init()
 RealTimeClock* RealTimeClock::GetInstance()
 {
     return mInstance;
-}
-
-//-----------------------------------------------------------------------------
-bool RealTimeClock::IsReady()
-{
-    return (mState == RTC_STATE::SYNCED || mState == RTC_STATE::NOT_SYNCED);
 }
 
 //-----------------------------------------------------------------------------
@@ -125,6 +121,12 @@ void RealTimeClock::Update()
         case RTC_STATE::NOT_SYNCED:
         break;
     }
+}
+
+//-----------------------------------------------------------------------------
+bool RealTimeClock::IsReady()
+{
+    return (mState == RTC_STATE::SYNCED || mState == RTC_STATE::NOT_SYNCED);
 }
 
 //-----------------------------------------------------------------------------
@@ -188,20 +190,21 @@ bool RealTimeClock::GetCurrentTime(std::string* hours, std::string* minutes, std
 //-----------------------------------------------------------------------------
 void RealTimeClock::SaveStringToEeprom(const int position, std::string str) 
 {
-    mMemory.write(position, str);
+    mMemory.Write(position, str);
 }
 
 //-----------------------------------------------------------------------------
 std::string RealTimeClock::ReadStringFromEeprom(const int position) 
 {
     std::string str;
-    mMemory.read(position, str);
+    mMemory.Read(position, str);
 
     return str;
 }
 
-//=====[Implementations of private functions]==================================
+//=====[Implementations of private methods]====================================
 
+//----private------------------------------------------------------------------
 RealTimeClock::RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t address, uint8_t eepromAddr)
     : mRtcCom(sdaPin, sclPin)
     , mAddress(address << 1)
@@ -210,7 +213,7 @@ RealTimeClock::RealTimeClock(PinName sdaPin, PinName sclPin, uint8_t address, ui
     , mNumSyncAtempts(0)
 {}
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 bool RealTimeClock::_SyncFromResponse(std::string response)
 {
     Json json(response.c_str(), response.length(), 100);
@@ -255,7 +258,7 @@ bool RealTimeClock::_SyncFromResponse(std::string response)
     }
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 void RealTimeClock::_Set(const tm time)
 {
     mRtcCom.start();
@@ -272,13 +275,13 @@ void RealTimeClock::_Set(const tm time)
     mRtcCom.stop();
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 uint8_t RealTimeClock::_Bcd2Dec(uint8_t num)
 {
   return ((num / 16 * 10) + (num % 16));
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 uint8_t RealTimeClock::_Dec2Bcd(uint8_t num)
 {
   return ((num / 10 * 16) + (num % 10));
