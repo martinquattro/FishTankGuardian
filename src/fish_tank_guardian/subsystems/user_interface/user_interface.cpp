@@ -1,11 +1,9 @@
 /*!****************************************************************************
- * @file user_interface.cpp
- * @brief TODO
- * @author Quattrone Martin
- * @date Oct 2023
+ * @file    user_interface.cpp
+ * @brief   Implementation of the UserInterface class.
+ * @author  Quattrone Martin
+ * @date    Oct 2023
  *******************************************************************************/
-
-//=====[Libraries]=============================================================
 
 #include "user_interface.h"
 
@@ -21,7 +19,7 @@ namespace Subsystems {
 
 UserInterface* UserInterface::mInstance = nullptr;
 
-//=====[Implementations of public functions]===================================
+//=====[Implementations of public methods]=====================================
 
 //----static-------------------------------------------------------------------
 void UserInterface::Init()
@@ -108,7 +106,4 @@ void UserInterface::Update()
         Drivers::Display::Write(currentTime.c_str());
     }
 }
-
-//=====[Implementations of private functions]==================================
-
 } // namespace Subsystems
