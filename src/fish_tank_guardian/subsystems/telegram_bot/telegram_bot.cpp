@@ -63,6 +63,8 @@ TelegramBot* TelegramBot::GetInstance()
 //-----------------------------------------------------------------------------
 void TelegramBot::Update()
 {
+    static uint64_t sNextAlertTick = 0;
+
     switch (mState)
     {
         case BOT_STATE::INIT:
@@ -76,8 +78,10 @@ void TelegramBot::Update()
 
         case BOT_STATE::MONITOR:
         {
-            if (mBotAlertsDelay.HasFinished() && !(Subsystems::WaterMonitor::GetInstance()->GetWaterState()))
+            // Same case of RealTimeClock class, delay object for long delays not working properly
+            if ((sNextAlertTick < Util::Tick::GetTickCounter()) && !(Subsystems::WaterMonitor::GetInstance()->GetWaterState()))
             {
+                sNextAlertTick = (Util::Tick::GetTickCounter() + DELAY_5_MINUTES);
                 mState = BOT_STATE::SEND_ALERT;
             }
             else
@@ -90,8 +94,9 @@ void TelegramBot::Update()
         
         case BOT_STATE::SEND_ALERT:
         {
-            if (mBotAlertsDelay.HasFinished() && !(Drivers::WiFiCom::GetInstance()->IsBusy()))
+            if (!(Drivers::WiFiCom::GetInstance()->IsBusy()))
             {
+                DEBUG_PRINT("TelegramBot - [ALERT] Sending out of limits warning\r\n");
                 std::string messageToSend = ALERT_OUT_OF_LIMITS;
                 messageToSend += "\n";
                 messageToSend += _GetMonitorStatusResponse();
@@ -99,7 +104,6 @@ void TelegramBot::Update()
                 _SendMessage(userId, messageToSend);
                 mState = BOT_STATE::WAITING_RESPONSE;
                 mBotDelay.Start(DELAY_5_SECONDS);
-                mBotAlertsDelay.Start(DELAY_10_SECONDS);
             }
         }
         break;
@@ -190,7 +194,6 @@ TelegramBot::TelegramBot(const char* apiUrl, const char* token)
     : mBotUrl(apiUrl)
     , mToken(token)
     , mBotDelay(0)
-    , mBotAlertsDelay(0)
 {}
 
 //-----------------------------------------------------------------------------

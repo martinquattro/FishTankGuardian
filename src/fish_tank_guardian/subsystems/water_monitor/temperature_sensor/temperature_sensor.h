@@ -48,6 +48,7 @@ namespace Drivers {
             TempReadingsVec mReadingsVector;
             TempReadingsVec::iterator mReadingsVectorIter;
             float mLastReading;
+            float mRef;
     };
 
 } // namespace Drivers

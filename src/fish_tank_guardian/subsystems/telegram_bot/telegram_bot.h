@@ -108,7 +108,6 @@ namespace Subsystems {
             TelegramMessage     mLastMessage;
             std::string         mResponse;
             Util::Delay         mBotDelay;
-            Util::Delay         mBotAlertsDelay;
             std::map<std::string, CommandFunction> mCommandsMap;
     };
 
