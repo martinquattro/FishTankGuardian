@@ -1,8 +1,10 @@
 /*!****************************************************************************
- * @file food_feeder.cpp
- * @brief TODO
- * @author Quattrone Martin
- * @date Oct 2023
+ * @file    food_feeder.cpp
+ * @brief   Implementation of the FoodFeeder class
+ * @details This code controls a food feeder system, managing feed times,
+ *          feeding operations, and related functionality.
+ * @author  Quattrone Martin
+ * @date    Oct 2023
  *******************************************************************************/
 
 //=====[Libraries]=============================================================
@@ -20,7 +22,7 @@ namespace Subsystems {
 
 FoodFeeder* FoodFeeder::mInstance = nullptr;
 
-//=====[Implementations of public functions]===================================
+//=====[Implementations of public methods]=====================================
 
 //----static-------------------------------------------------------------------
 void FoodFeeder::Init()
@@ -99,7 +101,7 @@ bool FoodFeeder::EraseFeedTime(const int feedTimeSlot)
 //-----------------------------------------------------------------------------
 bool FoodFeeder::AddFeedTime(std::string newFeedTime, const int numFeeds, const int feedTimeSlot)
 {
-    // Valdiate if it is a valid feedtime, slot and num of feeds
+    // Validate if it is a valid feedtime, slot, and num of feeds
     if (newFeedTime.size() != 8 
         || !(_IsValidTimeFormat(newFeedTime.c_str()) )
         || (feedTimeSlot < 0) 
@@ -111,7 +113,7 @@ bool FoodFeeder::AddFeedTime(std::string newFeedTime, const int numFeeds, const 
         return false;
     }
     
-    // Create the HH:MM:SS-X format to save in eeprom
+    // Create the HH:MM:SS-X format to save in EEPROM
     std::string feedTimeStr = newFeedTime + '-' + std::to_string(numFeeds);
 
     // Calculate the EEPROM position based on the slot size
@@ -169,7 +171,12 @@ std::string FoodFeeder::GetNextFeedTime()
 
         for (const auto& feedTimeInfo : feedTimes)
         {
-            if (feedTimeInfo.mFeedTime > currentTime && (nextFeedTime == "" || feedTimeInfo.mFeedTime < nextFeedTime))
+            if (feedTimeInfo.mFeedTime == currentTime)
+            {
+                nextFeedTime = feedTimeInfo.mFeedTime;
+                break;
+            }
+            else if (feedTimeInfo.mFeedTime > currentTime && (nextFeedTime == "" || feedTimeInfo.mFeedTime < nextFeedTime))
             {
                 nextFeedTime = feedTimeInfo.mFeedTime;
             }
@@ -195,13 +202,12 @@ std::string FoodFeeder::GetNextFeedTime()
 
 //=====[Implementations of private functions]==================================
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 FoodFeeder::FoodFeeder()
 {
-
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 bool FoodFeeder::_IsValidTimeFormat(const char* time) 
 {
     if (   std::isdigit(time[0]) && std::isdigit(time[1]) 
@@ -216,7 +222,7 @@ bool FoodFeeder::_IsValidTimeFormat(const char* time)
     return false;
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 bool FoodFeeder::_IsTimeToFeed(std::string currentTime, int* numFeeds)
 {
     std::vector<FeedTimeInfo> feedTimes = GetFeedTimes();

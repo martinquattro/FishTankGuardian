@@ -1,10 +1,10 @@
 /*!****************************************************************************
- * @file motor.cpp
- * @brief Implementation of the Motor class for 5-12V 28BYJ Stepper Motor with ULN2003 Driver
+ * @file    motor.cpp
+ * @brief   Implementation of the Motor class for 5-12V 28BYJ Stepper Motor with ULN2003 Driver
  * @details This code controls a 12V 28BYJ stepper motor using the ULN2003 driver.
  *          It includes initialization, rotation control, and utility functions.
- * @author Quattrone Martin
- * @date Oct 2023
+ * @author  Quattrone Martin
+ * @date    Oct 2023
  *******************************************************************************/
 
 //=====[Libraries]=============================================================
@@ -18,7 +18,7 @@ namespace Drivers {
 
 Motor* Motor::mInstance = nullptr;
 
-//=====[Implementations of public functions]===================================
+//=====[Implementations of public methods]=====================================
 
 //----static-------------------------------------------------------------------
 void Motor::Init()
@@ -44,9 +44,9 @@ void Motor::Rotate(const int numFullRotations)
     _Denergize();
 }
 
-//=====[Implementations of private functions]==================================
+//=====[Implementations of private methods]====================================
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 Motor::Motor(PinName pin1, PinName pin2, PinName pin3, PinName pin4, const int speed)
     : mPin1(pin1)
     , mPin2(pin2)
@@ -56,7 +56,7 @@ Motor::Motor(PinName pin1, PinName pin2, PinName pin3, PinName pin4, const int s
 {
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 void Motor::_Denergize()
 {
     mPin1.write(LOW);
@@ -65,7 +65,7 @@ void Motor::_Denergize()
     mPin4.write(LOW);
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 void Motor::_Rotate(const int numSteps)
 {
     int count = 0;
@@ -81,7 +81,6 @@ void Motor::_Rotate(const int numSteps)
             wait_us(mSpeed);
         }
     }
-
 } // namespace Drivers
 
 }
