@@ -1,6 +1,6 @@
 /*!****************************************************************************
  * @file pc_serial_com.cpp
- * @brief TODO
+ * @brief Implementation of PC serial communication module
  * @author Quattrone Martin
  * @date Oct 2023
  *******************************************************************************/
@@ -18,7 +18,7 @@ namespace Util {
 
 PcSerialCom* PcSerialCom::mInstance = nullptr;
 
-//=====[Implementations of public functions]===================================
+//=====[Implementations of public methods]=====================================
 
 //----static-------------------------------------------------------------------
 void PcSerialCom::Init()
@@ -29,7 +29,7 @@ void PcSerialCom::Init()
     }
 }
 
-//=====[Implementations of private functions]==================================
+//=====[Implementations of private methods]====================================
 
 PcSerialCom::PcSerialCom(PinName txPin, PinName rxPin, const int baudRate)
     : mUartUsb(txPin, rxPin, baudRate)
