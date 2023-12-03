@@ -1,9 +1,9 @@
 /*!****************************************************************************
- * @file temperature_sensor.h
- * @brief TODO
- * @author Quattrone Martin
- * @date Oct 2023
- *******************************************************************************/
+ * @file    temperature_sensor.h
+ * @brief   TemperatureSensor class header file.
+ * @author  Quattrone Martin
+ * @date    Oct 2023
+ ******************************************************************************/
 
 #ifndef TEMPERATURE_SENSOR_H
 #define TEMPERATURE_SENSOR_H
@@ -16,27 +16,37 @@
 #define MIN_TEMP_VALUE  0.0
 #define MAX_TEMP_VALUE  99.9
 
-namespace Drivers { 
+namespace Drivers {
 
     class TemperatureSensor 
     {
         public:
 
-            //! Initialize the sensor
+            /*!
+            * @brief Initializes the TemperatureSensor.
+            */
             static void Init();
 
-            //! Returns the sensor object
+            /*!
+            * @brief Gets the singleton instance of the TemperatureSensor.
+            * @return TemperatureSensor* Pointer to the TemperatureSensor instance.
+            */
             static TemperatureSensor* GetInstance();
 
-            //! 
+            /*!
+            * @brief Updates the TemperatureSensor readings.
+            */
             void Update();
 
-            //!
+            /*!
+            * @brief Gets the last temperature reading.
+            * @return float Last temperature reading.
+            */
             float GetLastReading();
 
         private:
 
-            using TempReadingsVec = vector<float>;
+            using TempReadingsVec = std::vector<float>;
 
             TemperatureSensor(const PinName pin);
             ~TemperatureSensor() = default;

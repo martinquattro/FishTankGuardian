@@ -5,8 +5,6 @@
  * @date Oct 2023
  *******************************************************************************/
 
-//=====[Libraries]=============================================================
-
 #include "mbed.h"
 #include "temperature_sensor.h"
 
@@ -16,7 +14,7 @@ namespace Drivers {
 
 TemperatureSensor* TemperatureSensor::mInstance = nullptr;
 
-//=====[Implementations of public functions]===================================
+//=====[Implementations of public methods]=====================================
 
 //----static-------------------------------------------------------------------
 void TemperatureSensor::Init()

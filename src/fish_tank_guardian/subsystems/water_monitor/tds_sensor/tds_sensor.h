@@ -1,9 +1,9 @@
 /*!****************************************************************************
  * @file tds_sensor.h
- * @brief TODO
+ * @brief TdsSensor class header file.
  * @author Quattrone Martin
  * @date Oct 2023
- *******************************************************************************/
+ ******************************************************************************/
 
 #ifndef TDS_SENSOR_H
 #define TDS_SENSOR_H
@@ -22,16 +22,27 @@ namespace Drivers {
     {
         public:
 
-            //! Initialize the sensor
+            /**
+             * @brief Initialize the TDS sensor.
+             */
             static void Init();
 
-            //! Returns the sensor object
+            /**
+             * @brief Returns the singleton instance of the TDS sensor.
+             * @return TdsSensor* Pointer to the TDS sensor instance.
+             */
             static TdsSensor* GetInstance();
 
-            //!
+            /**
+             * @brief Update the TDS sensor readings.
+             * @param temperature The temperature for compensation (default is 25.0).
+             */
             void Update(const float temperature = 25.0);
 
-            //!
+            /**
+             * @brief Get the last TDS reading.
+             * @return Last TDS reading in ppm.
+             */
             int GetLastReading();
 
         private:
