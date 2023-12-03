@@ -1,11 +1,9 @@
 /*!****************************************************************************
- * @file main.cpp
- * @brief TODO
- * @author Quattrone Martin
- * @date Oct 2023
- *******************************************************************************/
-
-//=====[Libraries]=============================================================
+ * @file    main.cpp
+ * @brief   Main file for the Fish Tank Guardian application.
+ * @author  Quattrone Martin
+ * @date    Oct 2023
+ ******************************************************************************/
 
 #include "fish_tank_guardian.h"
 
@@ -15,6 +13,7 @@
 int main()
 {
     Subsystems::FishTankGuardian::Init();
+
     while (true) 
     {
         Subsystems::FishTankGuardian::GetInstance()->Update();

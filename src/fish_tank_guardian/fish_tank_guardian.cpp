@@ -5,8 +5,6 @@
  * @date Oct 2023
  *******************************************************************************/
 
-//=====[Libraries]=============================================================
-
 #include "fish_tank_guardian.h"
 
 #include "arm_book_lib.h"
@@ -70,7 +68,7 @@ void FishTankGuardian::Update()
 
 //=====[Implementations of private functions]==================================
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 FishTankGuardian::FishTankGuardian() 
     : mDelay(SYSTEM_TIME_INCREMENT_MS)
 {}
