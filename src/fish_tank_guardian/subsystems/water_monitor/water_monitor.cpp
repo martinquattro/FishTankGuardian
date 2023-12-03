@@ -1,11 +1,9 @@
 /*!****************************************************************************
- * @file water_monitor.cpp
- * @brief TODO
- * @author Quattrone Martin
- * @date Oct 2023
+ * @file    water_monitor.cpp
+ * @brief   Implementation of the WaterMonitor class
+ * @author  Quattrone Martin
+ * @date    Oct 2023
  *******************************************************************************/
-
-//=====[Libraries]=============================================================
 
 #include "water_monitor.h"
 
@@ -21,7 +19,7 @@ namespace Subsystems {
 
 WaterMonitor* WaterMonitor::mInstance = nullptr;
 
-//=====[Implementations of public functions]===================================
+//=====[Implementations of public methods]=====================================
 
 //----static-------------------------------------------------------------------
 void WaterMonitor::Init()
@@ -134,7 +132,9 @@ bool WaterMonitor::GetTdsLimits(int* lowerLimit, int* upperLimit)
     return (_GetSensorLimits(TDS_LIMITS_EEPROM_START, lowerLimit, upperLimit));
 }
 
-//-----------------------------------------------------------------------------
+//=====[Implementations of private methods]====================================
+
+//----private------------------------------------------------------------------
 bool WaterMonitor::_GetSensorLimits(const int eepromPosition, int* lowerLimit, int* upperLimit)
 {   
     std::string limitsStr = Subsystems::RealTimeClock::GetInstance()->ReadStringFromEeprom(eepromPosition);
@@ -158,7 +158,4 @@ bool WaterMonitor::_GetSensorLimits(const int eepromPosition, int* lowerLimit, i
 
     return false;
 }
-
-//=====[Implementations of private functions]==================================
-
 } // namespace Subsystems
