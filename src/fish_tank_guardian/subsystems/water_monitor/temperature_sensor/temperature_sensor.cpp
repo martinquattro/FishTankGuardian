@@ -64,7 +64,7 @@ void TemperatureSensor::Update()
     float avgAnalogReading = (tempReadingSum / amounfOfReadings);
 
     // logic to transform reading to celcius degrees
-    const float tempValue = (avgAnalogReading * mRef / 0.01);
+    const float tempValue = (avgAnalogReading) * MAX_TEMP_VALUE;
 
     // check if we are out of boundaries
     if (tempValue < MIN_TEMP_VALUE)
