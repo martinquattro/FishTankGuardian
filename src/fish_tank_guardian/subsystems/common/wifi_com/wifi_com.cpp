@@ -1,18 +1,16 @@
 /*!****************************************************************************
- * @file wifi_com.cpp
- * @brief TODO
- * @author Quattrone Martin
- * @date Oct 2023
- *******************************************************************************/
-
-//=====[Libraries]=============================================================
+ * @file    wifi_com.cpp
+ * @brief   Implementation of the WiFiCom class methods.
+ * @author  Quattrone Martin
+ * @date    Oct 2023
+ ******************************************************************************/
 
 #include "wifi_com.h"
 
-#include "arm_book_lib.h"
-#include "mbed.h"
-#include "commands.h"
 #include <string>
+#include "arm_book_lib.h"
+#include "commands.h"
+#include "mbed.h"
 
 namespace Drivers {
 
@@ -53,60 +51,6 @@ void WiFiCom::Init()
 WiFiCom* WiFiCom::GetInstance()
 {
     return mInstance;
-}
-
-//-----------------------------------------------------------------------------
-bool WiFiCom::IsBusy()
-{
-    return (mState != WIFI_STATE::IDLE);
-}
-
-//-----------------------------------------------------------------------------
-void WiFiCom::Post(const std::string& server, const std::string& request)
-{
-    mState = WIFI_STATE::CMD_POST_SEND;
-    mServer = server;
-    mRequest = request;
-    mResponse.clear();
-}
-
-//-----------------------------------------------------------------------------
-void WiFiCom::Request(const std::string& url)
-{
-    mState = WIFI_STATE::CMD_GET_SEND;
-    mServer = url;
-    mRequest = "";
-    mCommandGetResponse.clear();
-}
-
-//-----------------------------------------------------------------------------
-bool WiFiCom::GetPostResponse(std::string* response)
-{
-    if (mState == WIFI_STATE::CMD_POST_RESPONSE_READY)
-    {
-        (*response) = mResponse;
-        mResponse.clear();
-        mIsResponseReady = false;
-
-        return true;
-    }
-
-    return false;
-}
-
-//-----------------------------------------------------------------------------
-bool WiFiCom::GetGetResponse(std::string* response)
-{
-    if (mState == WIFI_STATE::CMD_GET_RESPONSE_READY)
-    {
-        (*response) = mCommandGetResponse;
-        mCommandGetResponse.clear();
-        mIsGetResponseReady = false;
-
-        return true;
-    }
-
-    return false;
 }
 
 //-----------------------------------------------------------------------------
@@ -348,16 +292,71 @@ void WiFiCom::Update()
     }
 }
 
-
-//=====[Implementations of private functions]==================================
+//-----------------------------------------------------------------------------
+bool WiFiCom::IsBusy()
+{
+    return (mState != WIFI_STATE::IDLE);
+}
 
 //-----------------------------------------------------------------------------
+void WiFiCom::Post(const std::string& server, const std::string& request)
+{
+    mState = WIFI_STATE::CMD_POST_SEND;
+    mServer = server;
+    mRequest = request;
+    mResponse.clear();
+}
+
+//-----------------------------------------------------------------------------
+void WiFiCom::Request(const std::string& url)
+{
+    mState = WIFI_STATE::CMD_GET_SEND;
+    mServer = url;
+    mRequest = "";
+    mCommandGetResponse.clear();
+}
+
+//-----------------------------------------------------------------------------
+bool WiFiCom::GetPostResponse(std::string* response)
+{
+    if (mState == WIFI_STATE::CMD_POST_RESPONSE_READY)
+    {
+        (*response) = mResponse;
+        mResponse.clear();
+        mIsResponseReady = false;
+
+        return true;
+    }
+
+    return false;
+}
+
+//-----------------------------------------------------------------------------
+bool WiFiCom::GetGetResponse(std::string* response)
+{
+    if (mState == WIFI_STATE::CMD_GET_RESPONSE_READY)
+    {
+        (*response) = mCommandGetResponse;
+        mCommandGetResponse.clear();
+        mIsGetResponseReady = false;
+
+        return true;
+    }
+
+    return false;
+}
+
+
+//=====[Implementations of private methods]====================================
+
+//----private------------------------------------------------------------------
 WiFiCom::WiFiCom(PinName txPin, PinName rxPin, const int baudRate)
     : mSerial(txPin, rxPin, baudRate)
     , mWiFiComDelay(0)
 {
 }
-//-----------------------------------------------------------------------------
+
+//----private------------------------------------------------------------------
 void WiFiCom::_SendCommand(const char* command)
 {
     mSerial.enable_output(true);
@@ -365,7 +364,7 @@ void WiFiCom::_SendCommand(const char* command)
     mSerial.enable_output(false);
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 bool WiFiCom::_IsResponseCompleted(std::string* response)
 {
     char receivedChar;
@@ -385,7 +384,7 @@ bool WiFiCom::_IsResponseCompleted(std::string* response)
     return false;
 }
 
-//-----------------------------------------------------------------------------
+//----private------------------------------------------------------------------
 bool WiFiCom::_ReadCom(char* receivedChar)
 {
     char receivedCharLocal = '\0';
