@@ -49,8 +49,6 @@ void TelegramBot::Init()
     mInstance->mCommandsMap[COMMAND_MONITOR_SET_TEMP_LIMITS]    = std::bind(&TelegramBot::_CommandMonitorSetTempLimits, mInstance, std::placeholders::_1);
     mInstance->mCommandsMap[COMMAND_MONITOR_SET_TDS_LIMITS]     = std::bind(&TelegramBot::_CommandMonitorSetTdsLimits,  mInstance, std::placeholders::_1);
 
-    Drivers::WiFiCom::Init();
-
     DEBUG_PRINT("TelegramBot - [OK] Initialized\r\n");
 }
 

@@ -41,8 +41,8 @@ void WiFiCom::Init()
 
     // set init state
     mInstance->mState = WIFI_STATE::INIT;
-    mInstance->mSsid = "";
-    mInstance->mPassword = "";
+    mInstance->mSsid = (Subsystems::RealTimeClock::GetInstance()->ReadStringFromEeprom(WIFI_SSID_EEPROM_START));
+    mInstance->mPassword = (Subsystems::RealTimeClock::GetInstance()->ReadStringFromEeprom(WIFI_PASS_EEPROM_START));
     mInstance->mSerial.enable_output(false);
 }
 
@@ -143,8 +143,6 @@ void WiFiCom::Update()
             const bool isResponseCompleted = _IsResponseCompleted(&mResponse);
             if ((mWiFiComDelay.HasFinished()) || (isResponseCompleted && (mResponse.compare(RESULT_NOT_CONNECTED) == 0)))
             {
-                DEBUG_PRINT("CMD_STATUS_WAIT_RESPONSE - response = %s\r\n", mResponse.c_str());
-
                 mState = WIFI_STATE::CMD_CONNECT_SEND;
                 DEBUG_PRINT("WiFiCom - WiFi is not connected. Trying to connect...\r\n");
             }
@@ -170,7 +168,7 @@ void WiFiCom::Update()
                 esp32Command += STOP_CHAR;
                 _SendCommand(esp32Command.c_str());
                 mState = WIFI_STATE::CMD_CONNECT_WAIT_RESPONSE;
-                DEBUG_PRINT("WiFiCom - Sending request to connect to WiFi Network [%s]...\r\n", mSsid.c_str());
+                DEBUG_PRINT("WiFiCom - Sending request to connect to WiFi Network [%s][%s]...\r\n", mSsid.c_str(), mPassword.c_str());
                 mWiFiComDelay.Start(DELAY_10_SECONDS);
             }
         }
@@ -188,6 +186,8 @@ void WiFiCom::Update()
             else if (isResponseCompleted && (mResponse.compare(RESULT_OK) == 0))
             {
                 mState = WIFI_STATE::IDLE;
+                Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(WIFI_SSID_EEPROM_START, mSsid);
+                Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(WIFI_PASS_EEPROM_START, mPassword);
                 DEBUG_PRINT("WiFiCom - [OK] Success. WiFi connected.\r\n");
             }
         }

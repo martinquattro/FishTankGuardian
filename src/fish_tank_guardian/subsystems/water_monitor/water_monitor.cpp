@@ -101,7 +101,6 @@ bool WaterMonitor::SetTemperatureLimits(const int lowerLimit, const int upperLim
     int eepromPosition = TEMP_LIMITS_EEPROM_START;
     std::string strToSave = (std::to_string(lowerLimit) + "-" + std::to_string(upperLimit));
     
-    // Save the feed time to EEPROM
     Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(eepromPosition, strToSave);
 
     return true;
@@ -118,7 +117,6 @@ bool WaterMonitor::SetTdsLimits(const int lowerLimit, const int upperLimit)
     int eepromPosition = TDS_LIMITS_EEPROM_START;
     std::string strToSave = (std::to_string(lowerLimit) + "-" + std::to_string(upperLimit));
     
-    // Save the feed time to EEPROM
     Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(eepromPosition, strToSave);
 
     return true;
@@ -139,7 +137,6 @@ bool WaterMonitor::GetTdsLimits(int* lowerLimit, int* upperLimit)
 //-----------------------------------------------------------------------------
 bool WaterMonitor::_GetSensorLimits(const int eepromPosition, int* lowerLimit, int* upperLimit)
 {   
-    // Save the feed time to EEPROM
     std::string limitsStr = Subsystems::RealTimeClock::GetInstance()->ReadStringFromEeprom(eepromPosition);
 
     size_t dashPos = limitsStr.find('-');

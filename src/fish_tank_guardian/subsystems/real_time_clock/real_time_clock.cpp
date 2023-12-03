@@ -35,8 +35,7 @@ void RealTimeClock::Init()
 
     mInstance->mState = RTC_STATE::INIT;
 
-    // By default the time is set to GMT until the user sets its timezone
-    mInstance->mCurrentTimeZone = "Etc/GMT";
+    mInstance->mCurrentTimeZone = mInstance->ReadStringFromEeprom(RTC_TIMEZONE_EEPROM_START);
 
     mInstance->mRtcCom.start();
     mInstance->mRtcCom.write(mInstance->mAddress | 0);
@@ -244,6 +243,7 @@ bool RealTimeClock::_SyncFromResponse(std::string response)
 
         char dateStr[80];
         strftime(dateStr, sizeof(dateStr), "%H:%M:%S", &rtcTime);
+        SaveStringToEeprom(RTC_TIMEZONE_EEPROM_START, mCurrentTimeZone);
         DEBUG_PRINT("RealTimeClock - [OK] Time synqued to %s\r\n", dateStr);
 
         return true;

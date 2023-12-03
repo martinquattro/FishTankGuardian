@@ -14,10 +14,11 @@
 #include "delay.h"
 #include "Json.h"
 #include "mbed.h"
+#include "real_time_clock.h"
 
 #define BOT_API_URL     "https://api.telegram.org/bot"
 #define BOT_TOKEN       "6738012692:AAFmeMoCUuZEGBGVwbxtFt8sC8f15o_aRgs"
-#define USER_ID_EEPROM_START       224
+#define USER_ID_EEPROM_START       7 * RTC_EEPROM_PAGE_SIZE
 
 namespace Subsystems { 
 

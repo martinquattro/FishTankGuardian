@@ -44,6 +44,7 @@ void FishTankGuardian::Init()
     Subsystems::WaterMonitor::Init();
     Subsystems::UserInterface::Init();
     Subsystems::TelegramBot::Init();
+    Drivers::WiFiCom::Init();
 }
 
 //----static-------------------------------------------------------------------

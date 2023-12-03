@@ -8,12 +8,14 @@
 #ifndef REAL_TIME_CLOCK_H
 #define REAL_TIME_CLOCK_H
 
-#define RTC_PIN_SDA        PB_11
-#define RTC_PIN_SCL        PB_10
-#define RTC_ADDRESS_ID     0x68
-#define RTC_EEPROM_ADDRESS 0x50
-#define RTC_GET_TIME_URL "https://www.timeapi.io/api/Time/current/zone?timeZone="
-#define MAX_SYNC_ATTEMPTS  5
+#define RTC_PIN_SDA                 PB_11
+#define RTC_PIN_SCL                 PB_10
+#define RTC_ADDRESS_ID              0x68
+#define RTC_EEPROM_ADDRESS          0x50
+#define RTC_EEPROM_PAGE_SIZE        32
+#define RTC_GET_TIME_URL            "https://www.timeapi.io/api/Time/current/zone?timeZone="
+#define MAX_SYNC_ATTEMPTS           5
+#define RTC_TIMEZONE_EEPROM_START   10 * RTC_EEPROM_PAGE_SIZE
 
 #include "mbed.h"
 #include "memory.h"

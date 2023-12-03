@@ -11,10 +11,13 @@
 #include <string>
 #include "delay.h"
 #include "mbed.h"
+#include "real_time_clock.h"
 
-#define WIFI_PIN_TX             PE_8
-#define WIFI_PIN_RX             PE_7
-#define WIFI_BAUD_RATE          115200
+#define WIFI_PIN_TX                     PE_8
+#define WIFI_PIN_RX                     PE_7
+#define WIFI_BAUD_RATE                  115200
+#define WIFI_SSID_EEPROM_START          8 * RTC_EEPROM_PAGE_SIZE
+#define WIFI_PASS_EEPROM_START          9 * RTC_EEPROM_PAGE_SIZE
 
 namespace Drivers { 
 
