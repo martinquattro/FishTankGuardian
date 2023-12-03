@@ -1,11 +1,12 @@
 /*!****************************************************************************
  * @file utilities.cpp
- * @brief TODO
+ * @brief Implementation of utility functions
  * @author Quattrone Martin
  * @date Oct 2023
  *******************************************************************************/
 
 #include "utilities.h"
+
 #include <cstdio>
 #include <cstdarg>
 #include "mbed.h"

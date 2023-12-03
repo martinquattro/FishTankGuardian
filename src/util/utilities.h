@@ -1,8 +1,8 @@
 /*!****************************************************************************
- * @file Utilities.h
- * @brief TODO
- * @author Quattrone Martin
- * @date Oct 2023
+ * @file    Utilities.h
+ * @brief   Declaration of utility functions
+ * @author  Quattrone Martin
+ * @date    Oct 2023
  *******************************************************************************/
 
 #ifndef UTILITIES_H
@@ -12,13 +12,22 @@
 
 class Utilities 
 { 
-    public:
+public:
 
-        //!
-        static bool IsNumeric(const std::string& str);
+    /**
+     * @brief   Checks if all characters in the string are digits.
+     * @param   str The input string.
+     * @return  True if all characters are digits, false otherwise.
+     */
+    static bool IsNumeric(const std::string& str);
 
-        //!
-        static std::string FormatString(const char* format, ...);
+    /**
+     * @brief   Formats a string according to the provided format.
+     * @param   format The format string.
+     * @param   ... Additional arguments for formatting.
+     * @return  The formatted string.
+     */
+    static std::string FormatString(const char* format, ...);
 
 };
 
