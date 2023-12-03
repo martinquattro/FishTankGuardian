@@ -1,6 +1,6 @@
 /*!****************************************************************************
  * @file delay.cpp
- * @brief TODO
+ * @brief Implementation of non-blocking delay module
  * @author Quattrone Martin
  * @date Oct 2023
  *******************************************************************************/
@@ -14,7 +14,7 @@ namespace Util {
 tick_t Tick::mTickCounter = 0;
 Ticker Tick::mTicker;
 
-//=====[Implementations of public functions]===================================
+//=====[Implementations of public methods]=====================================
 
 //-----------------------------------------------------------------------------
 bool Delay::HasFinished()
