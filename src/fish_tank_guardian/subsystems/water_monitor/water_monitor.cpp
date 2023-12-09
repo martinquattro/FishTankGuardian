@@ -47,7 +47,7 @@ WaterMonitor* WaterMonitor::GetInstance()
 void WaterMonitor::Update()
 {
     Drivers::TemperatureSensor::GetInstance()->Update();
-    Drivers::TdsSensor::GetInstance()->Update();            // tds sensor uses temperature reading to have a better measure
+    Drivers::TdsSensor::GetInstance()->Update();
 }
 
 //-----------------------------------------------------------------------------

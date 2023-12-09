@@ -37,8 +37,8 @@ void WiFiCom::Init()
         mInstance = new WiFiCom(WIFI_PIN_TX, WIFI_PIN_RX, WIFI_BAUD_RATE);
     }
 
-    Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(WIFI_SSID_EEPROM_START, "");       // debug
-    Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(WIFI_PASS_EEPROM_START, "");       // debug
+    // Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(WIFI_SSID_EEPROM_START, "");       // debug
+    // Subsystems::RealTimeClock::GetInstance()->SaveStringToEeprom(WIFI_PASS_EEPROM_START, "");       // debug
 
     // set init state
     mInstance->mState = WIFI_STATE::INIT;
@@ -126,7 +126,7 @@ void WiFiCom::Update()
             const bool isResponseCompleted = _IsResponseCompleted(&mResponse);
             if ((mWiFiComDelay.HasFinished()) || (isResponseCompleted && (mResponse.compare(RESULT_ERROR) == 0)))
             {
-                DEBUG_PRINT("WiFiCom - [ERROR] WiFi Not Connected. Response = [%s]\r\n", mResponse.c_str());
+                DEBUG_PRINT("WiFiCom - [ERROR] WiFi Not Connected.\r\n");
                 mState = WIFI_STATE::CMD_ACCESSPOINT_SEND;
                 mWiFiComDelay.Start(DELAY_2_SECONDS);
             }
@@ -149,7 +149,7 @@ void WiFiCom::Update()
                 esp32Command += STOP_CHAR;
                 _SendCommand(esp32Command.c_str());
                 mState = WIFI_STATE::CMD_ACCESSPOINT_WAIT_RESPONSE;
-                DEBUG_PRINT("WiFiCom - Setting AccessPoint\r\n");
+                DEBUG_PRINT("WiFiCom - Setting WiFi module as AccessPoint\r\n");
             }
         }
         break;

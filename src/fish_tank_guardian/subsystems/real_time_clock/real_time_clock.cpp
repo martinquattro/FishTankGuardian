@@ -35,7 +35,7 @@ void RealTimeClock::Init()
         mInstance = new RealTimeClock(RTC_PIN_SDA, RTC_PIN_SCL, RTC_ADDRESS_ID, RTC_EEPROM_ADDRESS);
     }
 
-    mInstance->SaveStringToEeprom(RTC_TIMEZONE_EEPROM_START, "");       // debug
+    // mInstance->SaveStringToEeprom(RTC_TIMEZONE_EEPROM_START, "");       // debug
 
     mInstance->mState = RTC_STATE::INIT;
 

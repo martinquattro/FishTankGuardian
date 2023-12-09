@@ -59,7 +59,6 @@ void FishTankGuardian::Update()
         Subsystems::FoodFeeder::GetInstance()->Update();
         Subsystems::WaterMonitor::GetInstance()->Update();
         Subsystems::UserInterface::GetInstance()->Update();
-
     }
     Drivers::WiFiCom::GetInstance()->Update();
     Subsystems::RealTimeClock::GetInstance()->Update();
