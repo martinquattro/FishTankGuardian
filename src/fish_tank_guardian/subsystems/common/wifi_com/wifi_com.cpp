@@ -17,15 +17,7 @@ namespace Drivers {
 //=====[Declaration and initialization of private global variables]============
 
 WiFiCom* WiFiCom::mInstance              = nullptr;
-static const char sResponseOk[]          = "OK";
-static const char sResponseCwjapOk[]     = "+CWJAP:";
-static const char sResponseCwjap1[]      = "WIFI CONNECTED";
-static const char sResponseCwjap2[]      = "WIFI GOT IP";
-static const char sResponseCifsr[]       = "+CIFSR:STAIP,\"";
-static const char sResponseStatus3[]     = "STATUS:3";
-static const char sResponseCipstatus[]   = "+CIPSTATUS:";
-static const char sResponseSendOk[]      = "SEND OK";
-static const char sResponseCipclose[]    = "CLOSED";
+
 
 //=====[Implementations of public functions]===================================
 
