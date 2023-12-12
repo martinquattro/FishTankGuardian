@@ -12,7 +12,7 @@ Memories and documentation (Spanish) https://docs.google.com/document/d/1XdGEzkr
 
 _________________________________________________________________________________________________________
 
-## Modules Diagram
+## Block Diagram
 Four major peripheral groups are observed: user interface, sensors, real-time control, and actuators.
 
 The first group consists of the Telegram Bot and an LCD display that will show relevant information on the screen for quick visualization. The second group includes two sensors: a temperature sensor and a total dissolved solids (TDS) sensor to monitor the water's condition. The third group involves an RTC module to maintain precise time control for time-based functions. The last group includes the actuator responsible for rotating the food container, dispensing a dose in each iteration.
@@ -20,6 +20,10 @@ The first group consists of the Telegram Bot and an LCD display that will show r
 Both the Telegram Bot and the real-time module utilize the WiFi module for message sending and receiving. The WiFi module is also used to synchronize the time via the internet.
 
 ![DiagramaBloques](https://github.com/martinquattro/FishTankGuardian/assets/62821432/fed1e7d5-a0e3-467d-844b-3e32a0abc877)
+
+## Firmware diagram
+
+![DiagramaDeFirmware](https://github.com/martinquattro/FishTankGuardian/assets/62821432/0975e33d-24b8-4cd8-bb26-b1094bc61246)
 
 ## List of components
 - NUCLEO-F429ZI
