@@ -7,6 +7,8 @@ FishTankGuardian is a project designed to automate the care of aquariums, develo
 The project features an automated feeding system that allows users to schedule specific feeding times for the fish. Additionally, it continuously monitors the water parameters and alerts the user if they exceed pre-established limits.
 As a user interface, FishTankGuardian utilizes a Telegram bot, enabling users to interact with the system remotely. This feature allows users to receive updates on the aquarium's status, adjust feeding schedules, and receive instant alerts in case of issues.
 
+____________________________________________________________________________________________
+
 Resository: https://github.com/martinquattro/FishTankGuardian/
 
 Memories and documentation (Spanish) https://docs.google.com/document/d/1XdGEzkrNoZ_qmIqVganVuG-CD2JyYPGH2J27gbI3q3M/edit
