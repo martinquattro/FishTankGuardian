@@ -22,7 +22,7 @@ The first group consists of the Telegram Bot and an LCD display that will show r
 Both the Telegram Bot and the real-time module utilize the WiFi module for message sending and receiving. The WiFi module is also used to synchronize the time via the internet.
 
 <p align="center">
-    <img width="500" src="https://github.com/martinquattro/FishTankGuardian/blob/master/docs/images/DiagramaBloques.jpg" alt="BlockDiagram">
+    <img width="600" src="https://github.com/martinquattro/FishTankGuardian/blob/master/docs/images/DiagramaBloques.jpg" alt="BlockDiagram">
 </p>
 
 ## Firmware diagram
@@ -42,7 +42,7 @@ Both the Telegram Bot and the real-time module utilize the WiFi module for messa
   
 ## Connections Diagram 
 <p align="center">
-    <img width="600" src="https://github.com/martinquattro/FishTankGuardian/blob/master/docs/images/Schematic.png" alt="Schematic">
+    <img width="700" src="https://github.com/martinquattro/FishTankGuardian/blob/master/docs/images/Schematic.png" alt="Schematic">
 </p>
 
 ## Prototype
