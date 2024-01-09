@@ -12,6 +12,8 @@ As a user interface, FishTankGuardian utilizes a Telegram bot, enabling users to
 
 <a href="https://docs.google.com/document/d/1XdGEzkrNoZ_qmIqVganVuG-CD2JyYPGH2J27gbI3q3M/edit?usp=sharing">Memories and documentation (Spanish)</a>
 
+<a href="https://www.youtube.com/watch?v=qyAfDcVljZQ">Video Summary</a>
+
 <a href="https://www.youtube.com/watch?v=xCnJqBnb_as">Video Demonstration (Spanish)</a>
 
 ## Block Diagram
